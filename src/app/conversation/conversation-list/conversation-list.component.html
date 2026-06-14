@@ -1,0 +1,37 @@
+<div class="conversation-list-container">
+  <!-- Header -->
+  <div class="list-header d-flex justify-content-between align-items-center p-3">
+    <h3 class="mb-0">Conversations</h3>
+    <button mat-mini-fab color="primary" matTooltip="New conversation"
+            routerLink="/conversations/new">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="text-center py-5" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Conversation Items -->
+  <mat-nav-list *ngIf="!isLoading">
+    <app-conversation-item
+      *ngFor="let conversation of conversations; trackBy: trackByConversationId"
+      [conversation]="conversation"
+      [isOnline]="isUserOnline(getOtherParticipant(conversation)?.userId)"
+      [currentUserId]="currentUserId"
+      (click)="selectConversation(conversation)">
+    </app-conversation-item>
+  </mat-nav-list>
+
+  <!-- Empty State -->
+  <div class="empty-state text-center py-5" *ngIf="!isLoading && conversations.length === 0">
+    <mat-icon>chat_bubble_outline</mat-icon>
+    <h4>No conversations yet</h4>
+    <p>Start a new conversation to begin chatting</p>
+    <button mat-raised-button color="primary" routerLink="/conversations/new">
+      <mat-icon>add</mat-icon>
+      Start New Chat
+    </button>
+  </div>
+</div>

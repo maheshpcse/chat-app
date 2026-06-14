@@ -1,0 +1,41 @@
+<div class="container py-4" *ngIf="!isLoading && group">
+  <mat-card>
+    <mat-card-header>
+      <mat-icon mat-card-avatar>group</mat-icon>
+      <mat-card-title>{{ group.name }}</mat-card-title>
+      <mat-card-subtitle>{{ group.members.length }} members</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p *ngIf="group.description" class="group-description">{{ group.description }}</p>
+
+      <mat-divider class="my-3"></mat-divider>
+
+      <h4>Members</h4>
+      <mat-list>
+        <mat-list-item *ngFor="let member of group.members">
+          <app-avatar matListAvatar
+                      [imageUrl]="member.avatar"
+                      [name]="member.fullName"
+                      size="sm"
+                      [showStatus]="false">
+          </app-avatar>
+          <h4 matLine>{{ member.fullName }}</h4>
+          <p matLine>
+            <span class="member-role">{{ member.role }}</span>
+          </p>
+          <button mat-icon-button color="warn"
+                  *ngIf="isOwner && member.userId !== currentUserId"
+                  (click)="removeMember(member)"
+                  matTooltip="Remove member">
+            <mat-icon>person_remove</mat-icon>
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="text-center py-5" *ngIf="isLoading">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>

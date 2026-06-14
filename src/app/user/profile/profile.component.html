@@ -1,0 +1,110 @@
+<div class="container py-4" *ngIf="!isLoading">
+  <!-- Success/Error Messages -->
+  <div class="alert-success mb-3" *ngIf="successMessage">
+    <mat-icon>check_circle</mat-icon> {{ successMessage }}
+  </div>
+  <div class="alert-error mb-3" *ngIf="errorMessage">
+    <mat-icon>error_outline</mat-icon> {{ errorMessage }}
+  </div>
+
+  <mat-card class="profile-card">
+    <!-- Profile Header -->
+    <div class="profile-header text-center">
+      <div class="avatar-container">
+        <app-avatar [imageUrl]="user?.avatarUrl || user?.avatar" [name]="user?.fullName"
+                    size="lg" [showStatus]="false"></app-avatar>
+        <button mat-mini-fab color="primary" class="avatar-edit-btn"
+                (click)="avatarInput.click()">
+          <mat-icon>camera_alt</mat-icon>
+        </button>
+        <input #avatarInput type="file" hidden accept="image/*"
+               (change)="onAvatarSelected($event)">
+      </div>
+      <h3>{{ user?.firstName }} {{ user?.lastName }}</h3>
+      <p class="text-muted">@{{ user?.username }}</p>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Profile Tabs -->
+    <mat-tab-group>
+      <!-- Profile Info Tab -->
+      <mat-tab label="Profile Info">
+        <div class="tab-content p-3">
+          <div *ngIf="!isEditing">
+            <div class="info-row">
+              <strong>Full Name:</strong>
+              <span>{{ user?.firstName }} {{ user?.lastName }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Username:</strong>
+              <span>@{{ user?.username }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Email:</strong>
+              <span>{{ user?.email }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Role:</strong>
+              <span class="text-capitalize">{{ user?.role }}</span>
+            </div>
+            <div class="info-row">
+              <strong>Member Since:</strong>
+              <span>{{ user?.createdAt | date:'mediumDate' }}</span>
+            </div>
+            <button mat-raised-button color="primary" (click)="toggleEdit()" class="mt-3">
+              <mat-icon>edit</mat-icon> Edit Profile
+            </button>
+          </div>
+
+          <!-- Edit Form -->
+          <form *ngIf="isEditing" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>First Name</mat-label>
+              <input matInput formControlName="firstName">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Last Name</mat-label>
+              <input matInput formControlName="lastName">
+            </mat-form-field>
+            <div class="d-flex gap-2">
+              <button mat-raised-button color="primary" type="submit" [disabled]="isSaving">
+                Save
+              </button>
+              <button mat-button type="button" (click)="toggleEdit()">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Change Password Tab -->
+      <mat-tab label="Change Password">
+        <div class="tab-content p-3">
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Current Password</mat-label>
+              <input matInput formControlName="currentPassword" type="password">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>New Password</mat-label>
+              <input matInput formControlName="newPassword" type="password">
+              <mat-error>Minimum 8 characters</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Confirm New Password</mat-label>
+              <input matInput formControlName="confirmPassword" type="password">
+            </mat-form-field>
+            <button mat-raised-button color="warn" type="submit"
+                    [disabled]="passwordForm.invalid">
+              Change Password
+            </button>
+          </form>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>
+
+<div class="text-center py-5" *ngIf="isLoading">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>

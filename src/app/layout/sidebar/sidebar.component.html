@@ -1,0 +1,53 @@
+<div class="sidebar-container">
+  <!-- Search Bar -->
+  <div class="search-box p-3">
+    <mat-form-field appearance="outline" class="full-width search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Search conversations..."
+             [(ngModel)]="searchQuery">
+    </mat-form-field>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Conversation List -->
+  <mat-nav-list class="conversation-list">
+    <mat-list-item *ngFor="let conversation of filterConversations(); trackBy: trackByConversationId"
+                   (click)="selectConversation(conversation)"
+                   class="conversation-item">
+
+      <div class="d-flex align-items-center w-100">
+        <!-- Avatar with online status -->
+        <app-avatar
+          [imageUrl]="conversation.participants[0]?.avatar"
+          [name]="conversation.participants[0]?.fullName"
+          [isOnline]="isUserOnline(conversation.participants[0]?.userId)"
+          size="md">
+        </app-avatar>
+
+        <!-- Conversation Info -->
+        <div class="conv-info ml-3 flex-grow-1">
+          <div class="d-flex justify-content-between">
+            <span class="conv-name">{{ conversation.participants[0]?.fullName }}</span>
+            <small class="conv-time">{{ conversation.lastMessage?.createdAt | timeAgo }}</small>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="conv-last-msg">{{ conversation.lastMessage?.content | truncate:35 }}</span>
+            <span *ngIf="conversation.unreadCount > 0"
+                  [matBadge]="conversation.unreadCount"
+                  matBadgeColor="primary"
+                  matBadgeOverlap="false">
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </mat-list-item>
+  </mat-nav-list>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filterConversations().length === 0">
+    <mat-icon>chat_bubble_outline</mat-icon>
+    <p>No conversations yet</p>
+  </div>
+</div>

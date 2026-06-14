@@ -1,0 +1,11 @@
+<div class="chat-container">
+  <!-- Active Chat -->
+  <app-chat-window *ngIf="activeConversation"></app-chat-window>
+
+  <!-- Empty State: No conversation selected -->
+  <div class="empty-chat" *ngIf="!activeConversation">
+    <mat-icon>forum</mat-icon>
+    <h3>Welcome to Chat App</h3>
+    <p>Select a conversation from the sidebar to start chatting</p>
+  </div>
+</div>

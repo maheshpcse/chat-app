@@ -1,0 +1,28 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.sidenav-container {
+  flex: 1;
+  margin-top: 64px; // Toolbar height
+}
+
+.chat-sidenav {
+  width: 320px;
+  border-right: 1px solid #e0e0e0;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+}
+
+// Responsive: hide sidebar on mobile
+@media (max-width: 768px) {
+  .chat-sidenav {
+    width: 100%;
+  }
+}

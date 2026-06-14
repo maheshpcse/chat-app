@@ -1,0 +1,64 @@
+/* Global Styles */
+
+/* Import Angular Material theme */
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
+/* CSS Reset / Base */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: #333;
+  background-color: #fafafa;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Bootstrap utility overrides for compatibility */
+.full-width {
+  width: 100%;
+}
+
+/* Link styles */
+a {
+  color: #1976d2;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Material overrides */
+.mat-form-field {
+  width: 100%;
+}
+
+/* Toast overrides */
+.toast-container {
+  .ngx-toastr {
+    border-radius: 8px;
+  }
+}

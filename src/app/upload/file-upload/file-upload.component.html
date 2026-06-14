@@ -1,0 +1,21 @@
+<div class="upload-container"
+     [ngClass]="{'drag-over': isDragOver}"
+     (dragover)="onDragOver($event)"
+     (dragleave)="onDragLeave($event)"
+     (drop)="onDrop($event)">
+
+  <div class="upload-content" *ngIf="!isUploading">
+    <mat-icon>cloud_upload</mat-icon>
+    <p>Drag & drop a file here, or</p>
+    <button mat-raised-button color="primary" (click)="fileInput.click()">
+      Browse Files
+    </button>
+    <input #fileInput type="file" hidden (change)="onFileSelected($event)">
+    <small class="text-muted mt-2">Max file size: 10MB</small>
+  </div>
+
+  <div class="upload-progress" *ngIf="isUploading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Uploading...</p>
+  </div>
+</div>

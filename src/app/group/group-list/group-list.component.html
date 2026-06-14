@@ -1,0 +1,37 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>My Groups</h2>
+    <button mat-raised-button color="primary" (click)="createGroup()">
+      <mat-icon>group_add</mat-icon>
+      Create Group
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="text-center py-5" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Groups Grid -->
+  <div class="row" *ngIf="!isLoading">
+    <div class="col-md-4 col-sm-6 mb-3" *ngFor="let group of groups">
+      <mat-card class="group-card" (click)="openGroup(group)">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>group</mat-icon>
+          <mat-card-title>{{ group.name }}</mat-card-title>
+          <mat-card-subtitle>{{ group.members.length }} members</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p *ngIf="group.description">{{ group.description | truncate:60 }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state text-center py-5" *ngIf="!isLoading && groups.length === 0">
+    <mat-icon>group_off</mat-icon>
+    <p>You haven't joined any groups yet.</p>
+    <button mat-raised-button color="accent" (click)="createGroup()">Create Your First Group</button>
+  </div>
+</div>

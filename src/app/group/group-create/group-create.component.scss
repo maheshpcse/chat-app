@@ -1,0 +1,29 @@
+.group-create-card {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.selected-members {
+  margin-bottom: 16px;
+  small {
+    display: block;
+    margin-top: 8px;
+  }
+}
+
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  color: #c62828;
+  margin-bottom: 16px;
+}

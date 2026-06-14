@@ -1,0 +1,45 @@
+.message-input-container {
+  border-top: 1px solid #e0e0e0;
+  background: #fff;
+  padding: 8px 12px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.message-field {
+  flex: 1;
+  ::ng-deep .mat-form-field-wrapper {
+    margin-bottom: -1.25em;
+  }
+}
+
+.file-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+  .file-name {
+    flex: 1;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .remove-file {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    mat-icon {
+      font-size: 16px;
+    }
+  }
+}

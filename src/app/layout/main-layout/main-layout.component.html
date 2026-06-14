@@ -1,0 +1,22 @@
+<div class="app-container">
+  <!-- Header -->
+  <app-header></app-header>
+
+  <!-- Main Content Area with Sidebar -->
+  <mat-sidenav-container class="sidenav-container">
+
+    <!-- Sidebar: Conversation List -->
+    <mat-sidenav #sidenav mode="side" opened class="chat-sidenav">
+      <app-sidebar></app-sidebar>
+    </mat-sidenav>
+
+    <!-- Main Content: Chat Window / Other Pages -->
+    <mat-sidenav-content class="main-content">
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+
+  </mat-sidenav-container>
+</div>
+
+<!-- Global Loader -->
+<app-loader></app-loader>

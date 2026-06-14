@@ -1,0 +1,39 @@
+<mat-toolbar color="primary" class="app-header">
+  <span class="app-title">Chat App</span>
+
+  <span class="spacer"></span>
+
+  <!-- Notification Bell -->
+  <button mat-icon-button (click)="toggleNotifications()"
+          [matBadge]="unreadNotifications > 0 ? unreadNotifications : null"
+          matBadgeColor="warn"
+          matBadgeSize="small">
+    <mat-icon>notifications</mat-icon>
+  </button>
+
+  <!-- User Menu -->
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="currentUser">
+    <mat-icon>account_circle</mat-icon>
+  </button>
+
+  <mat-menu #userMenu="matMenu">
+    <div class="user-info px-3 py-2">
+      <strong>{{ currentUser?.fullName }}</strong>
+      <small class="d-block text-muted">{{ currentUser?.email }}</small>
+    </div>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="goToProfile()">
+      <mat-icon>person</mat-icon>
+      <span>Profile</span>
+    </button>
+    <button mat-menu-item (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>
+
+<!-- Notification Panel (dropdown) -->
+<div class="notification-panel" *ngIf="showNotifications" (appClickOutside)="showNotifications = false">
+  <app-notification-list></app-notification-list>
+</div>

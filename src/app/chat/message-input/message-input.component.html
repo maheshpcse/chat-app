@@ -1,0 +1,40 @@
+<div class="message-input-container">
+  <!-- Selected File Preview -->
+  <div class="file-preview" *ngIf="selectedFile">
+    <mat-icon>attach_file</mat-icon>
+    <span class="file-name">{{ selectedFile.name }}</span>
+    <button mat-icon-button (click)="removeSelectedFile()" class="remove-file">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Upload Progress -->
+  <mat-progress-bar *ngIf="isUploading" mode="indeterminate"></mat-progress-bar>
+
+  <!-- Input Area -->
+  <div class="input-row d-flex align-items-center">
+    <!-- File Upload Button -->
+    <button mat-icon-button (click)="fileInput.click()" [disabled]="isUploading"
+            matTooltip="Attach file">
+      <mat-icon>attach_file</mat-icon>
+    </button>
+    <input #fileInput type="file" hidden (change)="onFileSelected($event)"
+           accept="image/*,.pdf,.doc,.docx,.txt">
+
+    <!-- Text Input -->
+    <mat-form-field appearance="outline" class="flex-grow-1 message-field">
+      <input matInput
+             [formControl]="messageControl"
+             placeholder="Type a message..."
+             (keydown)="onKeyDown($event)"
+             autocomplete="off">
+    </mat-form-field>
+
+    <!-- Send Button -->
+    <button mat-icon-button color="primary" (click)="sendMessage()"
+            [disabled]="isUploading || (!messageControl.value?.trim() && !selectedFile)"
+            matTooltip="Send message">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

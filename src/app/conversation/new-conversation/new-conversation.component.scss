@@ -1,0 +1,48 @@
+.new-conv-card {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.search-results {
+  max-height: 350px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.user-result {
+  cursor: pointer;
+  border-bottom: 1px solid #f5f5f5;
+  height: auto !important;
+  padding: 8px 16px;
+
+  &:hover {
+    background-color: #f0f4ff;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.no-results {
+  color: #999;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #ccc;
+  }
+
+  p {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+}

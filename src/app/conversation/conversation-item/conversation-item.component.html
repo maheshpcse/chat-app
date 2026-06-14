@@ -1,0 +1,32 @@
+<mat-list-item class="conversation-item" [ngClass]="{'has-unread': conversation.unreadCount > 0}">
+  <div class="d-flex align-items-center w-100 py-2">
+    <!-- Avatar -->
+    <app-avatar
+      [imageUrl]="getAvatar()"
+      [name]="getDisplayName()"
+      [isOnline]="isOnline"
+      [showStatus]="!isGroupChat()"
+      size="md">
+    </app-avatar>
+
+    <!-- Conversation Details -->
+    <div class="conv-details flex-grow-1 ml-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="conv-name" [ngClass]="{'font-weight-bold': conversation.unreadCount > 0}">
+          {{ getDisplayName() }}
+        </span>
+        <small class="conv-time text-muted">
+          {{ conversation.lastMessage?.createdAt | timeAgo }}
+        </small>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mt-1">
+        <span class="conv-preview" [ngClass]="{'text-bold': conversation.unreadCount > 0}">
+          {{ getLastMessagePreview() | truncate:40 }}
+        </span>
+        <span class="unread-badge" *ngIf="conversation.unreadCount > 0">
+          {{ conversation.unreadCount > 99 ? '99+' : conversation.unreadCount }}
+        </span>
+      </div>
+    </div>
+  </div>
+</mat-list-item>

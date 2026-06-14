@@ -1,0 +1,53 @@
+<div class="chat-window">
+  <!-- Chat Header -->
+  <div class="chat-header d-flex align-items-center px-3 py-2">
+    <app-avatar
+      [imageUrl]="activeConversation?.participants[0]?.avatar"
+      [name]="getOtherParticipantName()"
+      [isOnline]="isOtherParticipantOnline()"
+      size="sm">
+    </app-avatar>
+    <div class="chat-header-info ml-3">
+      <h4 class="mb-0">{{ getOtherParticipantName() }}</h4>
+      <small *ngIf="isOtherParticipantOnline()" class="text-success">Online</small>
+      <small *ngIf="!isOtherParticipantOnline()" class="text-muted">Offline</small>
+    </div>
+    <span class="spacer"></span>
+    <button mat-icon-button [matMenuTriggerFor]="chatMenu">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #chatMenu="matMenu">
+      <button mat-menu-item>
+        <mat-icon>info</mat-icon>
+        <span>View Profile</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>block</mat-icon>
+        <span>Block User</span>
+      </button>
+    </mat-menu>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Messages Area -->
+  <div class="messages-area" #messagesContainer appAutoScroll>
+    <div *ngFor="let message of messages; trackBy: trackByMessageId"
+         class="message-wrapper"
+         [ngClass]="{'own-message': isOwnMessage(message), 'other-message': !isOwnMessage(message)}">
+      <app-message-bubble
+        [message]="message"
+        [isOwn]="isOwnMessage(message)">
+      </app-message-bubble>
+    </div>
+
+    <!-- Typing Indicator -->
+    <app-typing-indicator
+      *ngIf="typingUsers.length > 0"
+      [typingUsers]="typingUsers">
+    </app-typing-indicator>
+  </div>
+
+  <!-- Message Input -->
+  <app-message-input></app-message-input>
+</div>

@@ -1,0 +1,36 @@
+.conversation-list-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.list-header {
+  border-bottom: 1px solid #e0e0e0;
+
+  h3 {
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+.empty-state {
+  color: #999;
+  padding: 60px 20px;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #ccc;
+    margin-bottom: 16px;
+  }
+
+  h4 {
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin-bottom: 20px;
+  }
+}

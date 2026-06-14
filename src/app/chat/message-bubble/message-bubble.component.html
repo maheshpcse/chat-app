@@ -1,0 +1,31 @@
+<div class="bubble" [ngClass]="{'bubble-own': isOwn, 'bubble-other': !isOwn}">
+  <!-- Sender name (for group chats, other messages) -->
+  <span class="sender-name" *ngIf="!isOwn">{{ message.senderName }}</span>
+
+  <!-- Text Message -->
+  <p class="message-text" *ngIf="isText()">{{ message.content }}</p>
+
+  <!-- Image Message -->
+  <div class="message-image" *ngIf="isImage()">
+    <img [src]="message.fileUrl" [alt]="message.fileName" (click)="openImage()">
+  </div>
+
+  <!-- File Message -->
+  <div class="message-file" *ngIf="isFile()">
+    <mat-icon>attach_file</mat-icon>
+    <div class="file-info">
+      <span class="file-name">{{ message.fileName }}</span>
+      <small class="file-size">{{ message.fileSize | fileSize }}</small>
+    </div>
+    <a [href]="message.fileUrl" target="_blank" mat-icon-button>
+      <mat-icon>download</mat-icon>
+    </a>
+  </div>
+
+  <!-- Message Meta (time + read status) -->
+  <div class="message-meta">
+    <small class="message-time">{{ message.createdAt | timeAgo }}</small>
+    <mat-icon class="read-status" *ngIf="isOwn && message.isRead">done_all</mat-icon>
+    <mat-icon class="read-status unread" *ngIf="isOwn && !message.isRead">done</mat-icon>
+  </div>
+</div>
