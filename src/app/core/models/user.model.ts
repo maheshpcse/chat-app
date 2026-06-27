@@ -2,22 +2,22 @@
 // User Model
 // ===========================
 export interface IUser {
-  id: string;
+  id?: string;          // Mapped from userId in auth flow
+  userId?: string;      // Server returns userId
   username: string;
   email: string;
-  fullName: string;
+  fullName?: string;    // Computed client-side from firstName + lastName
   firstName: string;
   lastName: string;
-  avatar?: string;
   avatarUrl?: string;
   phoneNumber?: string;
   bio?: string;
   role?: UserRole;
   status?: string;
-  isOnline: boolean;
-  lastSeen?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  isOnline?: boolean;
+  lastSeenAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum UserRole {
@@ -27,14 +27,15 @@ export enum UserRole {
 }
 
 export interface IUserSearch {
-  query: string;
+  search: string;
   page?: number;
   limit?: number;
 }
 
 export interface IUserUpdate {
-  fullName?: string;
   firstName?: string;
   lastName?: string;
-  avatar?: string;
+  phoneNumber?: string;
+  avatarUrl?: string;
+  bio?: string;
 }

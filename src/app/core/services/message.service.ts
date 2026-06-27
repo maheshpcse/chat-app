@@ -40,8 +40,8 @@ export class MessageService {
     ).pipe(map(response => response.data));
   }
 
-  getUnreadMessages(): Observable<IMessage[]> {
-    return this.http.get<IApiResponse<IMessage[]>>(
+  getUnreadMessages(): Observable<{ unreadCount: number }> {
+    return this.http.get<IApiResponse<{ unreadCount: number }>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.MESSAGES.UNREAD}`
     ).pipe(map(response => response.data));
   }

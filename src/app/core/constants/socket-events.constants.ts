@@ -8,22 +8,22 @@ export const SOCKET_EVENTS = {
   CONNECTION_ERROR: 'connect_error',
 
   // Room management
-  JOIN_CONVERSATION: 'join_conversation',
-  LEAVE_CONVERSATION: 'leave_conversation',
+  JOIN_CONVERSATION: 'joinRoom',
+  LEAVE_CONVERSATION: 'leaveRoom',
 
   // Messages
-  SEND_MESSAGE: 'send_message',
-  RECEIVE_MESSAGE: 'receive_message',
-  MESSAGE_DELIVERED: 'message_delivered',
-  MESSAGE_READ: 'message_read',
+  SEND_MESSAGE: 'sendMessage',
+  RECEIVE_MESSAGE: 'newMessage',
+  MESSAGE_DELIVERED: 'messageDelivered',
+  MESSAGE_READ: 'messageRead',
 
   // Typing
-  TYPING_START: 'typing_start',
-  TYPING_STOP: 'typing_stop',
+  TYPING_START: 'typingStart',
+  TYPING_STOP: 'typingStop',
 
   // Presence
-  USER_ONLINE: 'user_online',
-  USER_OFFLINE: 'user_offline',
+  USER_ONLINE: 'userOnline',
+  USER_OFFLINE: 'userOffline',
   GET_ONLINE_USERS: 'get_online_users',
   ONLINE_USERS_LIST: 'online_users_list',
 
@@ -32,6 +32,12 @@ export const SOCKET_EVENTS = {
   NEW_CONVERSATION: 'new_conversation',
 
   // Read receipts
-  MARK_AS_READ: 'mark_as_read',
-  READ_RECEIPT: 'read_receipt'
+  MARK_AS_READ: 'messageRead',
+  READ_RECEIPT: 'messageRead',
+
+  // Contact events
+  CONTACT_REQUEST_RECEIVED: 'contactRequestReceived',
+  CONTACT_REQUEST_ACCEPTED: 'contactRequestAccepted',
+  CONTACT_REQUEST_REJECTED: 'contactRequestRejected',
+  CONTACT_LIST_UPDATED: 'contactListUpdated'
 };

@@ -90,9 +90,9 @@ export class RegisterComponent implements OnInit {
     const { confirmPassword, fullName, ...rest } = this.registerForm.value;
     const nameParts = fullName.trim().split(/\s+/);
     const firstName = nameParts[0];
-    const lastName = nameParts.slice(1).join(' ') || '';
+    const lastName = nameParts.slice(1).join(' ') || firstName;
 
-    const registerData = { ...rest, fullName, firstName, lastName };
+    const registerData = { ...rest, firstName, lastName };
 
     this.authService.register(registerData).subscribe(
       (response) => {

@@ -1,53 +1,183 @@
-<div class="sidebar-container">
-  <!-- Search Bar -->
-  <div class="search-box p-3">
-    <mat-form-field appearance="outline" class="full-width search-field">
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput placeholder="Search conversations..."
-             [(ngModel)]="searchQuery">
-    </mat-form-field>
+<div class="sidebar-container" [class.minimized]="isMinimized">
+
+  <!-- Minimized view: only icons -->
+  <div class="sidebar-minimized" *ngIf="isMinimized">
+    <button mat-icon-button (click)="toggleMinimize()" matTooltip="Expand">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+    <button mat-icon-button (click)="setTab('chats'); toggleMinimize()" matTooltip="Chats">
+      <mat-icon>chat</mat-icon>
+    </button>
+    <button mat-icon-button (click)="setTab('contacts'); toggleMinimize()" matTooltip="Contacts">
+      <mat-icon>people</mat-icon>
+    </button>
+    <button mat-icon-button (click)="setTab('requests'); toggleMinimize()" matTooltip="Requests"
+            [matBadge]="pendingRequestCount > 0 ? pendingRequestCount : null"
+            matBadgeColor="warn" matBadgeSize="small">
+      <mat-icon>person_add</mat-icon>
+    </button>
+    <button mat-icon-button (click)="setTab('search'); toggleMinimize()" matTooltip="Search Users">
+      <mat-icon>search</mat-icon>
+    </button>
   </div>
 
-  <mat-divider></mat-divider>
+  <!-- Full sidebar view -->
+  <div class="sidebar-full" *ngIf="!isMinimized">
 
-  <!-- Conversation List -->
-  <mat-nav-list class="conversation-list">
-    <mat-list-item *ngFor="let conversation of filterConversations(); trackBy: trackByConversationId"
-                   (click)="selectConversation(conversation)"
-                   class="conversation-item">
-
-      <div class="d-flex align-items-center w-100">
-        <!-- Avatar with online status -->
-        <app-avatar
-          [imageUrl]="conversation.participants[0]?.avatar"
-          [name]="conversation.participants[0]?.fullName"
-          [isOnline]="isUserOnline(conversation.participants[0]?.userId)"
-          size="md">
-        </app-avatar>
-
-        <!-- Conversation Info -->
-        <div class="conv-info ml-3 flex-grow-1">
-          <div class="d-flex justify-content-between">
-            <span class="conv-name">{{ conversation.participants[0]?.fullName }}</span>
-            <small class="conv-time">{{ conversation.lastMessage?.createdAt | timeAgo }}</small>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="conv-last-msg">{{ conversation.lastMessage?.content | truncate:35 }}</span>
-            <span *ngIf="conversation.unreadCount > 0"
-                  [matBadge]="conversation.unreadCount"
-                  matBadgeColor="primary"
-                  matBadgeOverlap="false">
-            </span>
-          </div>
-        </div>
+    <!-- Sidebar Header -->
+    <div class="sidebar-header">
+      <div class="d-flex align-items-center justify-content-between">
+        <h4 class="sidebar-title mb-0">Chat App</h4>
+        <button mat-icon-button (click)="toggleMinimize()" matTooltip="Minimize sidebar">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
       </div>
 
-    </mat-list-item>
-  </mat-nav-list>
+      <!-- Tab navigation -->
+      <div class="sidebar-tabs">
+        <button mat-button [class.active]="activeTab === 'chats'" (click)="setTab('chats')">
+          <mat-icon>chat</mat-icon>
+        </button>
+        <button mat-button [class.active]="activeTab === 'contacts'" (click)="setTab('contacts')">
+          <mat-icon>people</mat-icon>
+        </button>
+        <button mat-button [class.active]="activeTab === 'requests'" (click)="setTab('requests')"
+                [matBadge]="pendingRequestCount > 0 ? pendingRequestCount : null"
+                matBadgeColor="warn" matBadgeSize="small">
+          <mat-icon>person_add</mat-icon>
+        </button>
+        <button mat-button [class.active]="activeTab === 'search'" (click)="setTab('search')">
+          <mat-icon>search</mat-icon>
+        </button>
+      </div>
+    </div>
 
-  <!-- Empty State -->
-  <div class="empty-state" *ngIf="filterConversations().length === 0">
-    <mat-icon>chat_bubble_outline</mat-icon>
-    <p>No conversations yet</p>
+    <mat-divider></mat-divider>
+
+    <!-- TAB: CHATS -->
+    <div class="tab-content" *ngIf="activeTab === 'chats'">
+      <div class="search-box">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Filter conversations..." [(ngModel)]="conversationFilter">
+        </mat-form-field>
+      </div>
+      <div class="list-container">
+        <div *ngFor="let conv of filteredConversations(); trackBy: trackByConversationId"
+             class="list-item" (click)="selectConversation(conv)">
+          <app-avatar [imageUrl]="conv.avatarUrl" [name]="conv.displayName" size="md"></app-avatar>
+          <div class="item-info">
+            <div class="item-row">
+              <span class="item-name">{{ conv.displayName }}</span>
+              <small class="item-time" *ngIf="conv.lastMessageAt">{{ conv.lastMessageAt | timeAgo }}</small>
+            </div>
+            <div class="item-row">
+              <span class="item-subtitle">{{ conv.lastMessageContent | truncate:30 }}</span>
+              <span class="unread-badge" *ngIf="conv.unreadCount > 0">{{ conv.unreadCount }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="filteredConversations().length === 0">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <p>No conversations yet</p>
+          <button mat-stroked-button color="primary" (click)="setTab('contacts')">
+            Start chatting with contacts
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONTACTS -->
+    <div class="tab-content" *ngIf="activeTab === 'contacts'">
+      <div class="list-container">
+        <div *ngFor="let contact of contacts; trackBy: trackByContactId"
+             class="list-item" (click)="startChatWithContact(contact)">
+          <app-avatar [imageUrl]="contact.avatarUrl"
+                      [name]="contact.firstName + ' ' + contact.lastName"
+                      [isOnline]="isUserOnline(contact.contactUserId)" size="md">
+          </app-avatar>
+          <div class="item-info">
+            <span class="item-name">{{ contact.firstName }} {{ contact.lastName }}</span>
+            <small class="item-subtitle">@{{ contact.username }}</small>
+          </div>
+          <mat-icon class="chat-action" color="primary">chat</mat-icon>
+        </div>
+        <div class="empty-state" *ngIf="contacts.length === 0">
+          <mat-icon>people_outline</mat-icon>
+          <p>No contacts yet</p>
+          <button mat-stroked-button color="primary" (click)="setTab('search')">Search and add users</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: REQUESTS -->
+    <div class="tab-content" *ngIf="activeTab === 'requests'">
+      <h5 class="section-title" *ngIf="receivedRequests.length > 0">Received ({{ receivedRequests.length }})</h5>
+      <div *ngFor="let request of receivedRequests; trackBy: trackByRequestId" class="list-item request-item">
+        <app-avatar [imageUrl]="request.avatarUrl" [name]="request.firstName + ' ' + request.lastName" size="sm"></app-avatar>
+        <div class="item-info">
+          <span class="item-name">{{ request.firstName }} {{ request.lastName }}</span>
+          <small class="item-subtitle">@{{ request.username }}</small>
+        </div>
+        <div class="request-actions">
+          <button mat-icon-button color="primary" matTooltip="Accept" (click)="acceptRequest(request)">
+            <mat-icon>check</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Reject" (click)="rejectRequest(request)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+      <h5 class="section-title" *ngIf="sentRequests.length > 0">Sent ({{ sentRequests.length }})</h5>
+      <div *ngFor="let request of sentRequests; trackBy: trackByRequestId" class="list-item request-item">
+        <app-avatar [imageUrl]="request.avatarUrl" [name]="request.firstName + ' ' + request.lastName" size="sm"></app-avatar>
+        <div class="item-info">
+          <span class="item-name">{{ request.firstName }} {{ request.lastName }}</span>
+          <small class="item-subtitle">Pending...</small>
+        </div>
+        <button mat-icon-button color="warn" matTooltip="Cancel" (click)="cancelRequest(request)">
+          <mat-icon>undo</mat-icon>
+        </button>
+      </div>
+      <div class="empty-state" *ngIf="receivedRequests.length === 0 && sentRequests.length === 0">
+        <mat-icon>mail_outline</mat-icon>
+        <p>No pending requests</p>
+      </div>
+    </div>
+
+    <!-- TAB: SEARCH -->
+    <div class="tab-content" *ngIf="activeTab === 'search'">
+      <div class="search-box">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Search by name or username..."
+                 [value]="searchQuery" (input)="onSearchInput($event.target.value)" autofocus>
+        </mat-form-field>
+      </div>
+      <div class="text-center py-3" *ngIf="isSearching">
+        <mat-spinner diameter="28"></mat-spinner>
+      </div>
+      <div class="list-container" *ngIf="!isSearching">
+        <div *ngFor="let user of searchResults; trackBy: trackByUserId" class="list-item">
+          <app-avatar [imageUrl]="user.avatarUrl" [name]="user.firstName + ' ' + user.lastName" size="md"></app-avatar>
+          <div class="item-info">
+            <span class="item-name">{{ user.firstName }} {{ user.lastName }}</span>
+            <small class="item-subtitle">@{{ user.username }}</small>
+          </div>
+          <button mat-stroked-button color="primary" class="add-btn"
+                  (click)="sendContactRequest(user); $event.stopPropagation()">
+            <mat-icon>person_add</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!isSearching && searchQuery.length >= 2 && searchResults.length === 0">
+        <mat-icon>person_search</mat-icon>
+        <p>No users found</p>
+      </div>
+      <div class="empty-state" *ngIf="!isSearching && searchQuery.length < 2">
+        <mat-icon>search</mat-icon>
+        <p>Type at least 2 characters to search</p>
+      </div>
+    </div>
   </div>
 </div>

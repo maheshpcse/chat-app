@@ -1,20 +1,27 @@
 // ===========================
 // Conversation Model
 // ===========================
+
+/**
+ * IConversation matches the server response from spGetUserConversations.
+ * The server returns a flat structure with displayName/avatarUrl computed.
+ */
 export interface IConversation {
-  id: string;
-  type: ConversationType;
-  participants: IParticipant[];
-  lastMessage?: {
-    content: string;
-    senderId: string;
-    senderName: string;
-    createdAt: Date;
-    type: string;
-  };
-  unreadCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  conversationId: string;
+  conversationType: ConversationType;
+  lastMessageAt?: Date;
+  lastMessageContent?: string;
+  lastMessageType?: string;
+  lastMessageSender?: string;
+  displayName?: string;
+  avatarUrl?: string;
+  unreadCount?: number;
+  // These fields come from spCreatePrivateConversation
+  participantId?: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  createdAt?: Date;
 }
 
 export enum ConversationType {
@@ -22,16 +29,6 @@ export enum ConversationType {
   GROUP = 'group'
 }
 
-export interface IParticipant {
-  userId: string;
-  username: string;
-  fullName: string;
-  avatar?: string;
-  isOnline: boolean;
-  lastSeen?: Date;
-}
-
 export interface ICreateConversation {
   participantId: string;
-  type: ConversationType;
 }

@@ -23,20 +23,20 @@ export class MessageBubbleComponent {
   MessageType = MessageType; // Expose enum to template
 
   isImage(): boolean {
-    return this.message.type === MessageType.IMAGE;
+    return this.message.messageType === MessageType.IMAGE;
   }
 
   isFile(): boolean {
-    return this.message.type === MessageType.FILE;
+    return this.message.messageType === MessageType.FILE;
   }
 
   isText(): boolean {
-    return this.message.type === MessageType.TEXT;
+    return this.message.messageType === MessageType.TEXT;
   }
 
   openImage(): void {
-    if (this.message.fileUrl) {
-      window.open(this.message.fileUrl, '_blank');
+    if (this.message.attachmentUrl) {
+      window.open(this.message.attachmentUrl, '_blank');
     }
   }
 }

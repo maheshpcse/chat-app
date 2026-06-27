@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { IMessage, ISendMessage, ITypingEvent, MessageType } from '../models/message.model';
-import { IConversation } from '../models/conversation.model';
+import { IConversation, ConversationType } from '../models/conversation.model';
 import { SocketService } from './socket.service';
 import { MessageService } from './message.service';
 import { ConversationService } from './conversation.service';
+import { AuthService } from './auth.service';
 
 /**
  * ChatService - Orchestrates chat state combining HTTP and Socket services.
@@ -41,7 +42,8 @@ export class ChatService {
   constructor(
     private socketService: SocketService,
     private messageService: MessageService,
-    private conversationService: ConversationService
+    private conversationService: ConversationService,
+    private authService: AuthService
   ) {
     this.setupSocketListeners();
   }
@@ -56,11 +58,58 @@ export class ChatService {
     });
   }
 
+  /**
+   * Start or open a private conversation with a user.
+   * Calls POST /api/v1/conversations to create (or retrieve existing).
+   * Then sets it as active conversation.
+   */
+  startPrivateConversation(participantId: string): Observable<IConversation> {
+    return new Observable(observer => {
+      // Check if conversation already exists locally
+      const existing = this.conversationsSubject.value.find(conv =>
+        conv.conversationType === ConversationType.PRIVATE &&
+        conv.participantId === participantId
+      );
+
+      if (existing) {
+        this.setActiveConversation(existing);
+        observer.next(existing);
+        observer.complete();
+        return;
+      }
+
+      // Create new conversation via API
+      this.conversationService.createConversation({
+        participantId
+      }).subscribe(
+        (conversation) => {
+          // Add to conversations list
+          const current = this.conversationsSubject.value;
+          this.conversationsSubject.next([conversation, ...current]);
+          // Set as active
+          this.setActiveConversation(conversation);
+          observer.next(conversation);
+          observer.complete();
+        },
+        (error) => {
+          observer.error(error);
+        }
+      );
+    });
+  }
+
+  /**
+   * Get display name for a conversation.
+   */
+  getDisplayName(conversation: IConversation): string {
+    return conversation.displayName || conversation.username || 'Unknown';
+  }
+
   setActiveConversation(conversation: IConversation): void {
     // Leave previous conversation room
     const previous = this.activeConversationSubject.value;
     if (previous) {
-      this.socketService.leaveConversation(previous.id);
+      this.socketService.leaveConversation(previous.conversationId);
     }
 
     // Set new active conversation
@@ -69,14 +118,14 @@ export class ChatService {
     this.typingUsersSubject.next([]); // Clear typing indicators
 
     // Join new conversation room
-    this.socketService.joinConversation(conversation.id);
+    this.socketService.joinConversation(conversation.conversationId);
 
     // Load messages
-    this.loadMessages(conversation.id);
+    this.loadMessages(conversation.conversationId);
 
     // Mark as read
-    this.messageService.markAsRead(conversation.id).subscribe();
-    this.socketService.markAsRead(conversation.id);
+    this.messageService.markAsRead(conversation.conversationId).subscribe();
+    this.socketService.markAsRead(conversation.conversationId);
   }
 
   // ===========================
@@ -95,17 +144,15 @@ export class ChatService {
     });
   }
 
-  sendMessage(content: string, type: MessageType = MessageType.TEXT, fileUrl?: string, fileName?: string, fileSize?: number): void {
+  sendMessage(content: string, messageType: MessageType = MessageType.TEXT, attachmentUrl?: string): void {
     const conversation = this.activeConversationSubject.value;
     if (!conversation) { return; }
 
     const messageData: ISendMessage = {
-      conversationId: conversation.id,
+      conversationId: conversation.conversationId,
       content,
-      type,
-      fileUrl,
-      fileName,
-      fileSize
+      messageType,
+      attachmentUrl
     };
 
     // Send via HTTP (persists to DB)
@@ -125,14 +172,14 @@ export class ChatService {
   startTyping(): void {
     const conversation = this.activeConversationSubject.value;
     if (conversation) {
-      this.socketService.emitTypingStart(conversation.id);
+      this.socketService.emitTypingStart(conversation.conversationId);
     }
   }
 
   stopTyping(): void {
     const conversation = this.activeConversationSubject.value;
     if (conversation) {
-      this.socketService.emitTypingStop(conversation.id);
+      this.socketService.emitTypingStop(conversation.conversationId);
     }
   }
 
@@ -143,7 +190,7 @@ export class ChatService {
   clearActiveConversation(): void {
     const current = this.activeConversationSubject.value;
     if (current) {
-      this.socketService.leaveConversation(current.id);
+      this.socketService.leaveConversation(current.conversationId);
     }
     this.activeConversationSubject.next(null);
     this.messagesSubject.next([]);
@@ -155,12 +202,16 @@ export class ChatService {
   // ===========================
 
   private setupSocketListeners(): void {
-    // Listen for incoming messages
+    // Listen for incoming messages (with deduplication)
     const msgSub = this.socketService.messageReceived$.subscribe(message => {
       const activeConv = this.activeConversationSubject.value;
-      if (activeConv && message.conversationId === activeConv.id) {
+      if (activeConv && message.conversationId === activeConv.conversationId) {
         const current = this.messagesSubject.value;
-        this.messagesSubject.next([...current, message]);
+        // Deduplicate: don't add if messageId already exists (e.g. sender's own message added via HTTP response)
+        const exists = current.some(m => m.messageId === message.messageId);
+        if (!exists) {
+          this.messagesSubject.next([...current, message]);
+        }
       }
       // Update conversation list (last message)
       this.updateConversationLastMessage(message);
@@ -170,7 +221,7 @@ export class ChatService {
     // Listen for typing events
     const typingSub = this.socketService.typing$.subscribe(typingEvent => {
       const activeConv = this.activeConversationSubject.value;
-      if (activeConv && typingEvent.conversationId === activeConv.id) {
+      if (activeConv && typingEvent.conversationId === activeConv.conversationId) {
         this.handleTypingEvent(typingEvent);
       }
     });
@@ -191,23 +242,19 @@ export class ChatService {
   private updateConversationLastMessage(message: IMessage): void {
     const conversations = this.conversationsSubject.value;
     const updated = conversations.map(conv => {
-      if (conv.id === message.conversationId) {
+      if (conv.conversationId === message.conversationId) {
         return {
           ...conv,
-          lastMessage: {
-            content: message.content,
-            senderId: message.senderId,
-            senderName: message.senderName,
-            createdAt: message.createdAt,
-            type: message.type
-          },
-          updatedAt: message.createdAt
+          lastMessageContent: message.content,
+          lastMessageSender: message.senderId,
+          lastMessageType: message.messageType,
+          lastMessageAt: message.createdAt
         };
       }
       return conv;
     });
     // Sort by latest message
-    updated.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    updated.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
     this.conversationsSubject.next(updated);
   }
 }

@@ -36,7 +36,7 @@ export class UserService {
   }
 
   searchUsers(searchData: IUserSearch): Observable<IUser[]> {
-    let params = new HttpParams().set('query', searchData.query);
+    let params = new HttpParams().set('search', searchData.search);
     if (searchData.page) {
       params = params.set('page', searchData.page.toString());
     }

@@ -1,5 +1,4 @@
 .message-input-container {
-  border-top: 1px solid #e0e0e0;
   background: #fff;
   padding: 8px 12px;
 }
@@ -12,8 +11,25 @@
 
 .message-field {
   flex: 1;
-  ::ng-deep .mat-form-field-wrapper {
-    margin-bottom: -1.25em;
+
+  ::ng-deep {
+    .mat-form-field-wrapper {
+      margin-bottom: -1.25em;
+      padding-bottom: 0;
+    }
+
+    .mat-form-field-flex {
+      align-items: center;
+    }
+
+    .mat-form-field-infix {
+      padding: 8px 0;
+      border-top: 0;
+
+      input, textarea {
+        vertical-align: middle;
+      }
+    }
   }
 }
 

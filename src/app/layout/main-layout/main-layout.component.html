@@ -6,8 +6,9 @@
   <mat-sidenav-container class="sidenav-container">
 
     <!-- Sidebar: Conversation List -->
-    <mat-sidenav #sidenav mode="side" opened class="chat-sidenav">
-      <app-sidebar></app-sidebar>
+    <mat-sidenav #sidenav mode="side" opened class="chat-sidenav"
+                 [ngClass]="{'minimized': isSidebarMinimized}">
+      <app-sidebar (minimizedChange)="isSidebarMinimized = $event"></app-sidebar>
     </mat-sidenav>
 
     <!-- Main Content: Chat Window / Other Pages -->

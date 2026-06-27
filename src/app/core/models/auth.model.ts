@@ -10,20 +10,21 @@ export interface IRegisterRequest {
   username: string;
   email: string;
   password: string;
-  fullName: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
 }
 
 export interface IAuthResponse {
   accessToken: string;
   refreshToken: string;
   user: {
-    id: string;
+    userId: string;
     username: string;
     email: string;
-    fullName: string;
-    role: string;
+    firstName: string;
+    lastName: string;
+    role?: string;
   };
 }
 

@@ -108,7 +108,7 @@ export class MessageInputComponent implements OnInit, OnDestroy {
       (result) => {
         this.isUploading = false;
         const content = this.messageControl.value?.trim() || file.name;
-        this.chatService.sendMessage(content, type, result.fileUrl, result.fileName, file.size);
+        this.chatService.sendMessage(content, type, result.fileUrl);
         this.messageControl.setValue('');
         this.selectedFile = null;
       },

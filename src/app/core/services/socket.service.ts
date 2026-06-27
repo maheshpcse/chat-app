@@ -29,6 +29,8 @@ export class SocketService {
   private onlineUsersSubject = new BehaviorSubject<string[]>([]);
   private notificationSubject = new Subject<any>();
   private readReceiptSubject = new Subject<{ conversationId: string; userId: string }>();
+  private contactRequestSubject = new Subject<any>();
+  private contactAcceptedSubject = new Subject<any>();
 
   // Public observables for components to subscribe
   public messageReceived$ = this.messageReceivedSubject.asObservable();
@@ -36,6 +38,8 @@ export class SocketService {
   public onlineUsers$ = this.onlineUsersSubject.asObservable();
   public notification$ = this.notificationSubject.asObservable();
   public readReceipt$ = this.readReceiptSubject.asObservable();
+  public contactRequest$ = this.contactRequestSubject.asObservable();
+  public contactAccepted$ = this.contactAcceptedSubject.asObservable();
 
   constructor(private authService: AuthService) {}
 
@@ -187,6 +191,15 @@ export class SocketService {
     // Notifications
     this.socket.on(SOCKET_EVENTS.NOTIFICATION, (notification: any) => {
       this.notificationSubject.next(notification);
+    });
+
+    // Contact events
+    this.socket.on(SOCKET_EVENTS.CONTACT_REQUEST_RECEIVED, (data: any) => {
+      this.contactRequestSubject.next(data);
+    });
+
+    this.socket.on(SOCKET_EVENTS.CONTACT_REQUEST_ACCEPTED, (data: any) => {
+      this.contactAcceptedSubject.next(data);
     });
 
     // Connection events

@@ -22,27 +22,22 @@ export class ConversationItemComponent {
   @Input() currentUserId: string;
 
   getDisplayName(): string {
-    if (this.conversation.type === ConversationType.GROUP) {
-      return 'Group Chat'; // Group name would come from group data
-    }
-    const other = this.conversation.participants.find(p => p.userId !== this.currentUserId);
-    return other ? other.fullName : 'Unknown User';
+    return this.conversation.displayName || 'Unknown User';
   }
 
   getAvatar(): string {
-    const other = this.conversation.participants.find(p => p.userId !== this.currentUserId);
-    return other?.avatar || '';
+    return this.conversation.avatarUrl || '';
   }
 
   getLastMessagePreview(): string {
-    if (!this.conversation.lastMessage) {
+    if (!this.conversation.lastMessageContent) {
       return 'No messages yet';
     }
-    const prefix = this.conversation.lastMessage.senderId === this.currentUserId ? 'You: ' : '';
-    return prefix + this.conversation.lastMessage.content;
+    const prefix = this.conversation.lastMessageSender === this.currentUserId ? 'You: ' : '';
+    return prefix + this.conversation.lastMessageContent;
   }
 
   isGroupChat(): boolean {
-    return this.conversation.type === ConversationType.GROUP;
+    return this.conversation.conversationType === ConversationType.GROUP;
   }
 }

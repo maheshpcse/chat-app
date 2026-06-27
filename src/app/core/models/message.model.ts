@@ -2,18 +2,16 @@
 // Message Model
 // ===========================
 export interface IMessage {
-  id: string;
+  messageId: string;
   conversationId: string;
   senderId: string;
-  senderName: string;
+  senderName?: string;
   senderAvatar?: string;
   content: string;
-  type: MessageType;
-  fileUrl?: string;
-  fileName?: string;
-  fileSize?: number;
-  isRead: boolean;
-  readBy?: string[];
+  messageType: MessageType;
+  attachmentUrl?: string;
+  status: string;
+  isDeleted?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,10 +27,8 @@ export enum MessageType {
 export interface ISendMessage {
   conversationId: string;
   content: string;
-  type: MessageType;
-  fileUrl?: string;
-  fileName?: string;
-  fileSize?: number;
+  messageType: MessageType;
+  attachmentUrl?: string;
 }
 
 export interface ITypingEvent {

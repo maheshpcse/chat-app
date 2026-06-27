@@ -3,16 +3,21 @@
 // ===========================
 export interface IApiResponse<T> {
   success: boolean;
+  statusCode: number;
   message: string;
   data: T;
-  pagination?: IPagination;
+  meta?: {
+    pagination?: IPagination;
+  };
 }
 
 export interface IPagination {
-  page: number;
-  limit: number;
-  total: number;
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
   totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 export interface IApiError {

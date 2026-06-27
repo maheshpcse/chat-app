@@ -139,9 +139,23 @@ export class AuthService {
   private handleAuthSuccess(authData: IAuthResponse): void {
     localStorage.setItem(APP_CONSTANTS.TOKEN_KEY, authData.accessToken);
     localStorage.setItem(APP_CONSTANTS.REFRESH_TOKEN_KEY, authData.refreshToken);
-    localStorage.setItem(APP_CONSTANTS.USER_KEY, JSON.stringify(authData.user));
 
-    this.currentUserSubject.next(authData.user as any);
+    // Map server's userId to internal id, construct fullName from firstName + lastName
+    const user: IUser = {
+      id: authData.user.userId,
+      username: authData.user.username,
+      email: authData.user.email,
+      firstName: authData.user.firstName,
+      lastName: authData.user.lastName,
+      fullName: `${authData.user.firstName} ${authData.user.lastName}`.trim(),
+      role: authData.user.role as any,
+      isOnline: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    localStorage.setItem(APP_CONSTANTS.USER_KEY, JSON.stringify(user));
+    this.currentUserSubject.next(user);
     this.isLoggedInSubject.next(true);
   }
 

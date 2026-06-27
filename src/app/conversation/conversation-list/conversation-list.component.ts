@@ -67,11 +67,10 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   getOtherParticipant(conversation: IConversation): any {
-    return conversation.participants.find(p => p.userId !== this.currentUserId)
-      || conversation.participants[0];
+    return { displayName: conversation.displayName, avatarUrl: conversation.avatarUrl };
   }
 
   trackByConversationId(index: number, conversation: IConversation): string {
-    return conversation.id;
+    return conversation.conversationId;
   }
 }

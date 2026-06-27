@@ -47,10 +47,10 @@ export class GroupCreateComponent implements OnInit {
     // Search users with debounce (RxJS Subject + switchMap)
     this.searchSubject.pipe(
       debounceTime(300),
-      switchMap(query => this.userService.searchUsers({ query }))
+      switchMap(query => this.userService.searchUsers({ search: query }))
     ).subscribe(users => {
       this.searchResults = users.filter(u =>
-        !this.selectedMembers.find(m => m.id === u.id)
+        !this.selectedMembers.find(m => (m.userId || m.id) === (u.userId || u.id))
       );
     });
   }

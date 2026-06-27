@@ -77,8 +77,7 @@ export class ProfileComponent implements OnInit {
 
     this.isSaving = true;
     const { firstName, lastName } = this.profileForm.value;
-    const fullName = `${firstName} ${lastName}`.trim();
-    this.userService.updateMyProfile({ firstName, lastName, fullName }).subscribe(
+    this.userService.updateMyProfile({ firstName, lastName }).subscribe(
       (updatedUser) => {
         this.user = updatedUser;
         this.isEditing = false;
@@ -99,7 +98,7 @@ export class ProfileComponent implements OnInit {
       const file = input.files[0];
       this.uploadService.uploadLocal(file).subscribe(
         (result) => {
-          this.userService.updateMyProfile({ avatar: result['fileUrl'] || result['url'] }).subscribe(
+          this.userService.updateMyProfile({ avatarUrl: result['fileUrl'] || result['url'] }).subscribe(
             (updatedUser) => {
               this.user = updatedUser;
             }

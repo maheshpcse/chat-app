@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { UserService } from '../../core/services/user.service';
 import { ConversationService } from '../../core/services/conversation.service';
 import { IUser } from '../../core/models/user.model';
-import { ConversationType } from '../../core/models/conversation.model';
+// conversation model not needed here
 
 /**
  * NewConversationComponent - Search users and start a new private conversation.
@@ -44,7 +44,7 @@ export class NewConversationComponent implements OnInit {
       distinctUntilChanged(),
       switchMap(query => {
         this.isSearching = true;
-        return this.userService.searchUsers({ query, limit: 10 });
+        return this.userService.searchUsers({ search: query, limit: 10 });
       })
     ).subscribe(
       users => {
@@ -70,8 +70,7 @@ export class NewConversationComponent implements OnInit {
     this.isCreating = true;
 
     this.conversationService.createConversation({
-      participantId: user.id,
-      type: ConversationType.PRIVATE
+      participantId: user.userId || user.id
     }).subscribe(
       conversation => {
         this.isCreating = false;
