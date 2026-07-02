@@ -1,12 +1,15 @@
+@import '../../../app/shared/styles/theme.variables';
+
 .sidebar-container {
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: width 0.2s ease;
+  background: $bg-sidebar;
+  transition: width $transition-smooth;
 
   &.minimized {
-    width: 56px;
+    width: $sidebar-minimized-width;
   }
 }
 
@@ -15,8 +18,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 8px;
-  gap: 4px;
+  padding-top: $spacing-sm;
+  gap: $spacing-xs;
+  animation: fadeIn 250ms ease forwards;
+
+  button {
+    color: $nocturnal;
+  }
 }
 
 // Full sidebar
@@ -25,31 +33,35 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  animation: fadeIn 250ms ease forwards;
 }
 
 // Header
 .sidebar-header {
-  padding: 12px 16px 0;
+  padding: $spacing-md $spacing-lg 0;
 
   .sidebar-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
+    font-family: $font-heading;
+    font-size: $fs-xl;
+    font-weight: $fw-bold;
+    color: $oceanic-noir;
   }
 }
 
 // Tab navigation
 .sidebar-tabs {
   display: flex;
-  margin-top: 8px;
+  margin-top: $spacing-sm;
   gap: 2px;
 
   button {
     flex: 1;
     min-width: 0;
     padding: 6px 4px;
-    font-size: 11px;
-    border-radius: 4px;
+    font-size: $fs-xs;
+    border-radius: $radius-sm;
+    color: $text-secondary;
+    transition: all $transition-fast;
 
     mat-icon {
       font-size: 20px;
@@ -58,15 +70,19 @@
     }
 
     &.active {
-      background-color: rgba(25, 118, 210, 0.1);
-      color: #1976d2;
+      background-color: rgba($nocturnal, 0.08);
+      color: $nocturnal;
+    }
+
+    &:hover:not(.active) {
+      background-color: rgba($nocturnal, 0.04);
     }
   }
 }
 
-// Search box with proper alignment fix
+// Search box with proper alignment
 .search-box {
-  padding: 12px 16px 0;
+  padding: $spacing-md $spacing-lg 0;
 }
 
 .search-field {
@@ -80,19 +96,22 @@
 
     .mat-form-field-flex {
       align-items: center;
-      height: 40px;
+      height: 38px;
+      background: $gray-100;
+      border-radius: $radius-pill;
+      padding: 0 12px;
     }
 
     .mat-form-field-prefix {
       display: flex;
       align-items: center;
-      margin-right: 8px;
+      margin-right: $spacing-sm;
 
       .mat-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-        color: #999;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: $text-muted;
       }
     }
 
@@ -103,14 +122,20 @@
       border-top: 0;
 
       input {
-        line-height: 40px;
-        height: 40px;
+        font-family: $font-primary;
+        font-size: $fs-sm;
+        line-height: 38px;
+        height: 38px;
         vertical-align: middle;
       }
     }
 
     .mat-form-field-outline {
-      top: 0 !important;
+      display: none;
+    }
+
+    .mat-form-field-subscript-wrapper {
+      display: none;
     }
   }
 }
@@ -133,19 +158,19 @@
 .list-item {
   display: flex;
   align-items: center;
-  padding: 10px 16px;
+  padding: 10px $spacing-lg;
   cursor: pointer;
-  border-bottom: 1px solid #f5f5f5;
-  transition: background-color 0.15s;
+  border-bottom: 1px solid $gray-100;
+  transition: background-color $transition-fast;
 
   &:hover {
-    background-color: #f5f5f5;
+    background-color: $arctic-hover;
   }
 }
 
 .item-info {
   flex: 1;
-  margin-left: 12px;
+  margin-left: $spacing-md;
   overflow: hidden;
   min-width: 0;
 }
@@ -157,24 +182,28 @@
 }
 
 .item-name {
-  font-weight: 500;
-  font-size: 14px;
-  color: #333;
+  font-family: $font-primary;
+  font-weight: $fw-medium;
+  font-size: $fs-base;
+  color: $text-primary;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .item-time {
-  font-size: 11px;
-  color: #999;
+  font-family: $font-meta;
+  font-size: $fs-xs;
+  color: $text-muted;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-left: $spacing-sm;
 }
 
 .item-subtitle {
-  font-size: 13px;
-  color: #666;
+  font-family: $font-primary;
+  font-size: $fs-sm;
+  font-weight: $fw-regular;
+  color: $text-secondary;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -182,10 +211,11 @@
 
 // Unread badge
 .unread-badge {
-  background-color: #1976d2;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
+  background-color: $nocturnal;
+  color: $white;
+  font-family: $font-meta;
+  font-size: $fs-xs;
+  font-weight: $fw-semibold;
   min-width: 20px;
   height: 20px;
   border-radius: 10px;
@@ -194,16 +224,17 @@
   justify-content: center;
   padding: 0 6px;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-left: $spacing-sm;
 }
 
 // Section titles
 .section-title {
-  padding: 12px 16px 4px;
+  padding: $spacing-md $spacing-lg $spacing-xs;
   margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
+  font-family: $font-meta;
+  font-size: $fs-xs;
+  font-weight: $fw-semibold;
+  color: $text-secondary;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -213,21 +244,35 @@
   display: flex;
   gap: 2px;
   flex-shrink: 0;
+
+  button {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+  }
 }
 
 // Chat action icon
 .chat-action {
-  opacity: 0.5;
+  opacity: 0.4;
   flex-shrink: 0;
+  color: $nocturnal-light;
+  transition: opacity $transition-fast;
+}
+
+.list-item:hover .chat-action {
+  opacity: 0.8;
 }
 
 // Add button
 .add-btn {
   flex-shrink: 0;
   min-width: 64px;
-  font-size: 12px;
-  padding: 0 8px;
+  font-size: $fs-xs;
+  padding: 0 $spacing-sm;
   line-height: 30px;
+  border-color: $nocturnal-light;
+  color: $nocturnal;
 
   mat-icon {
     font-size: 16px;
@@ -244,19 +289,27 @@
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  color: #999;
+  color: $text-muted;
+  animation: fadeIn 300ms ease forwards;
 
   mat-icon {
     font-size: 48px;
     width: 48px;
     height: 48px;
-    margin-bottom: 12px;
-    color: #ccc;
+    margin-bottom: $spacing-md;
+    color: $gray-300;
   }
 
   p {
-    margin-bottom: 12px;
+    margin-bottom: $spacing-md;
     text-align: center;
-    font-size: 14px;
+    font-family: $font-primary;
+    font-size: $fs-base;
+    color: $text-secondary;
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

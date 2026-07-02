@@ -71,11 +71,15 @@
         <app-avatar
           [imageUrl]="activeConversation?.avatarUrl"
           [name]="getOtherParticipantName()"
+          [isOnline]="isOtherParticipantOnline()"
           size="lg">
         </app-avatar>
         <h4 class="profile-name">{{ getOtherParticipantName() }}</h4>
         <small class="profile-username" *ngIf="activeConversation?.username">
           @{{ activeConversation?.username }}
+        </small>
+        <small class="profile-status" [class.online]="isOtherParticipantOnline()">
+          {{ isOtherParticipantOnline() ? 'Online' : 'Offline' }}
         </small>
       </div>
       <mat-divider></mat-divider>
@@ -88,12 +92,30 @@
           </div>
         </div>
         <div class="profile-detail-item">
+          <mat-icon>circle</mat-icon>
+          <div>
+            <small>Status</small>
+            <p>{{ isOtherParticipantOnline() ? 'Online now' : 'Last seen recently' }}</p>
+          </div>
+        </div>
+        <div class="profile-detail-item">
           <mat-icon>access_time</mat-icon>
           <div>
             <small>Member since</small>
             <p>{{ activeConversation?.createdAt | date:'mediumDate' }}</p>
           </div>
         </div>
+      </div>
+      <mat-divider></mat-divider>
+      <div class="profile-actions">
+        <button mat-button color="warn" class="profile-action-btn">
+          <mat-icon>block</mat-icon>
+          <span>Block Contact</span>
+        </button>
+        <button mat-button color="warn" class="profile-action-btn">
+          <mat-icon>delete_outline</mat-icon>
+          <span>Remove Contact</span>
+        </button>
       </div>
     </div>
   </div>

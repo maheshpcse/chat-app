@@ -1,0 +1,110 @@
+// ====================================================
+// CHAT APP - Form Field Alignment Fixes
+// ====================================================
+@import './theme.variables';
+
+// Consistent form field alignment
+.aligned-form-field {
+  ::ng-deep {
+    .mat-form-field-wrapper {
+      margin-bottom: -1.25em;
+      padding-bottom: 0;
+    }
+
+    .mat-form-field-flex {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+    }
+
+    .mat-form-field-prefix,
+    .mat-form-field-suffix {
+      display: flex;
+      align-items: center;
+
+      .mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: $text-secondary;
+      }
+    }
+
+    .mat-form-field-prefix {
+      margin-right: $spacing-sm;
+    }
+
+    .mat-form-field-suffix {
+      margin-left: $spacing-sm;
+    }
+
+    .mat-form-field-infix {
+      padding: $spacing-sm 0;
+      border-top: 0;
+      display: flex;
+      align-items: center;
+
+      input {
+        font-family: $font-primary;
+        font-size: $fs-base;
+        line-height: 24px;
+        vertical-align: middle;
+      }
+    }
+
+    .mat-form-field-outline {
+      top: 0 !important;
+    }
+
+    .mat-form-field-label {
+      top: 50%;
+      transform: translateY(-50%);
+    }
+  }
+}
+
+// Chat input specific alignment
+.chat-input-field {
+  @extend .aligned-form-field;
+
+  ::ng-deep {
+    .mat-form-field-flex {
+      min-height: 44px;
+      padding: 0 12px;
+      border-radius: $radius-pill;
+    }
+
+    .mat-form-field-infix {
+      input,
+      textarea {
+        font-family: $font-chat;
+        font-size: $fs-md;
+      }
+    }
+  }
+}
+
+// Search input specific alignment
+.search-input-field {
+  @extend .aligned-form-field;
+
+  ::ng-deep {
+    .mat-form-field-flex {
+      min-height: 36px;
+      background: $gray-100;
+      border-radius: $radius-pill;
+      padding: 0 12px;
+    }
+
+    .mat-form-field-infix {
+      input {
+        font-family: $font-primary;
+        font-size: $fs-sm;
+      }
+    }
+
+    .mat-form-field-outline {
+      display: none;
+    }
+  }
+}

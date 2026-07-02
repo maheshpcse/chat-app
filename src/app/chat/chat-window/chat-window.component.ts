@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { ChatService } from '../../core/services/chat.service';
 import { AuthService } from '../../core/services/auth.service';
 import { SocketService } from '../../core/services/socket.service';
+import { PresenceService } from '../../core/services/presence.service';
 import { IMessage, ITypingEvent } from '../../core/models/message.model';
 import { IConversation } from '../../core/models/conversation.model';
 
@@ -28,7 +29,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   constructor(
     private chatService: ChatService,
     private authService: AuthService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private presenceService: PresenceService
   ) {}
 
   ngOnInit(): void {
@@ -41,11 +43,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.subscriptions.push(convSub);
 
     const msgSub = this.chatService.messages$.subscribe(messages => {
-      // Sort messages by createdAt ascending (old at top, new at bottom)
       this.messages = [...messages].sort((a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
-      // Only auto-scroll if user is near bottom
       if (this.isNearBottom) {
         this.shouldScroll = true;
       }
@@ -90,7 +90,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   isOtherParticipantOnline(): boolean {
-    return false;
+    if (!this.activeConversation?.participantId) { return false; }
+    return this.presenceService.isOnline(this.activeConversation.participantId);
   }
 
   toggleProfileSidebar(): void {

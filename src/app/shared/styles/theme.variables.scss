@@ -1,0 +1,159 @@
+// ====================================================
+// CHAT APP DESIGN SYSTEM - Theme Variables
+// ====================================================
+
+// Core Palette
+$arctic-powder: #F1F6F4;
+$forsytha: #FFC801;
+$nocturnal: #114C5A;
+$mystic-mint: #D9E8E2;
+$deep-saffron: #FF9932;
+$oceanic-noir: #172B36;
+$crimson: #DC143C;
+
+// Extended Palette
+$nocturnal-light: #1a6b7a;
+$nocturnal-dark: #0b3640;
+$oceanic-light: #243d4a;
+$mint-hover: #c8ddd5;
+$arctic-hover: #e4edea;
+$saffron-light: #ffb366;
+$forsytha-light: #ffd44d;
+
+// Neutrals
+$white: #ffffff;
+$gray-50: #fafbfc;
+$gray-100: #f5f7f6;
+$gray-200: #e8eceb;
+$gray-300: #d0d5d3;
+$gray-400: #a8b0ad;
+$gray-500: #6b7572;
+$gray-600: #4a5250;
+$gray-700: #333a38;
+$gray-800: #1f2524;
+$gray-900: #0f1312;
+
+// Semantic Colors
+$primary: $nocturnal;
+$primary-light: $nocturnal-light;
+$primary-dark: $nocturnal-dark;
+$accent: $forsytha;
+$accent-dark: #e0b000;
+$warn: $crimson;
+$success: #2e7d32;
+$info: $nocturnal-light;
+
+// Background Colors
+$bg-app: $arctic-powder;
+$bg-sidebar: $white;
+$bg-chat-area: $gray-100;
+$bg-message-own: $nocturnal;
+$bg-message-other: $white;
+$bg-input: $white;
+$bg-profile-sidebar: $white;
+$bg-header: $oceanic-noir;
+
+// Text Colors
+$text-primary: $gray-800;
+$text-secondary: $gray-500;
+$text-muted: $gray-400;
+$text-on-primary: $white;
+$text-on-dark: $arctic-powder;
+$text-link: $nocturnal-light;
+$text-accent: $deep-saffron;
+
+// Border Colors
+$border-light: $gray-200;
+$border-default: $gray-300;
+$border-focus: $nocturnal-light;
+
+// Shadows
+$shadow-xs: 0 1px 2px rgba($oceanic-noir, 0.05);
+$shadow-sm: 0 2px 4px rgba($oceanic-noir, 0.08);
+$shadow-md: 0 4px 12px rgba($oceanic-noir, 0.1);
+$shadow-lg: 0 8px 24px rgba($oceanic-noir, 0.12);
+$shadow-bubble: 0 1px 4px rgba($oceanic-noir, 0.06);
+
+// ====================================================
+// Typography
+// ====================================================
+
+// Font Families
+$font-primary: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+$font-heading: 'Poppins', 'Segoe UI', sans-serif;
+$font-chat: 'Nunito', 'Segoe UI', sans-serif;
+$font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+$font-meta: 'Inter', -apple-system, sans-serif;
+
+// Font Sizes
+$fs-xs: 0.6875rem;    // 11px
+$fs-sm: 0.75rem;      // 12px
+$fs-base: 0.875rem;   // 14px
+$fs-md: 0.9375rem;    // 15px
+$fs-lg: 1rem;         // 16px
+$fs-xl: 1.125rem;     // 18px
+$fs-2xl: 1.25rem;     // 20px
+$fs-3xl: 1.5rem;      // 24px
+
+// Font Weights
+$fw-light: 300;
+$fw-regular: 400;
+$fw-medium: 500;
+$fw-semibold: 600;
+$fw-bold: 700;
+
+// Line Heights
+$lh-tight: 1.2;
+$lh-normal: 1.4;
+$lh-relaxed: 1.6;
+
+// ====================================================
+// Spacing
+// ====================================================
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 24px;
+$spacing-2xl: 32px;
+
+// ====================================================
+// Dimensions
+// ====================================================
+$sidebar-width: 320px;
+$sidebar-minimized-width: 60px;
+$profile-sidebar-width: 300px;
+$header-height: 56px;
+$chat-header-height: 60px;
+$input-footer-min-height: 56px;
+$input-footer-max-height: 140px;
+$avatar-sm: 32px;
+$avatar-md: 40px;
+$avatar-lg: 80px;
+
+// ====================================================
+// Border Radius
+// ====================================================
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+$radius-pill: 24px;
+$radius-circle: 50%;
+
+// ====================================================
+// Transitions & Animations
+// ====================================================
+$transition-fast: 150ms ease;
+$transition-base: 250ms ease;
+$transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-smooth: 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
+
+// ====================================================
+// Z-Index Scale
+// ====================================================
+$z-sidebar: 10;
+$z-header: 100;
+$z-profile-sidebar: 20;
+$z-modal: 1000;
+$z-toast: 1100;

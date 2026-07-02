@@ -33,6 +33,8 @@ import { AvatarComponent } from './components/avatar/avatar.component';
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
 import { TruncatePipe } from './pipes/truncate.pipe';
 import { FileSizePipe } from './pipes/file-size.pipe';
+import { LastSeenPipe } from './pipes/last-seen.pipe';
+import { MessageTimePipe } from './pipes/message-time.pipe';
 
 // Shared Directives
 import { AutoScrollDirective } from './directives/auto-scroll.directive';
@@ -81,6 +83,8 @@ const MATERIAL_MODULES = [
     TimeAgoPipe,
     TruncatePipe,
     FileSizePipe,
+    LastSeenPipe,
+    MessageTimePipe,
     // Directives
     AutoScrollDirective,
     ClickOutsideDirective,
@@ -108,6 +112,8 @@ const MATERIAL_MODULES = [
     TimeAgoPipe,
     TruncatePipe,
     FileSizePipe,
+    LastSeenPipe,
+    MessageTimePipe,
     // Directives
     AutoScrollDirective,
     ClickOutsideDirective,

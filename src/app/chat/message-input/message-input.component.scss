@@ -1,12 +1,59 @@
+@import '../../../app/shared/styles/theme.variables';
+
 .message-input-container {
-  background: #fff;
-  padding: 8px 12px;
+  background: $white;
+  padding: $spacing-sm $spacing-md;
 }
 
 .input-row {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-end;
+  gap: $spacing-xs;
+}
+
+.action-btn {
+  color: $text-secondary;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  margin-bottom: 2px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    color: $nocturnal-light;
+  }
+}
+
+.send-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  margin-bottom: 2px;
+  color: $text-muted;
+  transition: color $transition-fast, background-color $transition-fast;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &.active {
+    color: $nocturnal;
+    background-color: rgba($nocturnal, 0.08);
+    border-radius: $radius-circle;
+
+    &:hover {
+      background-color: rgba($nocturnal, 0.15);
+    }
+  }
 }
 
 .message-field {
@@ -14,21 +61,42 @@
 
   ::ng-deep {
     .mat-form-field-wrapper {
-      margin-bottom: -1.25em;
+      margin: 0;
       padding-bottom: 0;
     }
 
     .mat-form-field-flex {
       align-items: center;
+      padding: 4px 12px;
+      background: $gray-100;
+      border-radius: $radius-pill;
     }
 
     .mat-form-field-infix {
-      padding: 8px 0;
+      padding: 6px 0;
       border-top: 0;
 
-      input, textarea {
-        vertical-align: middle;
+      textarea {
+        font-family: $font-chat;
+        font-size: $fs-md;
+        line-height: $lh-normal;
+        resize: none;
+        overflow-y: auto;
+        max-height: 100px;
       }
+    }
+
+    .mat-form-field-outline {
+      display: none;
+    }
+
+    .mat-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    .mat-form-field-label {
+      font-family: $font-chat;
+      color: $text-muted;
     }
   }
 }
@@ -36,26 +104,42 @@
 .file-preview {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: #f0f4ff;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: rgba($nocturnal, 0.05);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+  animation: fadeInUp 200ms ease forwards;
+
+  mat-icon {
+    color: $nocturnal-light;
+    font-size: 18px;
+  }
 
   .file-name {
     flex: 1;
-    font-size: 13px;
+    font-family: $font-primary;
+    font-size: $fs-sm;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: $text-primary;
   }
 
   .remove-file {
     width: 24px;
     height: 24px;
     line-height: 24px;
+
     mat-icon {
-      font-size: 16px;
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
     }
   }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }

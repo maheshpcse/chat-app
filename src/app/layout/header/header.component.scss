@@ -4,16 +4,21 @@
   left: 0;
   right: 0;
   z-index: 100;
+  height: 56px;
+  background-color: #172B36 !important;
 }
 
 .app-title {
-  font-size: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
   font-weight: 600;
+  letter-spacing: 0.02em;
 
   &.clickable {
     cursor: pointer;
+    transition: opacity 250ms ease;
     &:hover {
-      opacity: 0.85;
+      opacity: 0.8;
     }
   }
 }
@@ -25,19 +30,25 @@
 .user-info {
   padding: 8px 16px;
   small {
-    color: #888;
+    color: #a8b0ad;
   }
 }
 
 .notification-panel {
   position: fixed;
-  top: 64px;
+  top: 56px;
   right: 16px;
   width: 360px;
   max-height: 400px;
   overflow-y: auto;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(23, 43, 54, 0.15);
   z-index: 1000;
+  animation: fadeInDown 250ms ease forwards;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }

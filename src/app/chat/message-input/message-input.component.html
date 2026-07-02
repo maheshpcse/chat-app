@@ -9,30 +9,36 @@
   </div>
 
   <!-- Upload Progress -->
-  <mat-progress-bar *ngIf="isUploading" mode="indeterminate"></mat-progress-bar>
+  <mat-progress-bar *ngIf="isUploading" mode="indeterminate" color="accent"></mat-progress-bar>
 
   <!-- Input Area -->
-  <div class="input-row d-flex align-items-center">
+  <div class="input-row">
     <!-- File Upload Button -->
     <button mat-icon-button (click)="fileInput.click()" [disabled]="isUploading"
-            matTooltip="Attach file">
+            matTooltip="Attach file" class="action-btn">
       <mat-icon>attach_file</mat-icon>
     </button>
     <input #fileInput type="file" hidden (change)="onFileSelected($event)"
            accept="image/*,.pdf,.doc,.docx,.txt">
 
     <!-- Text Input -->
-    <mat-form-field appearance="outline" class="flex-grow-1 message-field">
-      <input matInput
-             [formControl]="messageControl"
-             placeholder="Type a message..."
-             (keydown)="onKeyDown($event)"
-             autocomplete="off">
+    <mat-form-field appearance="outline" class="message-field">
+      <textarea matInput
+                [formControl]="messageControl"
+                placeholder="Type a message..."
+                (keydown)="onKeyDown($event)"
+                cdkTextareaAutosize
+                [cdkAutosizeMinRows]="1"
+                [cdkAutosizeMaxRows]="4"
+                autocomplete="off">
+      </textarea>
     </mat-form-field>
 
     <!-- Send Button -->
-    <button mat-icon-button color="primary" (click)="sendMessage()"
+    <button mat-icon-button (click)="sendMessage()"
             [disabled]="isUploading || (!messageControl.value?.trim() && !selectedFile)"
+            class="send-btn"
+            [class.active]="messageControl.value?.trim() || selectedFile"
             matTooltip="Send message">
       <mat-icon>send</mat-icon>
     </button>
