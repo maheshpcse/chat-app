@@ -60,4 +60,10 @@ export class GroupService {
       `${environment.apiBaseUrl}${API_ENDPOINTS.GROUPS.MEMBERS}/${groupId}/members/${userId}`
     ).pipe(map(response => response.data));
   }
+
+  getGroupMembers(groupId: string): Observable<any[]> {
+    return this.http.get<IApiResponse<any[]>>(
+      `${environment.apiBaseUrl}${API_ENDPOINTS.GROUPS.MEMBERS}/${groupId}/members`
+    ).pipe(map(response => response.data));
+  }
 }

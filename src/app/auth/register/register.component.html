@@ -1,11 +1,38 @@
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-  <mat-card class="register-card">
-    <mat-card-header>
-      <mat-card-title>Create Account</mat-card-title>
-      <mat-card-subtitle>Join the conversation today!</mat-card-subtitle>
-    </mat-card-header>
+<div class="auth-page">
+  <!-- Branding Side -->
+  <div class="auth-branding">
+    <div class="brand-content">
+      <div class="brand-icon">
+        <mat-icon>forum</mat-icon>
+      </div>
+      <h1>Join the Community</h1>
+      <p>Create your account and start connecting with people worldwide.</p>
+      <div class="brand-features">
+        <div class="feature-item">
+          <mat-icon>verified_user</mat-icon>
+          <span>Secure & encrypted</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>devices</mat-icon>
+          <span>Multi-device support</span>
+        </div>
+        <div class="feature-item">
+          <mat-icon>schedule</mat-icon>
+          <span>Scheduled messages</span>
+        </div>
+      </div>
+    </div>
+    <div class="brand-pattern"></div>
+  </div>
 
-    <mat-card-content>
+  <!-- Form Side -->
+  <div class="auth-form-wrapper">
+    <div class="auth-form-container">
+      <div class="form-header">
+        <h2>Create Account</h2>
+        <p>Fill in your details to get started</p>
+      </div>
+
       <!-- Error Alert -->
       <div class="alert-error" *ngIf="errorMessage">
         <mat-icon>error_outline</mat-icon>
@@ -13,83 +40,83 @@
       </div>
 
       <!-- Register Form -->
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
         <!-- Full Name -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Full Name</mat-label>
-          <input matInput formControlName="fullName" placeholder="Enter your full name">
-          <mat-icon matPrefix>person</mat-icon>
-          <mat-error *ngIf="f.fullName.hasError('required')">Full name is required</mat-error>
-          <mat-error *ngIf="f.fullName.hasError('minlength')">Minimum 2 characters</mat-error>
-          <mat-error *ngIf="f.fullName.hasError('noWhitespace')">Cannot be only whitespace</mat-error>
-        </mat-form-field>
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <div class="input-wrapper" [class.error]="f.fullName.touched && f.fullName.invalid">
+            <mat-icon class="input-icon">person</mat-icon>
+            <input id="fullName" formControlName="fullName" placeholder="John Doe">
+          </div>
+          <span class="error-text" *ngIf="f.fullName.touched && f.fullName.hasError('required')">Full name is required</span>
+          <span class="error-text" *ngIf="f.fullName.touched && f.fullName.hasError('minlength')">Minimum 2 characters</span>
+        </div>
 
         <!-- Username -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Username</mat-label>
-          <input matInput formControlName="username" placeholder="Choose a username">
-          <mat-icon matPrefix>alternate_email</mat-icon>
-          <mat-error *ngIf="f.username.hasError('required')">Username is required</mat-error>
-          <mat-error *ngIf="f.username.hasError('minlength')">Minimum 3 characters</mat-error>
-          <mat-error *ngIf="f.username.hasError('pattern')">Only letters, numbers, and underscores</mat-error>
-        </mat-form-field>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper" [class.error]="f.username.touched && f.username.invalid">
+            <mat-icon class="input-icon">alternate_email</mat-icon>
+            <input id="username" formControlName="username" placeholder="john_doe">
+          </div>
+          <span class="error-text" *ngIf="f.username.touched && f.username.hasError('required')">Username is required</span>
+          <span class="error-text" *ngIf="f.username.touched && f.username.hasError('pattern')">Only letters, numbers, underscores</span>
+        </div>
 
         <!-- Email -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="Enter your email">
-          <mat-icon matPrefix>email</mat-icon>
-          <mat-error *ngIf="f.email.hasError('required')">Email is required</mat-error>
-          <mat-error *ngIf="f.email.hasError('email')">Please enter a valid email</mat-error>
-        </mat-form-field>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper" [class.error]="f.email.touched && f.email.invalid">
+            <mat-icon class="input-icon">email</mat-icon>
+            <input id="email" type="email" formControlName="email" placeholder="you@example.com">
+          </div>
+          <span class="error-text" *ngIf="f.email.touched && f.email.hasError('required')">Email is required</span>
+          <span class="error-text" *ngIf="f.email.touched && f.email.hasError('email')">Please enter a valid email</span>
+        </div>
 
-        <!-- Password -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput formControlName="password"
-                 [type]="hidePassword ? 'password' : 'text'"
-                 placeholder="Create a password (min 8 chars)">
-          <mat-icon matPrefix>lock</mat-icon>
-          <button mat-icon-button matSuffix type="button"
-                  (click)="hidePassword = !hidePassword">
-            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          <mat-error *ngIf="f.password.hasError('required')">Password is required</mat-error>
-          <mat-error *ngIf="f.password.hasError('minlength')">Minimum 8 characters</mat-error>
-        </mat-form-field>
+        <!-- Password Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-wrapper" [class.error]="f.password.touched && f.password.invalid">
+              <mat-icon class="input-icon">lock</mat-icon>
+              <input id="password" formControlName="password"
+                     [type]="hidePassword ? 'password' : 'text'"
+                     placeholder="Min 8 characters">
+              <button type="button" class="toggle-password" (click)="hidePassword = !hidePassword">
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+            <span class="error-text" *ngIf="f.password.touched && f.password.hasError('required')">Required</span>
+            <span class="error-text" *ngIf="f.password.touched && f.password.hasError('minlength')">Min 8 characters</span>
+          </div>
 
-        <!-- Confirm Password -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Confirm Password</mat-label>
-          <input matInput formControlName="confirmPassword"
-                 [type]="hideConfirmPassword ? 'password' : 'text'"
-                 placeholder="Re-enter your password">
-          <mat-icon matPrefix>lock_outline</mat-icon>
-          <button mat-icon-button matSuffix type="button"
-                  (click)="hideConfirmPassword = !hideConfirmPassword">
-            <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          <mat-error *ngIf="f.confirmPassword.hasError('required')">Confirm password is required</mat-error>
-          <mat-error *ngIf="f.confirmPassword.hasError('passwordMismatch')">Passwords do not match</mat-error>
-        </mat-form-field>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="input-wrapper" [class.error]="f.confirmPassword.touched && f.confirmPassword.invalid">
+              <mat-icon class="input-icon">lock_outline</mat-icon>
+              <input id="confirmPassword" formControlName="confirmPassword"
+                     [type]="hideConfirmPassword ? 'password' : 'text'"
+                     placeholder="Re-enter password">
+              <button type="button" class="toggle-password" (click)="hideConfirmPassword = !hideConfirmPassword">
+                <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+            <span class="error-text" *ngIf="f.confirmPassword.touched && f.confirmPassword.hasError('required')">Required</span>
+            <span class="error-text" *ngIf="f.confirmPassword.touched && f.confirmPassword.hasError('passwordMismatch')">Passwords don't match</span>
+          </div>
+        </div>
 
         <!-- Submit Button -->
-        <button mat-raised-button color="primary" type="submit"
-                class="full-width register-btn"
-                [disabled]="isLoading">
-          <mat-icon *ngIf="!isLoading">person_add</mat-icon>
+        <button type="submit" class="submit-btn" [disabled]="isLoading">
           <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
           <span *ngIf="!isLoading">Create Account</span>
         </button>
       </form>
-    </mat-card-content>
 
-    <mat-card-actions align="end">
-      <p class="login-link">
-        Already have an account?
-        <a routerLink="/auth/login" mat-button color="accent">Sign In</a>
-      </p>
-    </mat-card-actions>
-  </mat-card>
+      <div class="auth-footer">
+        <p>Already have an account? <a routerLink="/auth/login">Sign In</a></p>
+      </div>
+    </div>
+  </div>
 </div>

@@ -41,12 +41,12 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     // Redirect if already logged in
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/chat']);
+      this.router.navigate(['/dashboard']);
       return;
     }
 
     // Get return URL from query params
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/chat';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
 
     // Initialize Reactive Form
     this.loginForm = this.fb.group({

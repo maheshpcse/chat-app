@@ -4,8 +4,11 @@ import { ChatService } from '../../core/services/chat.service';
 import { AuthService } from '../../core/services/auth.service';
 import { SocketService } from '../../core/services/socket.service';
 import { PresenceService } from '../../core/services/presence.service';
+import { UserService } from '../../core/services/user.service';
 import { IMessage, ITypingEvent } from '../../core/models/message.model';
-import { IConversation } from '../../core/models/conversation.model';
+import { IConversation, ConversationType } from '../../core/models/conversation.model';
+import { IUser } from '../../core/models/user.model';
+import { GroupService } from '../../core/services/group.service';
 
 @Component({
   selector: 'app-chat-window',
@@ -21,6 +24,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   typingUsers: ITypingEvent[] = [];
   currentUserId: string;
   showProfileSidebar: boolean = false;
+  sidebarUser: IUser | null = null;
+  groupMembers: any[] = [];
 
   private subscriptions: Subscription[] = [];
   private shouldScroll = true;
@@ -30,7 +35,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     private chatService: ChatService,
     private authService: AuthService,
     private socketService: SocketService,
-    private presenceService: PresenceService
+    public presenceService: PresenceService,
+    private userService: UserService,
+    private groupService: GroupService
   ) {}
 
   ngOnInit(): void {
@@ -96,6 +103,30 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   toggleProfileSidebar(): void {
     this.showProfileSidebar = !this.showProfileSidebar;
+    if (this.showProfileSidebar && this.activeConversation) {
+      if (this.isGroupConversation()) {
+        // Load group members
+        this.groupService.getGroupMembers(this.activeConversation.conversationId).subscribe(
+          (members) => { this.groupMembers = members; },
+          () => { this.groupMembers = []; }
+        );
+      } else if (this.activeConversation.participantId) {
+        // Load user profile for private chat
+        this.userService.getUserById(this.activeConversation.participantId).subscribe(
+          (user) => { this.sidebarUser = user; },
+          () => { this.sidebarUser = null; }
+        );
+      }
+    }
+  }
+
+  isGroupConversation(): boolean {
+    return this.activeConversation?.conversationType === ConversationType.GROUP;
+  }
+
+  getLastSeenStatus(): string {
+    if (!this.activeConversation?.participantId) { return 'Offline'; }
+    return this.presenceService.getLastSeenDisplay(this.activeConversation.participantId);
   }
 
   private scrollToBottom(): void {

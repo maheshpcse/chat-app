@@ -1,0 +1,60 @@
+<div class="schedule-dialog">
+  <div class="dialog-header">
+    <mat-icon class="header-icon">schedule_send</mat-icon>
+    <h3>Schedule Message</h3>
+    <small *ngIf="data.conversationName">to {{ data.conversationName }}</small>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="dialog-body">
+    <!-- Error Alert -->
+    <div class="alert-error" *ngIf="errorMessage">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
+      <!-- Message Content -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Message</mat-label>
+        <textarea matInput formControlName="content" rows="4"
+                  placeholder="Type your scheduled message..."
+                  cdkTextareaAutosize
+                  cdkAutosizeMinRows="3"
+                  cdkAutosizeMaxRows="8"></textarea>
+        <mat-icon matPrefix>message</mat-icon>
+        <mat-hint align="end">{{ scheduleForm.get('content').value?.length || 0 }} / 2000</mat-hint>
+        <mat-error *ngIf="scheduleForm.get('content').hasError('required')">Message is required</mat-error>
+      </mat-form-field>
+
+      <!-- Date and Time Row -->
+      <div class="datetime-row">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>Date</mat-label>
+          <input matInput type="date" formControlName="scheduledDate" [min]="minDate">
+          <mat-icon matPrefix>calendar_today</mat-icon>
+          <mat-error>Select a date</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Time</mat-label>
+          <input matInput type="time" formControlName="scheduledTime">
+          <mat-icon matPrefix>access_time</mat-icon>
+          <mat-error>Select a time</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Actions -->
+      <div class="dialog-actions">
+        <button mat-button type="button" (click)="onCancel()" class="cancel-btn">Cancel</button>
+        <button mat-raised-button color="primary" type="submit"
+                [disabled]="isSubmitting || scheduleForm.invalid" class="schedule-btn">
+          <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
+          <mat-icon *ngIf="!isSubmitting">schedule_send</mat-icon>
+          <span *ngIf="!isSubmitting">Schedule</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

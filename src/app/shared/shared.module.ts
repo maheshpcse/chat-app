@@ -23,11 +23,13 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 
 // Shared Components
 import { LoaderComponent } from './components/loader/loader.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { AvatarComponent } from './components/avatar/avatar.component';
+import { EmojiPickerComponent } from './components/emoji-picker/emoji-picker.component';
 
 // Shared Pipes
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
@@ -70,7 +72,8 @@ const MATERIAL_MODULES = [
   MatSnackBarModule,
   MatTooltipModule,
   MatDividerModule,
-  MatProgressBarModule
+  MatProgressBarModule,
+  MatSelectModule
 ];
 
 @NgModule({
@@ -79,6 +82,7 @@ const MATERIAL_MODULES = [
     LoaderComponent,
     ConfirmDialogComponent,
     AvatarComponent,
+    EmojiPickerComponent,
     // Pipes
     TimeAgoPipe,
     TruncatePipe,
@@ -108,6 +112,7 @@ const MATERIAL_MODULES = [
     LoaderComponent,
     ConfirmDialogComponent,
     AvatarComponent,
+    EmojiPickerComponent,
     // Pipes
     TimeAgoPipe,
     TruncatePipe,

@@ -1,0 +1,130 @@
+@import '../../styles/theme.variables';
+
+.emoji-picker {
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  border: 1px solid $border-light;
+  overflow: hidden;
+  z-index: $z-emoji-picker;
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm $spacing-md;
+  border-bottom: 1px solid $border-light;
+
+  .picker-title {
+    font-family: $font-heading;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    color: $text-primary;
+  }
+
+  .close-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    transition: background $transition-fast;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: $text-muted;
+    }
+
+    &:hover {
+      background: $gray-100;
+    }
+  }
+}
+
+.category-tabs {
+  display: flex;
+  padding: $spacing-xs $spacing-sm;
+  gap: 2px;
+  border-bottom: 1px solid $border-light;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background $transition-fast;
+  flex-shrink: 0;
+
+  &:hover {
+    background: $arctic-hover;
+  }
+
+  &.active {
+    background: rgba($nocturnal, 0.1);
+  }
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: $spacing-sm;
+  max-height: 240px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $gray-300;
+    border-radius: 2px;
+  }
+}
+
+.emoji-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background $transition-fast, transform 100ms ease;
+
+  &:hover {
+    background: $emoji-hover;
+    transform: scale(1.15);
+  }
+}
+
+.empty-category {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: $spacing-xl;
+  font-family: $font-primary;
+  font-size: $fs-sm;
+  color: $text-muted;
+}

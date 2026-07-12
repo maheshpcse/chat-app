@@ -1,0 +1,34 @@
+<div class="emoji-picker" (click)="$event.stopPropagation()">
+  <!-- Header -->
+  <div class="picker-header">
+    <span class="picker-title">Emoji</span>
+    <button class="close-btn" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="category-tabs">
+    <button *ngFor="let cat of categories"
+            class="tab-btn"
+            [class.active]="activeCategory === cat.id"
+            (click)="selectCategory(cat.id)"
+            [title]="cat.label">
+      {{ cat.icon }}
+    </button>
+  </div>
+
+  <!-- Emoji Grid -->
+  <div class="emoji-grid">
+    <button *ngFor="let emoji of getDisplayEmojis()"
+            class="emoji-btn"
+            (click)="selectEmoji(emoji)"
+            [title]="emoji">
+      {{ emoji }}
+    </button>
+
+    <div class="empty-category" *ngIf="getDisplayEmojis().length === 0">
+      <span>No emojis found</span>
+    </div>
+  </div>
+</div>

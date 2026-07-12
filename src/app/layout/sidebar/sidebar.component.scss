@@ -38,20 +38,13 @@
 
 // Header
 .sidebar-header {
-  padding: $spacing-md $spacing-lg 0;
-
-  .sidebar-title {
-    font-family: $font-heading;
-    font-size: $fs-xl;
-    font-weight: $fw-bold;
-    color: $oceanic-noir;
-  }
+  padding: $spacing-sm $spacing-sm 0;
+  overflow: hidden;
 }
 
 // Tab navigation
 .sidebar-tabs {
   display: flex;
-  margin-top: $spacing-sm;
   gap: 2px;
 
   button {
@@ -77,12 +70,22 @@
     &:hover:not(.active) {
       background-color: rgba($nocturnal, 0.04);
     }
+
+    &.collapse-btn {
+      flex: 0 0 auto;
+      color: $gray-400;
+
+      &:hover {
+        color: $nocturnal;
+      }
+    }
   }
 }
 
 // Search box with proper alignment
 .search-box {
-  padding: $spacing-md $spacing-lg 0;
+  padding: $spacing-md $spacing-lg;
+  padding-bottom: $spacing-sm;
 }
 
 .search-field {
@@ -90,11 +93,12 @@
 
   ::ng-deep {
     .mat-form-field-wrapper {
-      margin-bottom: -1.25em;
+      margin-bottom: 0;
       padding-bottom: 0;
     }
 
     .mat-form-field-flex {
+      display: flex;
       align-items: center;
       height: 38px;
       background: $gray-100;
@@ -106,12 +110,14 @@
       display: flex;
       align-items: center;
       margin-right: $spacing-sm;
+      height: 38px;
 
       .mat-icon {
         font-size: 18px;
         width: 18px;
         height: 18px;
         color: $text-muted;
+        line-height: 38px;
       }
     }
 
@@ -120,6 +126,7 @@
       align-items: center;
       padding: 0;
       border-top: 0;
+      height: 38px;
 
       input {
         font-family: $font-primary;
@@ -136,6 +143,10 @@
 
     .mat-form-field-subscript-wrapper {
       display: none;
+    }
+
+    .mat-form-field-label-wrapper {
+      top: -0.5em;
     }
   }
 }

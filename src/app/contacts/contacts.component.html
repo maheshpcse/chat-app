@@ -1,0 +1,152 @@
+<div class="contacts-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1><mat-icon>contacts</mat-icon> Contacts</h1>
+      <span class="contact-count">{{ contacts.length }} contacts</span>
+    </div>
+    <div class="header-right">
+      <!-- Search -->
+      <div class="search-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text" placeholder="Search contacts..."
+               [value]="searchTerm"
+               (input)="onSearch($event.target.value)">
+      </div>
+
+      <!-- View Toggle -->
+      <div class="view-toggle">
+        <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
+                matTooltip="List View">
+          <mat-icon>view_list</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
+                matTooltip="Grid View">
+          <mat-icon>view_module</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')"
+                matTooltip="Table View">
+          <mat-icon>table_chart</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading contacts...</p>
+  </div>
+
+  <!-- Alphabet Sidebar -->
+  <div class="contacts-body" *ngIf="!isLoading">
+    <div class="alphabet-nav" *ngIf="viewMode !== 'table'">
+      <button *ngFor="let letter of getAlphabetLetters()"
+              class="letter-btn"
+              (click)="scrollToLetter(letter)">
+        {{ letter }}
+      </button>
+    </div>
+
+    <!-- ===================== LIST VIEW ===================== -->
+    <div class="contacts-content" *ngIf="viewMode === 'list'">
+      <div *ngFor="let group of groupedContacts" class="contact-group" [id]="'group-' + group.letter">
+        <div class="group-header">
+          <span class="group-letter">{{ group.letter }}</span>
+          <span class="group-count">{{ group.contacts.length }}</span>
+        </div>
+
+        <div class="contact-list-item" *ngFor="let contact of group.contacts"
+             (click)="startChat(contact)">
+          <div class="contact-avatar">
+            <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl" [size]="44"></app-avatar>
+            <span class="status-dot" [class.online]="isOnline(contact.contactUserId)"></span>
+          </div>
+          <div class="contact-info">
+            <span class="contact-name">{{ getFullName(contact) }}</span>
+            <span class="contact-username">@{{ contact.username }}</span>
+          </div>
+          <div class="contact-actions">
+            <button mat-icon-button matTooltip="Start Chat" (click)="startChat(contact); $event.stopPropagation()">
+              <mat-icon>chat</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== GRID VIEW ===================== -->
+    <div class="contacts-grid" *ngIf="viewMode === 'grid'">
+      <div *ngFor="let group of groupedContacts" class="grid-section" [id]="'group-' + group.letter">
+        <div class="group-header">
+          <span class="group-letter">{{ group.letter }}</span>
+        </div>
+        <div class="grid-cards">
+          <div class="contact-card" *ngFor="let contact of group.contacts"
+               (click)="startChat(contact)">
+            <div class="card-avatar">
+              <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl" [size]="56"></app-avatar>
+              <span class="status-dot-lg" [class.online]="isOnline(contact.contactUserId)"></span>
+            </div>
+            <span class="card-name">{{ getFullName(contact) }}</span>
+            <span class="card-username">@{{ contact.username }}</span>
+            <button mat-stroked-button color="primary" class="card-chat-btn"
+                    (click)="startChat(contact); $event.stopPropagation()">
+              <mat-icon>chat</mat-icon> Chat
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TABLE VIEW ===================== -->
+    <div class="contacts-table-wrapper" *ngIf="viewMode === 'table'">
+      <table class="contacts-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Status</th>
+            <th>Last Seen</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contact of filteredContacts" (click)="startChat(contact)">
+            <td class="name-cell">
+              <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl" [size]="32"></app-avatar>
+              <span>{{ getFullName(contact) }}</span>
+            </td>
+            <td class="username-cell">@{{ contact.username }}</td>
+            <td>
+              <span class="status-badge" [class.online]="isOnline(contact.contactUserId)">
+                {{ isOnline(contact.contactUserId) ? 'Online' : 'Offline' }}
+              </span>
+            </td>
+            <td class="time-cell">{{ contact.lastSeenAt | lastSeen }}</td>
+            <td class="actions-cell">
+              <button mat-icon-button color="primary" matTooltip="Start Chat"
+                      (click)="startChat(contact); $event.stopPropagation()">
+                <mat-icon>chat</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && contacts.length === 0">
+    <mat-icon>people_outline</mat-icon>
+    <h3>No contacts yet</h3>
+    <p>Start by searching for users and sending contact requests.</p>
+  </div>
+
+  <!-- No Search Results -->
+  <div class="empty-state" *ngIf="!isLoading && contacts.length > 0 && filteredContacts.length === 0">
+    <mat-icon>search_off</mat-icon>
+    <h3>No matches found</h3>
+    <p>Try a different search term.</p>
+  </div>
+</div>

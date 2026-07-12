@@ -105,6 +105,13 @@ export class ChatService {
     return conversation.displayName || conversation.username || 'Unknown';
   }
 
+  /**
+   * Get the current active conversation synchronously.
+   */
+  getActiveConversation(): IConversation | null {
+    return this.activeConversationSubject.value;
+  }
+
   setActiveConversation(conversation: IConversation): void {
     // Leave previous conversation room
     const previous = this.activeConversationSubject.value;

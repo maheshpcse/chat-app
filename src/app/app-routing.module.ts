@@ -29,6 +29,10 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
+        path: 'dashboard',
+        loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+      },
+      {
         path: 'chat',
         loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule)
       },
@@ -37,23 +41,31 @@ const routes: Routes = [
         loadChildren: () => import('./conversation/conversation.module').then(m => m.ConversationModule)
       },
       {
+        path: 'contacts',
+        loadChildren: () => import('./contacts/contacts.module').then(m => m.ContactsModule)
+      },
+      {
         path: 'groups',
         loadChildren: () => import('./group/group.module').then(m => m.GroupModule)
       },
       {
-        path: 'user',
-        loadChildren: () => import('./user/user.module').then(m => m.UserModule)
+        path: 'settings',
+        loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
+      },
+      {
+        path: 'notifications',
+        loadChildren: () => import('./notifications/notifications-page.module').then(m => m.NotificationsPageModule)
       },
       {
         path: '',
-        redirectTo: 'chat',
+        redirectTo: 'dashboard',
         pathMatch: 'full'
       }
     ]
   },
 
   // Wildcard redirect
-  { path: '**', redirectTo: 'chat' }
+  { path: '**', redirectTo: 'dashboard' }
 ];
 
 @NgModule({

@@ -1,0 +1,532 @@
+@import '../../app/shared/styles/theme.variables';
+
+:host {
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+  background: $bg-primary;
+}
+
+.contacts-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-xl $spacing-lg;
+}
+
+// ==========================================
+// Page Header
+// ==========================================
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+
+  h1 {
+    font-family: $font-heading;
+    font-size: 24px;
+    font-weight: $fw-bold;
+    color: $text-primary;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      color: $nocturnal;
+    }
+  }
+
+  .contact-count {
+    font-family: $font-meta;
+    font-size: $fs-sm;
+    color: $text-muted;
+    background: $arctic-hover;
+    padding: 4px 12px;
+    border-radius: $radius-pill;
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+// ==========================================
+// Search
+// ==========================================
+.search-wrapper {
+  position: relative;
+  width: 280px;
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $text-muted;
+  }
+
+  input {
+    width: 100%;
+    height: 40px;
+    padding: 0 16px 0 40px;
+    border: 1px solid $border-light;
+    border-radius: $radius-pill;
+    font-family: $font-primary;
+    font-size: $fs-sm;
+    background: $white;
+    color: $text-primary;
+    outline: none;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+
+    &:focus {
+      border-color: $nocturnal;
+      box-shadow: 0 0 0 3px rgba($nocturnal, 0.08);
+    }
+
+    &::placeholder {
+      color: $text-muted;
+    }
+  }
+}
+
+// ==========================================
+// View Toggle
+// ==========================================
+.view-toggle {
+  display: flex;
+  background: $gray-100;
+  border-radius: $radius-md;
+  padding: 2px;
+
+  button {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-sm;
+    transition: all $transition-fast;
+
+    mat-icon {
+      font-size: 20px;
+      color: $text-muted;
+    }
+
+    &.active {
+      background: $white;
+      box-shadow: $shadow-sm;
+
+      mat-icon {
+        color: $nocturnal;
+      }
+    }
+  }
+}
+
+// ==========================================
+// Contacts Body
+// ==========================================
+.contacts-body {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.contacts-content,
+.contacts-grid,
+.contacts-table-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+// ==========================================
+// Alphabet Nav
+// ==========================================
+.alphabet-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: $spacing-md;
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
+.letter-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  font-family: $font-heading;
+  font-size: 11px;
+  font-weight: $fw-semibold;
+  color: $text-muted;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $nocturnal;
+    color: $white;
+  }
+}
+
+// ==========================================
+// Group Headers
+// ==========================================
+.contact-group,
+.grid-section {
+  margin-bottom: $spacing-md;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-xs;
+
+  .group-letter {
+    font-family: $font-heading;
+    font-size: 16px;
+    font-weight: $fw-bold;
+    color: $nocturnal;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba($nocturnal, 0.08);
+    border-radius: 50%;
+  }
+
+  .group-count {
+    font-family: $font-meta;
+    font-size: $fs-xs;
+    color: $text-muted;
+  }
+}
+
+// ==========================================
+// List View
+// ==========================================
+.contact-list-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $arctic-hover;
+  }
+}
+
+.contact-avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.status-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: $gray-300;
+  border: 2px solid $white;
+
+  &.online {
+    background: $success-green;
+  }
+}
+
+.contact-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .contact-name {
+    font-family: $font-primary;
+    font-size: $fs-base;
+    font-weight: $fw-semibold;
+    color: $text-primary;
+  }
+
+  .contact-username {
+    font-family: $font-meta;
+    font-size: $fs-xs;
+    color: $text-muted;
+  }
+}
+
+.contact-actions {
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity $transition-fast;
+
+  .contact-list-item:hover & {
+    opacity: 1;
+  }
+
+  mat-icon {
+    color: $nocturnal;
+  }
+}
+
+// ==========================================
+// Grid View
+// ==========================================
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: $spacing-md;
+  padding: 0 $spacing-md;
+}
+
+.contact-card {
+  background: $white;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-md $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: $nocturnal;
+    box-shadow: $shadow-md;
+    transform: translateY(-3px);
+  }
+}
+
+.card-avatar {
+  position: relative;
+  margin-bottom: $spacing-md;
+}
+
+.status-dot-lg {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: $gray-300;
+  border: 2px solid $white;
+
+  &.online {
+    background: $success-green;
+  }
+}
+
+.card-name {
+  font-family: $font-primary;
+  font-size: $fs-base;
+  font-weight: $fw-semibold;
+  color: $text-primary;
+  margin-bottom: 2px;
+}
+
+.card-username {
+  font-family: $font-meta;
+  font-size: $fs-xs;
+  color: $text-muted;
+  margin-bottom: $spacing-md;
+}
+
+.card-chat-btn {
+  width: 100%;
+  font-size: $fs-xs;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
+}
+
+// ==========================================
+// Table View
+// ==========================================
+.contacts-table-wrapper {
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+.contacts-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    font-family: $font-heading;
+    font-size: $fs-xs;
+    font-weight: $fw-semibold;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: $spacing-md $spacing-lg;
+    text-align: left;
+    background: $gray-50;
+    border-bottom: 1px solid $border-light;
+  }
+
+  td {
+    padding: $spacing-md $spacing-lg;
+    font-family: $font-primary;
+    font-size: $fs-sm;
+    color: $text-primary;
+    border-bottom: 1px solid $border-light;
+  }
+
+  tr {
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: $arctic-hover;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-weight: $fw-medium;
+}
+
+.username-cell {
+  color: $text-muted;
+  font-family: $font-meta;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: $radius-pill;
+  font-size: $fs-xs;
+  font-weight: $fw-medium;
+  background: $gray-100;
+  color: $text-muted;
+
+  &.online {
+    background: rgba($success-green, 0.1);
+    color: darken($success-green, 10%);
+  }
+}
+
+.time-cell {
+  font-family: $font-meta;
+  font-size: $fs-xs;
+  color: $text-muted;
+}
+
+.actions-cell {
+  text-align: center;
+}
+
+// ==========================================
+// Empty State
+// ==========================================
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-2xl * 2;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: $gray-300;
+    margin-bottom: $spacing-lg;
+  }
+
+  h3 {
+    font-family: $font-heading;
+    font-size: $fs-xl;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    font-family: $font-primary;
+    font-size: $fs-md;
+    color: $text-muted;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-2xl * 2;
+
+  p {
+    margin-top: $spacing-lg;
+    font-family: $font-primary;
+    color: $text-muted;
+  }
+}
+
+// ==========================================
+// Responsive
+// ==========================================
+@media (max-width: 768px) {
+  .contacts-page {
+    padding: $spacing-md;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .alphabet-nav {
+    display: none;
+  }
+
+  .grid-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

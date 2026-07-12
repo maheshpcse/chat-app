@@ -1,0 +1,366 @@
+<div class="settings-page">
+  <!-- Settings Sidebar -->
+  <div class="settings-sidebar">
+    <h2><mat-icon>settings</mat-icon> Settings</h2>
+    <nav class="settings-nav">
+      <button *ngFor="let section of sections"
+              class="nav-item"
+              [class.active]="activeSection === section.id"
+              (click)="setActiveSection(section.id)">
+        <mat-icon>{{ section.icon }}</mat-icon>
+        <span>{{ section.label }}</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Settings Content -->
+  <div class="settings-content">
+
+    <!-- ============== PROFILE ============== -->
+    <div class="settings-section" *ngIf="activeSection === 'profile'">
+      <div class="section-header">
+        <h3>Profile Settings</h3>
+        <p>Update your personal information</p>
+      </div>
+
+      <div class="profile-avatar-section">
+        <div class="avatar-large">
+          <div class="avatar-placeholder" *ngIf="!currentUser?.avatarUrl">
+            {{ getUserInitials() }}
+          </div>
+          <img *ngIf="currentUser?.avatarUrl" [src]="currentUser.avatarUrl" alt="Avatar">
+        </div>
+        <div class="avatar-info">
+          <span class="avatar-name">{{ currentUser?.fullName || currentUser?.username }}</span>
+          <span class="avatar-email">{{ currentUser?.email }}</span>
+        </div>
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="settings-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName">
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="profileForm.get('firstName').hasError('required')">Required</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName">
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error *ngIf="profileForm.get('lastName').hasError('required')">Required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Bio</mat-label>
+          <textarea matInput formControlName="bio" rows="3" placeholder="Tell people about yourself..."></textarea>
+          <mat-icon matPrefix>info</mat-icon>
+          <mat-hint align="end">{{ profileForm.get('bio').value?.length || 0 }}/200</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone Number</mat-label>
+          <input matInput formControlName="phoneNumber" placeholder="+1 234 567 8900">
+          <mat-icon matPrefix>phone</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit"
+                class="save-btn" [disabled]="isProfileSaving || profileForm.invalid">
+          <mat-spinner *ngIf="isProfileSaving" diameter="18"></mat-spinner>
+          <span *ngIf="!isProfileSaving">Save Changes</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- ============== PRIVACY ============== -->
+    <div class="settings-section" *ngIf="activeSection === 'privacy'">
+      <div class="section-header">
+        <h3>Privacy Settings</h3>
+        <p>Control who can see your information</p>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-item">
+          <div class="setting-label">
+            <mat-icon>wifi</mat-icon>
+            <div>
+              <span class="label-title">Online Status</span>
+              <span class="label-desc">Who can see when you're online</span>
+            </div>
+          </div>
+          <mat-form-field appearance="outline" class="select-field">
+            <mat-select [value]="privacySettings.onlineStatus"
+                        (selectionChange)="setPrivacy('onlineStatus', $event.value)">
+              <mat-option value="everyone">Everyone</mat-option>
+              <mat-option value="contacts">Contacts Only</mat-option>
+              <mat-option value="nobody">Nobody</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <mat-icon>access_time</mat-icon>
+            <div>
+              <span class="label-title">Last Seen</span>
+              <span class="label-desc">Who can see your last seen time</span>
+            </div>
+          </div>
+          <mat-form-field appearance="outline" class="select-field">
+            <mat-select [value]="privacySettings.lastSeen"
+                        (selectionChange)="setPrivacy('lastSeen', $event.value)">
+              <mat-option value="everyone">Everyone</mat-option>
+              <mat-option value="contacts">Contacts Only</mat-option>
+              <mat-option value="nobody">Nobody</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <mat-icon>photo_camera</mat-icon>
+            <div>
+              <span class="label-title">Profile Photo</span>
+              <span class="label-desc">Who can see your profile photo</span>
+            </div>
+          </div>
+          <mat-form-field appearance="outline" class="select-field">
+            <mat-select [value]="privacySettings.profilePhoto"
+                        (selectionChange)="setPrivacy('profilePhoto', $event.value)">
+              <mat-option value="everyone">Everyone</mat-option>
+              <mat-option value="contacts">Contacts Only</mat-option>
+              <mat-option value="nobody">Nobody</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== NOTIFICATIONS ============== -->
+    <div class="settings-section" *ngIf="activeSection === 'notifications'">
+      <div class="section-header">
+        <h3>Notification Preferences</h3>
+        <p>Manage how you receive notifications</p>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-item toggle-item">
+          <div class="setting-label">
+            <mat-icon>message</mat-icon>
+            <div>
+              <span class="label-title">Message Notifications</span>
+              <span class="label-desc">Receive notifications for new messages</span>
+            </div>
+          </div>
+          <div class="toggle-switch" [class.active]="notificationSettings.messages"
+               (click)="toggleNotification('messages')">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item toggle-item">
+          <div class="setting-label">
+            <mat-icon>group</mat-icon>
+            <div>
+              <span class="label-title">Group Notifications</span>
+              <span class="label-desc">Receive notifications for group activity</span>
+            </div>
+          </div>
+          <div class="toggle-switch" [class.active]="notificationSettings.groups"
+               (click)="toggleNotification('groups')">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item toggle-item">
+          <div class="setting-label">
+            <mat-icon>person_add</mat-icon>
+            <div>
+              <span class="label-title">Contact Notifications</span>
+              <span class="label-desc">Receive notifications for contact requests</span>
+            </div>
+          </div>
+          <div class="toggle-switch" [class.active]="notificationSettings.contacts"
+               (click)="toggleNotification('contacts')">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item toggle-item">
+          <div class="setting-label">
+            <mat-icon>volume_up</mat-icon>
+            <div>
+              <span class="label-title">Sound</span>
+              <span class="label-desc">Play notification sounds</span>
+            </div>
+          </div>
+          <div class="toggle-switch" [class.active]="notificationSettings.sound"
+               (click)="toggleNotification('sound')">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== CHAT ============== -->
+    <div class="settings-section" *ngIf="activeSection === 'chat'">
+      <div class="section-header">
+        <h3>Chat Preferences</h3>
+        <p>Customize your chat experience</p>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-item toggle-item">
+          <div class="setting-label">
+            <mat-icon>keyboard_return</mat-icon>
+            <div>
+              <span class="label-title">Enter Key Sends Message</span>
+              <span class="label-desc">Press Enter to send, Shift+Enter for new line</span>
+            </div>
+          </div>
+          <div class="toggle-switch" [class.active]="chatPreferences.enterSends"
+               (click)="toggleEnterSends()">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-label">
+            <mat-icon>format_size</mat-icon>
+            <div>
+              <span class="label-title">Font Size</span>
+              <span class="label-desc">Choose message text size</span>
+            </div>
+          </div>
+          <div class="font-size-options">
+            <button class="size-btn" [class.active]="chatPreferences.fontSize === 'small'"
+                    (click)="setFontSize('small')">
+              <span class="size-small">Aa</span>
+            </button>
+            <button class="size-btn" [class.active]="chatPreferences.fontSize === 'medium'"
+                    (click)="setFontSize('medium')">
+              <span class="size-medium">Aa</span>
+            </button>
+            <button class="size-btn" [class.active]="chatPreferences.fontSize === 'large'"
+                    (click)="setFontSize('large')">
+              <span class="size-large">Aa</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== APPEARANCE ============== -->
+    <div class="settings-section" *ngIf="activeSection === 'theme'">
+      <div class="section-header">
+        <h3>Appearance</h3>
+        <p>Customize the look and feel</p>
+      </div>
+
+      <div class="theme-options">
+        <div class="theme-card" [class.active]="themePreference === 'light'"
+             (click)="themePreference = 'light'">
+          <div class="theme-preview light-preview">
+            <div class="preview-header"></div>
+            <div class="preview-body">
+              <div class="preview-line"></div>
+              <div class="preview-line short"></div>
+            </div>
+          </div>
+          <span>Light</span>
+          <mat-icon *ngIf="themePreference === 'light'">check_circle</mat-icon>
+        </div>
+
+        <div class="theme-card" [class.active]="themePreference === 'dark'" (click)="themePreference = 'dark'">
+          <div class="theme-preview dark-preview">
+            <div class="preview-header"></div>
+            <div class="preview-body">
+              <div class="preview-line"></div>
+              <div class="preview-line short"></div>
+            </div>
+          </div>
+          <span>Dark</span>
+          <mat-icon *ngIf="themePreference === 'dark'">check_circle</mat-icon>
+        </div>
+
+        <div class="theme-card disabled-card">
+          <div class="theme-preview system-preview">
+            <div class="preview-header"></div>
+            <div class="preview-body">
+              <div class="preview-line"></div>
+              <div class="preview-line short"></div>
+            </div>
+          </div>
+          <span>System</span>
+          <small>Coming Soon</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== SECURITY ============== -->
+    <div class="settings-section" *ngIf="activeSection === 'security'">
+      <div class="section-header">
+        <h3>Security</h3>
+        <p>Update your password</p>
+      </div>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="settings-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Current Password</mat-label>
+          <input matInput formControlName="currentPassword"
+                 [type]="hideCurrentPassword ? 'password' : 'text'">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button mat-icon-button matSuffix type="button"
+                  (click)="hideCurrentPassword = !hideCurrentPassword">
+            <mat-icon>{{ hideCurrentPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>Current password is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>New Password</mat-label>
+          <input matInput formControlName="newPassword"
+                 [type]="hideNewPassword ? 'password' : 'text'">
+          <mat-icon matPrefix>lock_outline</mat-icon>
+          <button mat-icon-button matSuffix type="button"
+                  (click)="hideNewPassword = !hideNewPassword">
+            <mat-icon>{{ hideNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>Minimum 8 characters required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm New Password</mat-label>
+          <input matInput formControlName="confirmPassword"
+                 [type]="hideConfirmPassword ? 'password' : 'text'">
+          <mat-icon matPrefix>lock_outline</mat-icon>
+          <button mat-icon-button matSuffix type="button"
+                  (click)="hideConfirmPassword = !hideConfirmPassword">
+            <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>Please confirm your password</mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit"
+                class="save-btn" [disabled]="isPasswordSaving || passwordForm.invalid">
+          <mat-spinner *ngIf="isPasswordSaving" diameter="18"></mat-spinner>
+          <span *ngIf="!isPasswordSaving">Change Password</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -21,6 +21,27 @@
     <input #fileInput type="file" hidden (change)="onFileSelected($event)"
            accept="image/*,.pdf,.doc,.docx,.txt">
 
+    <!-- Emoji Picker Button -->
+    <div class="emoji-wrapper">
+      <button mat-icon-button (click)="toggleEmojiPicker()"
+              matTooltip="Emoji" class="action-btn"
+              [class.active]="showEmojiPicker">
+        <mat-icon>emoji_emotions</mat-icon>
+      </button>
+      <div class="emoji-picker-anchor" *ngIf="showEmojiPicker">
+        <app-emoji-picker
+          (emojiSelected)="insertEmoji($event)"
+          (closePicker)="closeEmojiPicker()">
+        </app-emoji-picker>
+      </div>
+    </div>
+
+    <!-- Schedule Message Button -->
+    <button mat-icon-button (click)="openScheduleDialog()"
+            matTooltip="Schedule message" class="action-btn">
+      <mat-icon>schedule_send</mat-icon>
+    </button>
+
     <!-- Text Input -->
     <mat-form-field appearance="outline" class="message-field">
       <textarea matInput

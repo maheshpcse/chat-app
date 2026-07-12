@@ -1,3 +1,5 @@
+@import '../../../app/shared/styles/theme.variables';
+
 .app-header {
   position: fixed;
   top: 0;
@@ -5,13 +7,13 @@
   right: 0;
   z-index: 100;
   height: 56px;
-  background-color: #172B36 !important;
+  background-color: $oceanic-noir !important;
 }
 
 .app-title {
-  font-family: 'Poppins', sans-serif;
+  font-family: $font-heading;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: $fw-semibold;
   letter-spacing: 0.02em;
 
   &.clickable {
@@ -23,29 +25,140 @@
   }
 }
 
+// Main Navigation Links
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 32px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    color: rgba($white, 0.7);
+    text-decoration: none;
+    font-family: $font-primary;
+    font-size: 13px;
+    font-weight: $fw-medium;
+    border-radius: $radius-sm;
+    transition: all 250ms ease;
+    cursor: pointer;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    span {
+      display: none;
+      @media (min-width: 1024px) {
+        display: inline;
+      }
+    }
+
+    &:hover {
+      background-color: rgba($white, 0.1);
+      color: $white;
+    }
+
+    &.active {
+      background-color: rgba($forsytha, 0.15);
+      color: $forsytha;
+    }
+  }
+}
+
 .spacer {
   flex: 1 1 auto;
 }
 
-.user-info {
-  padding: 8px 16px;
+// ==========================================
+// Header Avatar
+// ==========================================
+.user-avatar-btn {
+  margin-left: 4px;
+}
+
+.header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $nocturnal, $nocturnal-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-heading;
+  font-size: 12px;
+  font-weight: $fw-bold;
+  color: $white;
+  letter-spacing: 0.02em;
+  border: 2px solid rgba($white, 0.2);
+}
+
+.header-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba($white, 0.2);
+}
+
+// ==========================================
+// User Info Panel in Dropdown
+// ==========================================
+.user-info-panel {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-family: $font-heading;
+    font-size: $fs-sm;
+    color: $text-primary;
+  }
+
   small {
-    color: #a8b0ad;
+    font-family: $font-meta;
+    font-size: $fs-xs;
+    color: $gray-400;
   }
 }
 
+// ==========================================
+// Notification Panel
+// ==========================================
 .notification-panel {
   position: fixed;
   top: 56px;
   right: 16px;
-  width: 360px;
-  max-height: 400px;
+  width: 380px;
+  max-height: 460px;
   overflow-y: auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(23, 43, 54, 0.15);
+  overflow-x: hidden;
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: 0 8px 32px rgba($oceanic-noir, 0.18);
   z-index: 1000;
   animation: fadeInDown 250ms ease forwards;
+}
+
+.notif-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+
+  h5 {
+    font-family: $font-heading;
+    font-size: $fs-md;
+    font-weight: $fw-semibold;
+    color: $text-primary;
+    margin: 0;
+  }
 }
 
 @keyframes fadeInDown {

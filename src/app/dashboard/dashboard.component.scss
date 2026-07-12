@@ -1,0 +1,525 @@
+@import '../../app/shared/styles/theme.variables';
+
+:host {
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+  background: $bg-primary;
+}
+
+.dashboard-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-xl $spacing-lg;
+}
+
+// ==========================================
+// Welcome Card
+// ==========================================
+.welcome-card {
+  background: $gradient-primary;
+  border-radius: $dashboard-card-radius;
+  padding: $spacing-xl $spacing-2xl;
+  color: $white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xl;
+  box-shadow: $shadow-lg;
+  animation: fadeInDown 400ms ease-out forwards;
+}
+
+.welcome-content {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+}
+
+.welcome-avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba($white, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: $fw-bold;
+  font-family: $font-heading;
+  color: $white;
+  border: 2px solid rgba($white, 0.3);
+}
+
+.avatar-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba($white, 0.3);
+}
+
+.online-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: $success-green;
+  border: 2px solid $nocturnal;
+}
+
+.welcome-text {
+  h1 {
+    font-family: $font-heading;
+    font-size: 26px;
+    font-weight: $fw-bold;
+    margin: 0 0 $spacing-xs;
+    letter-spacing: -0.01em;
+  }
+
+  .welcome-subtitle {
+    font-family: $font-primary;
+    font-size: $fs-md;
+    opacity: 0.8;
+    margin: 0;
+  }
+}
+
+.welcome-date {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-family: $font-meta;
+  font-size: $fs-sm;
+  opacity: 0.7;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// ==========================================
+// Stats Grid
+// ==========================================
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+}
+
+.stat-card {
+  background: $white;
+  border-radius: $dashboard-card-radius;
+  padding: $spacing-lg $spacing-xl;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  box-shadow: $shadow-sm;
+  cursor: pointer;
+  transition: transform $transition-fast, box-shadow $transition-fast;
+  animation: fadeInUp 400ms ease-out forwards;
+  animation-delay: 100ms;
+  opacity: 0;
+
+  &:nth-child(2) { animation-delay: 150ms; }
+  &:nth-child(3) { animation-delay: 200ms; }
+  &:nth-child(4) { animation-delay: 250ms; }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: $shadow-md;
+  }
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: $white;
+  }
+}
+
+.stat-messages .stat-icon-wrapper { background: $gradient-primary; }
+.stat-contacts .stat-icon-wrapper { background: $gradient-accent; }
+.stat-online .stat-icon-wrapper { background: linear-gradient(135deg, $success-green 0%, darken($success-green, 10%) 100%); }
+.stat-requests .stat-icon-wrapper { background: $gradient-warm; }
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+
+  .stat-value {
+    font-family: $font-heading;
+    font-size: 28px;
+    font-weight: $fw-bold;
+    color: $text-primary;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: $font-primary;
+    font-size: $fs-xs;
+    color: $text-muted;
+    margin-top: $spacing-xs;
+  }
+}
+
+// ==========================================
+// Content Grid
+// ==========================================
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-lg;
+}
+
+.dashboard-card {
+  background: $white;
+  border-radius: $dashboard-card-radius;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+  animation: fadeInUp 500ms ease-out forwards;
+  animation-delay: 300ms;
+  opacity: 0;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-lg $spacing-xl;
+
+  h3 {
+    font-family: $font-heading;
+    font-size: $fs-lg;
+    font-weight: $fw-semibold;
+    color: $text-primary;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: $nocturnal;
+    }
+  }
+}
+
+.card-body {
+  padding: $spacing-md $spacing-xl $spacing-xl;
+}
+
+// ==========================================
+// Conversation Items
+// ==========================================
+.conversation-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $arctic-hover;
+  }
+}
+
+.conv-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .conv-name {
+    font-family: $font-primary;
+    font-size: $fs-base;
+    font-weight: $fw-semibold;
+    color: $text-primary;
+  }
+
+  .conv-preview {
+    font-family: $font-primary;
+    font-size: $fs-sm;
+    color: $text-muted;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.conv-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $spacing-xs;
+  flex-shrink: 0;
+
+  .conv-time {
+    font-family: $font-meta;
+    font-size: 10px;
+    color: $text-muted;
+  }
+}
+
+.unread-badge {
+  background: $forsytha;
+  color: $oceanic-noir;
+  font-family: $font-meta;
+  font-size: 10px;
+  font-weight: $fw-bold;
+  padding: 2px 7px;
+  border-radius: $radius-pill;
+  min-width: 18px;
+  text-align: center;
+}
+
+// ==========================================
+// Quick Actions
+// ==========================================
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-lg;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  background: $white;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: $nocturnal;
+    background: $arctic-hover;
+    transform: translateY(-2px);
+    box-shadow: $shadow-sm;
+  }
+
+  span {
+    font-family: $font-primary;
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    color: $text-primary;
+  }
+}
+
+.action-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    color: $white;
+  }
+}
+
+.chat-action { background: $gradient-primary; }
+.group-action { background: $gradient-accent; }
+.contact-action { background: $gradient-mint; mat-icon { color: $nocturnal; } }
+.settings-action { background: $gradient-warm; }
+
+// ==========================================
+// Notification Timeline
+// ==========================================
+.notification-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-item {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-sm;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+  position: relative;
+
+  &:hover {
+    background: $arctic-hover;
+  }
+
+  &.unread {
+    background: $notification-unread-bg;
+  }
+
+  // Connector line between timeline dots
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 27px;
+    top: 44px;
+    bottom: -8px;
+    width: 2px;
+    background: $border-light;
+  }
+}
+
+.timeline-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: $arctic-hover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $nocturnal;
+  }
+}
+
+.unread .timeline-dot {
+  background: rgba($forsytha, 0.15);
+  mat-icon { color: $deep-saffron; }
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  .timeline-title {
+    font-family: $font-primary;
+    font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    color: $text-primary;
+  }
+
+  .timeline-message {
+    font-family: $font-primary;
+    font-size: $fs-xs;
+    color: $text-secondary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .timeline-time {
+    font-family: $font-meta;
+    font-size: 10px;
+    color: $text-muted;
+    margin-top: 2px;
+  }
+}
+
+// ==========================================
+// Empty State
+// ==========================================
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-2xl;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $gray-300;
+    margin-bottom: $spacing-md;
+  }
+
+  p {
+    font-family: $font-primary;
+    font-size: $fs-md;
+    color: $text-muted;
+    margin-bottom: $spacing-md;
+  }
+}
+
+// ==========================================
+// Keyframes
+// ==========================================
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ==========================================
+// Responsive
+// ==========================================
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-card {
+    flex-direction: column;
+    gap: $spacing-md;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: $spacing-md;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-md;
+  }
+
+  .welcome-text h1 {
+    font-size: 20px;
+  }
+}
+
+// Notifications card spans full width
+.notifications-card {
+  grid-column: 1 / -1;
+}

@@ -31,6 +31,8 @@ export class SocketService {
   private readReceiptSubject = new Subject<{ conversationId: string; userId: string }>();
   private contactRequestSubject = new Subject<any>();
   private contactAcceptedSubject = new Subject<any>();
+  private userOnlineSubject = new Subject<{ userId: string; timestamp: number }>();
+  private userOfflineSubject = new Subject<{ userId: string; timestamp: number }>();
 
   // Public observables for components to subscribe
   public messageReceived$ = this.messageReceivedSubject.asObservable();
@@ -40,6 +42,8 @@ export class SocketService {
   public readReceipt$ = this.readReceiptSubject.asObservable();
   public contactRequest$ = this.contactRequestSubject.asObservable();
   public contactAccepted$ = this.contactAcceptedSubject.asObservable();
+  public userOnline$ = this.userOnlineSubject.asObservable();
+  public userOffline$ = this.userOfflineSubject.asObservable();
 
   constructor(private authService: AuthService) {}
 
@@ -167,16 +171,24 @@ export class SocketService {
     });
 
     // Online/offline status
-    this.socket.on(SOCKET_EVENTS.USER_ONLINE, (data: { userId: string }) => {
+    this.socket.on(SOCKET_EVENTS.USER_ONLINE, (data: { userId: string; timestamp?: number }) => {
       const current = this.onlineUsersSubject.value;
       if (!current.includes(data.userId)) {
         this.onlineUsersSubject.next([...current, data.userId]);
       }
+      this.userOnlineSubject.next({
+        userId: data.userId,
+        timestamp: data.timestamp || Date.now()
+      });
     });
 
-    this.socket.on(SOCKET_EVENTS.USER_OFFLINE, (data: { userId: string }) => {
+    this.socket.on(SOCKET_EVENTS.USER_OFFLINE, (data: { userId: string; timestamp?: number }) => {
       const current = this.onlineUsersSubject.value;
       this.onlineUsersSubject.next(current.filter(id => id !== data.userId));
+      this.userOfflineSubject.next({
+        userId: data.userId,
+        timestamp: data.timestamp || Date.now()
+      });
     });
 
     this.socket.on(SOCKET_EVENTS.ONLINE_USERS_LIST, (users: string[]) => {

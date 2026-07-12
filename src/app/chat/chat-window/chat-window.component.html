@@ -12,7 +12,7 @@
         <h4>{{ getOtherParticipantName() }}</h4>
         <small *ngIf="typingUsers.length > 0" class="typing-status">typing...</small>
         <small *ngIf="typingUsers.length === 0 && isOtherParticipantOnline()" class="text-success">Online</small>
-        <small *ngIf="typingUsers.length === 0 && !isOtherParticipantOnline()" class="text-muted">Offline</small>
+        <small *ngIf="typingUsers.length === 0 && !isOtherParticipantOnline()" class="text-muted last-seen-text">{{ getLastSeenStatus() }}</small>
       </div>
       <span class="spacer"></span>
       <button mat-icon-button matTooltip="View Profile" (click)="toggleProfileSidebar()">
@@ -40,7 +40,8 @@
            [ngClass]="{'own-message': isOwnMessage(message), 'other-message': !isOwnMessage(message)}">
         <app-message-bubble
           [message]="message"
-          [isOwn]="isOwnMessage(message)">
+          [isOwn]="isOwnMessage(message)"
+          [isGroupChat]="activeConversation?.conversationType === 'group'">
         </app-message-bubble>
       </div>
 
@@ -60,23 +61,25 @@
   <!-- Right Profile Sidebar -->
   <div class="profile-sidebar" *ngIf="showProfileSidebar">
     <div class="profile-sidebar-header">
-      <h5>Contact Info</h5>
+      <h5>{{ isGroupConversation() ? 'Group Info' : 'Contact Info' }}</h5>
       <button mat-icon-button (click)="toggleProfileSidebar()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
     <mat-divider></mat-divider>
-    <div class="profile-sidebar-content">
+
+    <!-- ==================== PRIVATE CHAT SIDEBAR ==================== -->
+    <div class="profile-sidebar-content" *ngIf="!isGroupConversation()">
       <div class="profile-avatar-section">
         <app-avatar
-          [imageUrl]="activeConversation?.avatarUrl"
+          [imageUrl]="sidebarUser?.avatarUrl || activeConversation?.avatarUrl"
           [name]="getOtherParticipantName()"
           [isOnline]="isOtherParticipantOnline()"
           size="lg">
         </app-avatar>
-        <h4 class="profile-name">{{ getOtherParticipantName() }}</h4>
-        <small class="profile-username" *ngIf="activeConversation?.username">
-          @{{ activeConversation?.username }}
+        <h4 class="profile-name">{{ sidebarUser?.firstName ? (sidebarUser.firstName + ' ' + sidebarUser.lastName) : getOtherParticipantName() }}</h4>
+        <small class="profile-username" *ngIf="sidebarUser?.username">
+          @{{ sidebarUser.username }}
         </small>
         <small class="profile-status" [class.online]="isOtherParticipantOnline()">
           {{ isOtherParticipantOnline() ? 'Online' : 'Offline' }}
@@ -88,21 +91,35 @@
           <mat-icon>person</mat-icon>
           <div>
             <small>Username</small>
-            <p>@{{ activeConversation?.username || 'N/A' }}</p>
+            <p>@{{ sidebarUser?.username || 'N/A' }}</p>
+          </div>
+        </div>
+        <div class="profile-detail-item" *ngIf="sidebarUser?.email">
+          <mat-icon>email</mat-icon>
+          <div>
+            <small>Email</small>
+            <p>{{ sidebarUser.email }}</p>
+          </div>
+        </div>
+        <div class="profile-detail-item" *ngIf="sidebarUser?.bio">
+          <mat-icon>info</mat-icon>
+          <div>
+            <small>Bio</small>
+            <p>{{ sidebarUser.bio }}</p>
           </div>
         </div>
         <div class="profile-detail-item">
           <mat-icon>circle</mat-icon>
           <div>
             <small>Status</small>
-            <p>{{ isOtherParticipantOnline() ? 'Online now' : 'Last seen recently' }}</p>
+            <p>{{ isOtherParticipantOnline() ? 'Online now' : getLastSeenStatus() }}</p>
           </div>
         </div>
-        <div class="profile-detail-item">
+        <div class="profile-detail-item" *ngIf="sidebarUser?.createdAt">
           <mat-icon>access_time</mat-icon>
           <div>
             <small>Member since</small>
-            <p>{{ activeConversation?.createdAt | date:'mediumDate' }}</p>
+            <p>{{ sidebarUser.createdAt | date:'mediumDate' }}</p>
           </div>
         </div>
       </div>
@@ -118,5 +135,43 @@
         </button>
       </div>
     </div>
+
+    <!-- ==================== GROUP CHAT SIDEBAR ==================== -->
+    <div class="profile-sidebar-content" *ngIf="isGroupConversation()">
+      <div class="profile-avatar-section">
+        <div class="group-avatar-icon">
+          <mat-icon>group</mat-icon>
+        </div>
+        <h4 class="profile-name">{{ activeConversation?.displayName || 'Group Chat' }}</h4>
+        <small class="profile-status">Group · {{ groupMembers.length }} members</small>
+      </div>
+      <mat-divider></mat-divider>
+
+      <!-- Group Members List -->
+      <div class="group-members-section">
+        <h6 class="section-title">Members ({{ groupMembers.length }})</h6>
+        <div class="group-member-item" *ngFor="let member of groupMembers">
+          <app-avatar
+            [imageUrl]="member.avatarUrl"
+            [name]="member.firstName + ' ' + member.lastName"
+            [isOnline]="presenceService.isOnline(member.userId || member.id)"
+            size="xs">
+          </app-avatar>
+          <div class="member-info">
+            <span class="member-name">{{ member.firstName }} {{ member.lastName }}</span>
+            <small class="member-role" *ngIf="member.role === 'admin'">Admin</small>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+      <div class="profile-actions">
+        <button mat-button color="warn" class="profile-action-btn">
+          <mat-icon>exit_to_app</mat-icon>
+          <span>Leave Group</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
+

@@ -1,0 +1,488 @@
+@import '../../app/shared/styles/theme.variables';
+
+:host {
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+  background: $bg-primary;
+}
+
+.settings-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: $spacing-xl $spacing-lg;
+  display: flex;
+  gap: $spacing-xl;
+}
+
+// ==========================================
+// Settings Sidebar
+// ==========================================
+.settings-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: $spacing-xl;
+  align-self: flex-start;
+
+  h2 {
+    font-family: $font-heading;
+    font-size: 22px;
+    font-weight: $fw-bold;
+    color: $text-primary;
+    margin: 0 0 $spacing-lg;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: $nocturnal;
+    }
+  }
+}
+
+.settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  border: none;
+  background: transparent;
+  border-radius: $radius-md;
+  cursor: pointer;
+  font-family: $font-primary;
+  font-size: $fs-base;
+  font-weight: $fw-medium;
+  color: $text-secondary;
+  transition: all $transition-fast;
+  text-align: left;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: $arctic-hover;
+    color: $text-primary;
+  }
+
+  &.active {
+    background: rgba($nocturnal, 0.08);
+    color: $nocturnal;
+    font-weight: $fw-semibold;
+
+    mat-icon { color: $nocturnal; }
+  }
+}
+
+// ==========================================
+// Settings Content
+// ==========================================
+.settings-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-section {
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  padding: $spacing-xl $spacing-2xl;
+  animation: fadeIn 300ms ease-out;
+}
+
+.section-header {
+  margin-bottom: $spacing-xl;
+
+  h3 {
+    font-family: $font-heading;
+    font-size: 20px;
+    font-weight: $fw-bold;
+    color: $text-primary;
+    margin: 0 0 $spacing-xs;
+  }
+
+  p {
+    font-family: $font-primary;
+    font-size: $fs-sm;
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+// ==========================================
+// Profile Section
+// ==========================================
+.profile-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  padding: $spacing-lg;
+  background: $arctic-hover;
+  border-radius: $radius-lg;
+}
+
+.avatar-large {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+
+  .avatar-placeholder {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: $gradient-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: $fw-bold;
+    color: $white;
+    font-family: $font-heading;
+  }
+
+  img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.avatar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .avatar-name {
+    font-family: $font-heading;
+    font-size: $fs-lg;
+    font-weight: $fw-semibold;
+    color: $text-primary;
+  }
+
+  .avatar-email {
+    font-family: $font-meta;
+    font-size: $fs-sm;
+    color: $text-muted;
+  }
+}
+
+// ==========================================
+// Forms
+// ==========================================
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.form-row {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.half-width {
+  flex: 1;
+}
+
+.save-btn {
+  align-self: flex-start;
+  min-width: 160px;
+  height: 44px;
+  font-family: $font-primary;
+  font-size: $fs-base;
+  font-weight: $fw-semibold;
+  margin-top: $spacing-md;
+}
+
+// ==========================================
+// Setting Items
+// ==========================================
+.setting-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg 0;
+  gap: $spacing-lg;
+}
+
+.setting-label {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex: 1;
+
+  > mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    color: $nocturnal;
+    flex-shrink: 0;
+  }
+
+  .label-title {
+    display: block;
+    font-family: $font-primary;
+    font-size: $fs-base;
+    font-weight: $fw-medium;
+    color: $text-primary;
+  }
+
+  .label-desc {
+    display: block;
+    font-family: $font-primary;
+    font-size: $fs-xs;
+    color: $text-muted;
+    margin-top: 2px;
+  }
+}
+
+.select-field {
+  width: 180px;
+  flex-shrink: 0;
+
+  ::ng-deep {
+    .mat-form-field-wrapper {
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .mat-form-field-subscript-wrapper {
+      display: none;
+    }
+  }
+}
+
+// ==========================================
+// Toggle Switch
+// ==========================================
+.toggle-switch {
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  background: $gray-300;
+  position: relative;
+  cursor: pointer;
+  transition: background $transition-fast;
+  flex-shrink: 0;
+
+  &.active {
+    background: $nocturnal;
+
+    .toggle-knob {
+      transform: translateX(22px);
+    }
+  }
+}
+
+.toggle-knob {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: $white;
+  box-shadow: $shadow-sm;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform $transition-fast;
+}
+
+// ==========================================
+// Font Size Options
+// ==========================================
+.font-size-options {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.size-btn {
+  width: 48px;
+  height: 48px;
+  border: 2px solid $border-light;
+  border-radius: $radius-md;
+  background: $white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-primary;
+  font-weight: $fw-semibold;
+  color: $text-secondary;
+  transition: all $transition-fast;
+
+  &.active {
+    border-color: $nocturnal;
+    background: rgba($nocturnal, 0.05);
+    color: $nocturnal;
+  }
+
+  &:hover {
+    border-color: $nocturnal;
+  }
+
+  .size-small { font-size: 12px; }
+  .size-medium { font-size: 16px; }
+  .size-large { font-size: 20px; }
+}
+
+// ==========================================
+// Theme Cards
+// ==========================================
+.theme-options {
+  display: flex;
+  gap: $spacing-lg;
+}
+
+.theme-card {
+  width: 160px;
+  border: 2px solid $border-light;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  cursor: pointer;
+  text-align: center;
+  transition: all $transition-fast;
+  position: relative;
+
+  &.active {
+    border-color: $nocturnal;
+    box-shadow: 0 0 0 3px rgba($nocturnal, 0.1);
+  }
+
+  &:hover:not(.disabled-card) {
+    border-color: $nocturnal;
+  }
+
+  &.disabled-card {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    small {
+      display: block;
+      font-size: 10px;
+      color: $text-muted;
+      margin-top: 4px;
+    }
+  }
+
+  span {
+    display: block;
+    font-family: $font-primary;
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    color: $text-primary;
+    margin-top: $spacing-sm;
+  }
+
+  mat-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 18px;
+    color: $nocturnal;
+  }
+}
+
+.theme-preview {
+  height: 80px;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  .preview-header {
+    height: 16px;
+  }
+
+  .preview-body {
+    padding: 8px;
+  }
+
+  .preview-line {
+    height: 6px;
+    border-radius: 3px;
+    margin-bottom: 6px;
+
+    &.short { width: 60%; }
+  }
+}
+
+.light-preview {
+  background: $gray-50;
+  .preview-header { background: $nocturnal; }
+  .preview-line { background: $gray-200; }
+}
+
+.dark-preview {
+  background: #1a1a2e;
+  .preview-header { background: #16213e; }
+  .preview-line { background: #333; }
+}
+
+.system-preview {
+  background: linear-gradient(135deg, $gray-50 50%, #1a1a2e 50%);
+  .preview-header { background: linear-gradient(90deg, $nocturnal 50%, #16213e 50%); }
+  .preview-line { background: linear-gradient(90deg, $gray-200 50%, #333 50%); }
+}
+
+// ==========================================
+// Keyframes
+// ==========================================
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ==========================================
+// Responsive
+// ==========================================
+@media (max-width: 768px) {
+  .settings-page {
+    flex-direction: column;
+    padding: $spacing-md;
+  }
+
+  .settings-sidebar {
+    width: 100%;
+    position: static;
+  }
+
+  .settings-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: $spacing-xs;
+
+    .nav-item {
+      white-space: nowrap;
+      padding: $spacing-sm $spacing-md;
+
+      span { display: none; }
+    }
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .theme-options {
+    flex-wrap: wrap;
+  }
+}

@@ -12,6 +12,7 @@
   flex: 1;
   min-width: 0;
   height: 100%;
+  overflow: hidden;
   background: $bg-chat-area;
 }
 
@@ -57,6 +58,11 @@
   margin-left: $spacing-md;
 }
 
+.last-seen-text {
+  font-style: italic;
+  font-size: 11px;
+}
+
 .spacer {
   flex: 1 1 auto;
 }
@@ -64,6 +70,7 @@
 .messages-area {
   flex: 1;
   overflow-y: auto;
+  min-height: 0; // Critical: allows flex child to shrink below content height for scroll
   padding: $spacing-xl $spacing-lg;
   background-color: $bg-chat-area;
   display: flex;
@@ -224,5 +231,77 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
+  }
+}
+
+// ==========================================
+// Group Sidebar Styles
+// ==========================================
+.group-avatar-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $nocturnal 0%, $oceanic-noir 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-md;
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: $white;
+  }
+}
+
+.group-members-section {
+  padding: $spacing-md $spacing-lg;
+
+  .section-title {
+    font-family: $font-heading;
+    font-size: $fs-xs;
+    font-weight: $fw-semibold;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 $spacing-md 0;
+  }
+}
+
+.group-member-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid $border-light;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .member-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .member-name {
+    font-family: $font-primary;
+    font-size: $fs-sm;
+    font-weight: $fw-medium;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .member-role {
+    font-family: $font-meta;
+    font-size: 10px;
+    font-weight: $fw-bold;
+    color: $deep-saffron;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 }

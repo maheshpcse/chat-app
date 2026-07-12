@@ -7,6 +7,7 @@ import { ChatWindowComponent } from './chat-window/chat-window.component';
 import { MessageBubbleComponent } from './message-bubble/message-bubble.component';
 import { MessageInputComponent } from './message-input/message-input.component';
 import { TypingIndicatorComponent } from './typing-indicator/typing-indicator.component';
+import { ScheduleMessageDialogComponent } from './schedule-message-dialog/schedule-message-dialog.component';
 
 @NgModule({
   declarations: [
@@ -14,12 +15,17 @@ import { TypingIndicatorComponent } from './typing-indicator/typing-indicator.co
     ChatWindowComponent,
     MessageBubbleComponent,
     MessageInputComponent,
-    TypingIndicatorComponent
+    TypingIndicatorComponent,
+    ScheduleMessageDialogComponent
   ],
   imports: [
     SharedModule,
     ChatRoutingModule,
     TextFieldModule
+  ],
+  // entryComponents needed in Angular 10 for MatDialog
+  entryComponents: [
+    ScheduleMessageDialogComponent
   ]
 })
 export class ChatModule {}

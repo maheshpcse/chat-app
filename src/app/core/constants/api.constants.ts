@@ -45,5 +45,25 @@ export const API_ENDPOINTS = {
     LOCAL: '/uploads/local',
     S3: '/uploads/s3',
     DOWNLOAD: '/uploads/download'
+  },
+
+  // Notifications
+  NOTIFICATIONS: {
+    BASE: '/notifications',
+    UNREAD_COUNT: '/notifications/unread-count',
+    READ: '/notifications', // + /:notificationId/read
+    READ_ALL: '/notifications/read-all',
+    CLEAR: '/notifications/clear'
+  },
+
+  // Settings
+  SETTINGS: {
+    BASE: '/settings' // GET all, PUT bulk, PUT /:key, DELETE /:key
+  },
+
+  // Scheduled Messages
+  SCHEDULED_MESSAGES: {
+    BASE: '/scheduled-messages',
+    CANCEL: '/scheduled-messages' // + /:id/cancel
   }
 };

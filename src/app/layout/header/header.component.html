@@ -1,5 +1,25 @@
 <mat-toolbar color="primary" class="app-header">
-  <span class="app-title clickable" routerLink="/chat">Chat App</span>
+  <span class="app-title clickable" routerLink="/dashboard">Chat App</span>
+
+  <!-- Main Navigation Links -->
+  <nav class="main-nav">
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <mat-icon>dashboard</mat-icon>
+      <span>Dashboard</span>
+    </a>
+    <a routerLink="/chat" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <mat-icon>chat</mat-icon>
+      <span>Chat</span>
+    </a>
+    <a routerLink="/contacts" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <mat-icon>people</mat-icon>
+      <span>Contacts</span>
+    </a>
+    <a routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <mat-icon>settings</mat-icon>
+      <span>Settings</span>
+    </a>
+  </nav>
 
   <span class="spacer"></span>
 
@@ -7,19 +27,24 @@
   <button mat-icon-button (click)="toggleNotifications()"
           [matBadge]="unreadNotifications > 0 ? unreadNotifications : null"
           matBadgeColor="warn"
-          matBadgeSize="small">
+          matBadgeSize="small"
+          matTooltip="Notifications">
     <mat-icon>notifications</mat-icon>
   </button>
 
-  <!-- User Menu -->
-  <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="currentUser">
-    <mat-icon>account_circle</mat-icon>
+  <!-- User Avatar / Menu -->
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="currentUser" class="user-avatar-btn">
+    <div class="header-avatar" *ngIf="!currentUser.avatarUrl">
+      {{ getUserInitials() }}
+    </div>
+    <img *ngIf="currentUser.avatarUrl" [src]="currentUser.avatarUrl"
+         class="header-avatar-img" alt="Profile">
   </button>
 
   <mat-menu #userMenu="matMenu">
-    <div class="user-info px-3 py-2">
-      <strong>{{ currentUser?.fullName }}</strong>
-      <small class="d-block text-muted">{{ currentUser?.email }}</small>
+    <div class="user-info-panel">
+      <strong>{{ currentUser?.firstName }} {{ currentUser?.lastName }}</strong>
+      <small>{{ currentUser?.email }}</small>
     </div>
     <mat-divider></mat-divider>
     <button mat-menu-item (click)="goToProfile()">
@@ -35,5 +60,10 @@
 
 <!-- Notification Panel (dropdown) -->
 <div class="notification-panel" *ngIf="showNotifications" (appClickOutside)="showNotifications = false">
+  <div class="notif-panel-header">
+    <h5>Notifications</h5>
+    <button mat-button color="primary" (click)="viewAllNotifications()">View All</button>
+  </div>
+  <mat-divider></mat-divider>
   <app-notification-list></app-notification-list>
 </div>

@@ -28,6 +28,8 @@ html, body {
   background-color: $bg-app;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 /* Typography hierarchy */
@@ -121,4 +123,115 @@ a {
     border-radius: $radius-md;
     font-family: $font-primary;
   }
+}
+
+/* ====================================================
+   GLOBAL: Input with icon alignment fix
+   ==================================================== */
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid $gray-300;
+  border-radius: $radius-md;
+  background: $white;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+  min-height: 44px;
+
+  .input-icon {
+    flex-shrink: 0;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $gray-400;
+    line-height: 1;
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: $font-primary;
+    font-size: $fs-base;
+    color: $text-primary;
+    padding: 10px 0;
+    min-width: 0;
+    line-height: 1.4;
+
+    &::placeholder {
+      color: $gray-400;
+    }
+  }
+
+  .toggle-password {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    color: $gray-400;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $text-primary;
+    }
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &:focus-within {
+    border-color: $nocturnal;
+    box-shadow: 0 0 0 3px rgba($nocturnal, 0.08);
+  }
+
+  &.error {
+    border-color: $warn;
+  }
+}
+
+/* ====================================================
+   GLOBAL: Mat-form-field prefix alignment fix
+   ==================================================== */
+::ng-deep .mat-form-field-prefix {
+  display: flex !important;
+  align-items: center !important;
+  margin-right: 8px !important;
+
+  .mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 1 !important;
+  }
+}
+
+/* ====================================================
+   GLOBAL: Smooth transitions
+   ==================================================== */
+.fade-enter {
+  opacity: 0;
+  animation: fadeIn 250ms ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }

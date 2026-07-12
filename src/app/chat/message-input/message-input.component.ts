@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ChatService } from '../../core/services/chat.service';
 import { UploadService } from '../../core/services/upload.service';
 import { MessageType } from '../../core/models/message.model';
 import { APP_CONSTANTS } from '../../core/constants/app.constants';
+import { ScheduleMessageDialogComponent } from '../schedule-message-dialog/schedule-message-dialog.component';
 
 /**
  * MessageInputComponent - Message text area with file upload and typing indicator.
@@ -27,6 +29,7 @@ export class MessageInputComponent implements OnInit, OnDestroy {
   messageControl = new FormControl('');
   isUploading: boolean = false;
   selectedFile: File | null = null;
+  showEmojiPicker: boolean = false;
 
   private typingSubject = new Subject<boolean>();
   private typingTimeout: any;
@@ -34,7 +37,8 @@ export class MessageInputComponent implements OnInit, OnDestroy {
 
   constructor(
     private chatService: ChatService,
-    private uploadService: UploadService
+    private uploadService: UploadService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -95,6 +99,40 @@ export class MessageInputComponent implements OnInit, OnDestroy {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+
+  toggleEmojiPicker(): void {
+    this.showEmojiPicker = !this.showEmojiPicker;
+  }
+
+  insertEmoji(emoji: string): void {
+    const current = this.messageControl.value || '';
+    this.messageControl.setValue(current + emoji);
+  }
+
+  closeEmojiPicker(): void {
+    this.showEmojiPicker = false;
+  }
+
+  openScheduleDialog(): void {
+    const activeConv = this.chatService.getActiveConversation();
+    if (!activeConv) { return; }
+
+    const dialogRef = this.dialog.open(ScheduleMessageDialogComponent, {
+      data: {
+        conversationId: activeConv.conversationId,
+        conversationName: activeConv.displayName || 'this conversation'
+      },
+      width: '480px',
+      panelClass: 'schedule-message-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Scheduled message created successfully
+        console.log('Message scheduled:', result);
+      }
+    });
   }
 
   private uploadAndSend(): void {

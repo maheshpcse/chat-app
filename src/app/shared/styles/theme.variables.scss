@@ -41,10 +41,12 @@ $accent: $forsytha;
 $accent-dark: #e0b000;
 $warn: $crimson;
 $success: #2e7d32;
+$success-green: #2e7d32;
 $info: $nocturnal-light;
 
 // Background Colors
 $bg-app: $arctic-powder;
+$bg-primary: $arctic-powder;
 $bg-sidebar: $white;
 $bg-chat-area: $gray-100;
 $bg-message-own: $nocturnal;
@@ -155,5 +157,38 @@ $transition-smooth: 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
 $z-sidebar: 10;
 $z-header: 100;
 $z-profile-sidebar: 20;
+$z-emoji-picker: 500;
+$z-notification-panel: 1000;
+$z-scheduled-modal: 1050;
 $z-modal: 1000;
 $z-toast: 1100;
+
+// ====================================================
+// Notification Colors
+// ====================================================
+$notification-bg: rgba($forsytha, 0.08);
+$notification-dot: $deep-saffron;
+$notification-unread-bg: rgba($forsytha, 0.06);
+
+// ====================================================
+// Dashboard Gradients
+// ====================================================
+$gradient-primary: linear-gradient(135deg, $nocturnal 0%, $oceanic-noir 100%);
+$gradient-accent: linear-gradient(135deg, $forsytha 0%, $deep-saffron 100%);
+$gradient-mint: linear-gradient(135deg, $mystic-mint 0%, $arctic-powder 100%);
+$gradient-warm: linear-gradient(135deg, $deep-saffron 0%, $forsytha 100%);
+
+// ====================================================
+// Feature Colors
+// ====================================================
+$emoji-bg: $white;
+$emoji-hover: $arctic-hover;
+$scheduled-color: $deep-saffron;
+$settings-section-bg: $white;
+
+// ====================================================
+// Dashboard Card Dimensions
+// ====================================================
+$dashboard-card-radius: $radius-lg;
+$dashboard-card-shadow: $shadow-md;
+$dashboard-card-padding: $spacing-xl;

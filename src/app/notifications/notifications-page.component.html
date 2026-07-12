@@ -1,0 +1,146 @@
+<div class="notifications-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1><mat-icon>notifications</mat-icon> Notifications</h1>
+      <span class="unread-badge-lg" *ngIf="unreadCount > 0">{{ unreadCount }} unread</span>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="markAllAsRead()" *ngIf="unreadCount > 0">
+        <mat-icon>done_all</mat-icon> Mark All Read
+      </button>
+      <button mat-stroked-button color="warn" (click)="clearAll()" *ngIf="notifications.length > 0">
+        <mat-icon>delete_sweep</mat-icon> Clear All
+      </button>
+
+      <!-- View Toggle -->
+      <div class="view-toggle">
+        <button mat-icon-button [class.active]="viewMode === 'timeline'" (click)="setViewMode('timeline')"
+                matTooltip="Timeline">
+          <mat-icon>timeline</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
+                matTooltip="List">
+          <mat-icon>view_list</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
+                matTooltip="Grid">
+          <mat-icon>view_module</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')"
+                matTooltip="Table">
+          <mat-icon>table_chart</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <button *ngFor="let f of filterTypes"
+            class="filter-chip"
+            [class.active]="filterType === f.value"
+            (click)="setFilter(f.value)">
+      <mat-icon>{{ f.icon }}</mat-icon>
+      {{ f.label }}
+    </button>
+  </div>
+
+  <!-- ===================== TIMELINE VIEW ===================== -->
+  <div class="timeline-view" *ngIf="viewMode === 'timeline'">
+    <div class="timeline-item" *ngFor="let notif of filteredNotifications"
+         [class.unread]="!notif.isRead"
+         (click)="markAsRead(notif)">
+      <div class="timeline-connector">
+        <div class="timeline-dot" [class.unread-dot]="!notif.isRead">
+          <mat-icon>{{ getIcon(notif.type) }}</mat-icon>
+        </div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <span class="notif-title">{{ notif.title }}</span>
+          <small class="notif-time">{{ notif.createdAt | timeAgo }}</small>
+        </div>
+        <p class="notif-message">{{ notif.message }}</p>
+        <span class="notif-type-badge">{{ getTypeLabel(notif.type) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== LIST VIEW ===================== -->
+  <div class="list-view" *ngIf="viewMode === 'list'">
+    <div class="list-item" *ngFor="let notif of filteredNotifications"
+         [class.unread]="!notif.isRead"
+         (click)="markAsRead(notif)">
+      <div class="list-icon" [class.unread-icon]="!notif.isRead">
+        <mat-icon>{{ getIcon(notif.type) }}</mat-icon>
+      </div>
+      <div class="list-content">
+        <span class="notif-title">{{ notif.title }}</span>
+        <span class="notif-message">{{ notif.message }}</span>
+      </div>
+      <div class="list-meta">
+        <small>{{ notif.createdAt | timeAgo }}</small>
+        <span class="notif-type-badge">{{ getTypeLabel(notif.type) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== GRID VIEW ===================== -->
+  <div class="grid-view" *ngIf="viewMode === 'grid'">
+    <div class="grid-card" *ngFor="let notif of filteredNotifications"
+         [class.unread]="!notif.isRead"
+         (click)="markAsRead(notif)">
+      <div class="grid-card-header">
+        <div class="grid-icon" [class.unread-icon]="!notif.isRead">
+          <mat-icon>{{ getIcon(notif.type) }}</mat-icon>
+        </div>
+        <span class="notif-type-badge">{{ getTypeLabel(notif.type) }}</span>
+      </div>
+      <h4 class="notif-title">{{ notif.title }}</h4>
+      <p class="notif-message">{{ notif.message }}</p>
+      <small class="notif-time">{{ notif.createdAt | timeAgo }}</small>
+    </div>
+  </div>
+
+  <!-- ===================== TABLE VIEW ===================== -->
+  <div class="table-view" *ngIf="viewMode === 'table'">
+    <table class="notif-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Title</th>
+          <th>Message</th>
+          <th>Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let notif of filteredNotifications"
+            [class.unread]="!notif.isRead"
+            (click)="markAsRead(notif)">
+          <td>
+            <span class="notif-type-badge">{{ getTypeLabel(notif.type) }}</span>
+          </td>
+          <td class="title-cell">{{ notif.title }}</td>
+          <td class="message-cell">{{ notif.message }}</td>
+          <td class="time-cell">{{ notif.createdAt | timeAgo }}</td>
+          <td>
+            <span class="status-indicator" [class.read]="notif.isRead">
+              {{ notif.isRead ? 'Read' : 'Unread' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredNotifications.length === 0">
+    <mat-icon>notifications_none</mat-icon>
+    <h3>No notifications</h3>
+    <p *ngIf="filterType !== 'all'">Try changing the filter to see more notifications.</p>
+    <p *ngIf="filterType === 'all'">You're all caught up!</p>
+  </div>
+</div>

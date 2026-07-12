@@ -2,7 +2,8 @@
 
 .message-input-container {
   background: $white;
-  padding: $spacing-sm $spacing-md;
+  padding: $spacing-md $spacing-md;
+  border-top: 1px solid $border-light;
 }
 
 .input-row {
@@ -28,6 +29,23 @@
   &:hover {
     color: $nocturnal-light;
   }
+
+  &.active {
+    color: $forsytha;
+  }
+}
+
+.emoji-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.emoji-picker-anchor {
+  position: absolute;
+  bottom: 44px;
+  left: 0;
+  z-index: $z-emoji-picker;
+  animation: fadeInUp 200ms ease forwards;
 }
 
 .send-btn {

@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ChatService } from '../../core/services/chat.service';
@@ -49,7 +50,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private socketService: SocketService,
     private userService: UserService,
     private authService: AuthService,
-    private contactService: ContactService
+    private contactService: ContactService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -198,11 +200,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   selectConversation(conversation: IConversation): void {
     this.chatService.setActiveConversation(conversation);
+    // Navigate to chat page if not already there
+    this.router.navigate(['/chat']);
   }
 
   startChatWithContact(contact: IContact): void {
     this.chatService.startPrivateConversation(contact.contactUserId).subscribe(
-      () => this.setTab('chats'),
+      () => {
+        this.setTab('chats');
+        // Navigate to chat page to show the conversation
+        this.router.navigate(['/chat']);
+      },
       (error) => console.error('Failed to start conversation:', error)
     );
   }

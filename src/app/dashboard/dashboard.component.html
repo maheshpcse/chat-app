@@ -1,0 +1,163 @@
+<div class="dashboard-page">
+  <!-- Welcome Card -->
+  <div class="welcome-card">
+    <div class="welcome-content">
+      <div class="welcome-avatar">
+        <div class="avatar-circle" *ngIf="!currentUser?.avatarUrl">
+          {{ getUserInitials() }}
+        </div>
+        <img *ngIf="currentUser?.avatarUrl" [src]="currentUser.avatarUrl" class="avatar-img" alt="Avatar">
+        <span class="online-dot"></span>
+      </div>
+      <div class="welcome-text">
+        <h1>{{ greeting }}, {{ currentUser?.firstName || 'User' }}</h1>
+        <p class="welcome-subtitle">Here's what's happening with your conversations today.</p>
+      </div>
+    </div>
+    <div class="welcome-date">
+      <mat-icon>calendar_today</mat-icon>
+      <span>{{ today | date:'EEEE, MMMM d, y' }}</span>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-grid">
+    <div class="stat-card stat-messages" (click)="navigateTo('/chat')">
+      <div class="stat-icon-wrapper">
+        <mat-icon>forum</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ unreadCount }}</span>
+        <span class="stat-label">Unread Messages</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-contacts" (click)="navigateTo('/contacts')">
+      <div class="stat-icon-wrapper">
+        <mat-icon>people</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalContactCount }}</span>
+        <span class="stat-label">Total Contacts</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-online">
+      <div class="stat-icon-wrapper">
+        <mat-icon>wifi</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ onlineContactCount }}</span>
+        <span class="stat-label">Online Now</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-requests" (click)="navigateTo('/contacts')">
+      <div class="stat-icon-wrapper">
+        <mat-icon>person_add</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ pendingRequestCount }}</span>
+        <span class="stat-label">Pending Requests</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="content-grid">
+    <!-- Recent Conversations -->
+    <div class="dashboard-card conversations-card">
+      <div class="card-header">
+        <h3><mat-icon>chat_bubble_outline</mat-icon> Recent Conversations</h3>
+        <button mat-button color="primary" (click)="navigateTo('/chat')">View All</button>
+      </div>
+      <mat-divider></mat-divider>
+      <div class="card-body">
+        <div class="conversation-item" *ngFor="let conv of recentConversations"
+             (click)="openConversation(conv)">
+          <app-avatar [name]="conv.displayName" [imageUrl]="conv.avatarUrl" size="sm"></app-avatar>
+          <div class="conv-info">
+            <span class="conv-name">{{ conv.displayName || 'Unknown' }}</span>
+            <span class="conv-preview">{{ conv.lastMessageContent | truncate:40 }}</span>
+          </div>
+          <div class="conv-meta">
+            <small class="conv-time">{{ conv.lastMessageAt | timeAgo }}</small>
+            <span class="unread-badge" *ngIf="conv.unreadCount > 0">{{ conv.unreadCount }}</span>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="recentConversations.length === 0">
+          <mat-icon>forum</mat-icon>
+          <p>No conversations yet</p>
+          <button mat-stroked-button color="primary" (click)="navigateTo('/chat')">Start Chatting</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-card actions-card">
+      <div class="card-header">
+        <h3><mat-icon>flash_on</mat-icon> Quick Actions</h3>
+      </div>
+      <mat-divider></mat-divider>
+      <div class="card-body actions-grid">
+        <button class="action-btn" (click)="navigateTo('/chat')">
+          <div class="action-icon chat-action">
+            <mat-icon>message</mat-icon>
+          </div>
+          <span>Start Chat</span>
+        </button>
+
+        <button class="action-btn" (click)="navigateTo('/groups')">
+          <div class="action-icon group-action">
+            <mat-icon>group_add</mat-icon>
+          </div>
+          <span>Create Group</span>
+        </button>
+
+        <button class="action-btn" (click)="navigateTo('/contacts')">
+          <div class="action-icon contact-action">
+            <mat-icon>person_search</mat-icon>
+          </div>
+          <span>Find Users</span>
+        </button>
+
+        <button class="action-btn" (click)="navigateTo('/settings')">
+          <div class="action-icon settings-action">
+            <mat-icon>settings</mat-icon>
+          </div>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Notifications Timeline -->
+    <div class="dashboard-card notifications-card">
+      <div class="card-header">
+        <h3><mat-icon>notifications_none</mat-icon> Recent Notifications</h3>
+        <button mat-button color="primary" (click)="navigateTo('/notifications')">View All</button>
+      </div>
+      <mat-divider></mat-divider>
+      <div class="card-body">
+        <div class="notification-timeline">
+          <div class="timeline-item" *ngFor="let notif of notifications"
+               [class.unread]="!notif.isRead">
+            <div class="timeline-dot">
+              <mat-icon>{{ getNotificationIcon(notif.type) }}</mat-icon>
+            </div>
+            <div class="timeline-content">
+              <span class="timeline-title">{{ notif.title }}</span>
+              <span class="timeline-message">{{ notif.message }}</span>
+              <small class="timeline-time">{{ notif.createdAt | timeAgo }}</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="notifications.length === 0">
+          <mat-icon>notifications_none</mat-icon>
+          <p>No notifications yet</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

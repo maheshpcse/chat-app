@@ -1,6 +1,6 @@
 <div class="bubble" [ngClass]="{'bubble-own': isOwn, 'bubble-other': !isOwn}">
-  <!-- Sender name (for group chats, other messages) -->
-  <span class="sender-name" *ngIf="!isOwn">{{ message.senderName }}</span>
+  <!-- Sender name (only for group chats, other people's messages) -->
+  <span class="sender-name" *ngIf="!isOwn && isGroupChat" [style.color]="getSenderColor()">{{ message.senderName }}</span>
 
   <!-- Text Message -->
   <p class="message-text" *ngIf="isText()">{{ message.content }}</p>

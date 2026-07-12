@@ -14,20 +14,25 @@ import { INotification } from '../../core/models/notification.model';
 export class NotificationListComponent implements OnInit, OnDestroy {
 
   notifications: INotification[] = [];
-  private subscription: Subscription;
+  unreadCount: number = 0;
+  private subscriptions: Subscription[] = [];
 
   constructor(private notificationService: NotificationService) {}
 
   ngOnInit(): void {
-    this.subscription = this.notificationService.notifications$.subscribe(notifications => {
+    const notifSub = this.notificationService.notifications$.subscribe(notifications => {
       this.notifications = notifications;
     });
+    this.subscriptions.push(notifSub);
+
+    const countSub = this.notificationService.unreadCount$.subscribe(count => {
+      this.unreadCount = count;
+    });
+    this.subscriptions.push(countSub);
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   markAsRead(notification: INotification): void {

@@ -1,0 +1,119 @@
+@import '../../shared/styles/theme.variables';
+
+.schedule-dialog {
+  min-width: 420px;
+  max-width: 500px;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-lg $spacing-xl;
+
+  .header-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: $nocturnal;
+  }
+
+  h3 {
+    font-family: $font-heading;
+    font-size: $fs-lg;
+    font-weight: $fw-bold;
+    color: $text-primary;
+    margin: 0;
+    flex: 1;
+  }
+
+  small {
+    font-family: $font-meta;
+    font-size: $fs-xs;
+    color: $text-muted;
+  }
+}
+
+.dialog-body {
+  padding: $spacing-lg $spacing-xl $spacing-xl;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: $spacing-sm;
+}
+
+.datetime-row {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  .date-field {
+    flex: 1.2;
+  }
+
+  .time-field {
+    flex: 1;
+  }
+}
+
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: rgba(#c62828, 0.06);
+  border: 1px solid rgba(#c62828, 0.15);
+  border-radius: $radius-md;
+  color: #c62828;
+  margin-bottom: $spacing-lg;
+  font-family: $font-primary;
+  font-size: $fs-sm;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  margin-top: $spacing-lg;
+
+  .cancel-btn {
+    font-family: $font-primary;
+    color: $text-secondary;
+  }
+
+  .schedule-btn {
+    font-family: $font-heading;
+    font-weight: $fw-semibold;
+    border-radius: $radius-md;
+    min-width: 120px;
+
+    mat-icon {
+      margin-right: 4px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    mat-spinner {
+      margin: 0 auto;
+    }
+  }
+}
+
+::ng-deep {
+  .mat-form-field-appearance-outline .mat-form-field-outline {
+    color: $border-default;
+  }
+
+  .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+    color: $nocturnal;
+  }
+}

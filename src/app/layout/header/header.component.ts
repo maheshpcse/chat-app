@@ -58,6 +58,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.showNotifications = !this.showNotifications;
   }
 
+  viewAllNotifications(): void {
+    this.showNotifications = false;
+    this.router.navigate(['/notifications']);
+  }
+
   onLogout(): void {
     this.authService.logout().subscribe(
       () => {
@@ -74,6 +79,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   goToProfile(): void {
-    this.router.navigate(['/user/profile']);
+    this.router.navigate(['/settings']);
+  }
+
+  getUserInitials(): string {
+    if (!this.currentUser) { return '?'; }
+    const first = (this.currentUser.firstName || '').charAt(0).toUpperCase();
+    const last = (this.currentUser.lastName || '').charAt(0).toUpperCase();
+    return first + last || '?';
   }
 }
