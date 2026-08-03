@@ -1,0 +1,157 @@
+﻿<div class="admin-page">
+  <div class="page-head">
+    <div>
+      <h2>Users</h2>
+      <p>Search, filter, and manage chat user accounts</p>
+    </div>
+  </div>
+
+  <div class="filters card">
+    <div class="filter-row">
+      <div class="field grow">
+        <label for="admin-user-search">Search</label>
+        <input id="admin-user-search" type="text" [(ngModel)]="search" (keyup.enter)="onSearch()" placeholder="Name, email, username">
+      </div>
+      <div class="field">
+        <label id="admin-user-status-label">Status</label>
+        <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+          <mat-select aria-labelledby="admin-user-status-label" [(ngModel)]="status" placeholder="All">
+            <mat-option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="field">
+        <label id="admin-user-role-label">Role</label>
+        <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+          <mat-select aria-labelledby="admin-user-role-label" [(ngModel)]="role" placeholder="All">
+            <mat-option *ngFor="let r of roleOptions" [value]="r.value">{{ r.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn primary" (click)="onSearch()">Apply</button>
+        <button type="button" class="btn ghost" (click)="clearFilters()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert warning" *ngIf="warningMessage">{{ warningMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="card table-card">
+    <ng-container *ngIf="loading; else usersTable">
+      <div class="table-shimmer shimmer-card">
+        <div class="sk-table-head">
+          <div class="sk-line sk-th" *ngFor="let _ of [1,2,3,4,5,6,7]"></div>
+        </div>
+        <div class="sk-table-row" *ngFor="let _ of [1,2,3,4,5,6,7,8]">
+          <div class="sk-cell user-cell">
+            <div class="sk-line w-55"></div>
+            <div class="sk-line w-40 thin"></div>
+          </div>
+          <div class="sk-line sk-cell w-70"></div>
+          <div class="sk-pill"></div>
+          <div class="sk-pill"></div>
+          <div class="sk-line sk-cell w-45"></div>
+          <div class="sk-line sk-cell w-50"></div>
+          <div class="sk-select"></div>
+        </div>
+        <div class="sk-pager">
+          <div class="sk-line w-35 thin"></div>
+          <div class="sk-pager-btns">
+            <div class="sk-btn short"></div>
+            <div class="sk-btn short"></div>
+            <div class="sk-btn short"></div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #usersTable>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Online</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="!users.length">
+              <td colspan="7" class="empty">No users found</td>
+            </tr>
+            <tr *ngFor="let user of users; trackBy: trackByUserId">
+              <td>
+                <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+                <span class="muted">@{{ user.username }}</span>
+              </td>
+              <td>{{ user.email }}</td>
+              <td><span class="pill">{{ displayLabel(user.role) }}</span></td>
+              <td><span class="pill" [attr.data-status]="user.status">{{ displayLabel(user.status) }}</span></td>
+              <td>
+                <span class="dot" [class.on]="user.isOnline"></span>
+                {{ user.isOnline ? 'Online' : 'Offline' }}
+              </td>
+              <td>{{ user.createdAt | date:'mediumDate' }}</td>
+              <td>
+                <label class="sr-only" [attr.for]="'user-status-' + user.userId">Status for {{ user.username }}</label>
+                <mat-form-field appearance="outline" class="admin-mat-field status-field" floatLabel="never">
+                  <mat-select [id]="'user-status-' + user.userId"
+                              [ngModel]="user.status"
+                              (ngModelChange)="setStatus(user, $event)"
+                              [attr.aria-label]="'Status for ' + user.username">
+                    <mat-option *ngFor="let s of rowStatusOptions" [value]="s.value">{{ s.label }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pager" *ngIf="total > 0">
+        <div class="pager-meta">
+          <span>Showing {{ rangeFrom }}–{{ rangeTo }} of {{ total }}</span>
+          <div class="page-size">
+            <label id="users-page-size-label">Rows</label>
+            <mat-form-field appearance="outline" class="admin-mat-field page-size-field" floatLabel="never">
+              <mat-select aria-labelledby="users-page-size-label"
+                          [ngModel]="limit"
+                          (ngModelChange)="onLimitChange($event)">
+                <mat-option *ngFor="let n of limitOptions" [value]="n">{{ n }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="pager-controls" *ngIf="totalPages > 1">
+          <button type="button" class="btn ghost page-btn" (click)="firstPage()" [disabled]="page <= 1" aria-label="First page">
+            <mat-icon>first_page</mat-icon>
+          </button>
+          <button type="button" class="btn ghost page-btn" (click)="prevPage()" [disabled]="page <= 1" aria-label="Previous page">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button type="button"
+                  class="btn ghost page-num"
+                  *ngFor="let p of pageNumbers"
+                  [class.active]="p === page"
+                  (click)="goToPage(p)">
+            {{ p }}
+          </button>
+          <button type="button" class="btn ghost page-btn" (click)="nextPage()" [disabled]="page >= totalPages" aria-label="Next page">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button type="button" class="btn ghost page-btn" (click)="lastPage()" [disabled]="page >= totalPages" aria-label="Last page">
+            <mat-icon>last_page</mat-icon>
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>

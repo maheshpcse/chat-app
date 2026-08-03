@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ChatService } from '../../core/services/chat.service';
 import { UploadService } from '../../core/services/upload.service';
@@ -10,14 +10,8 @@ import { APP_CONSTANTS } from '../../core/constants/app.constants';
 import { ScheduleMessageDialogComponent } from '../schedule-message-dialog/schedule-message-dialog.component';
 
 /**
- * MessageInputComponent - Message text area with file upload and typing indicator.
- *
- * Angular Concepts Used:
- * - FormControl (standalone reactive form control)
- * - Subject with debounceTime (typing detection)
- * - distinctUntilChanged (avoid duplicate emissions)
- * - File input handling
- * - ViewChild not needed here - uses FormControl valueChanges
+ * MessageInputComponent - footer composer.
+ * Emoji panel uses header-notification open/close pattern (click + outside + fade).
  */
 @Component({
   selector: 'app-message-input',
@@ -26,13 +20,18 @@ import { ScheduleMessageDialogComponent } from '../schedule-message-dialog/sched
 })
 export class MessageInputComponent implements OnInit, OnDestroy {
 
-  messageControl = new FormControl('');
-  isUploading: boolean = false;
-  selectedFile: File | null = null;
-  showEmojiPicker: boolean = false;
+  @ViewChild('emojiButton', { static: false }) emojiButton: ElementRef<HTMLElement>;
+  @ViewChild('emojiPanel', { static: false }) emojiPanel: ElementRef<HTMLElement>;
 
-  private typingSubject = new Subject<boolean>();
+  messageControl = new FormControl('');
+  isUploading = false;
+  selectedFile: File | null = null;
+  showEmojiPicker = false;
+  emojiClosing = false;
+
   private typingTimeout: any;
+  private emojiHideTimer: any = null;
+  private readonly emojiFadeMs = 420;
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -42,7 +41,6 @@ export class MessageInputComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Listen to input changes for typing indicator
     const valueSub = this.messageControl.valueChanges.pipe(
       debounceTime(APP_CONSTANTS.SEARCH_DEBOUNCE_TIME),
       distinctUntilChanged()
@@ -59,6 +57,7 @@ export class MessageInputComponent implements OnInit, OnDestroy {
     if (this.typingTimeout) {
       clearTimeout(this.typingTimeout);
     }
+    this.clearEmojiHideTimer();
   }
 
   sendMessage(): void {
@@ -78,13 +77,10 @@ export class MessageInputComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-
-      // Validate file size
       if (file.size > APP_CONSTANTS.MAX_FILE_SIZE) {
         alert('File size exceeds 10MB limit');
         return;
       }
-
       this.selectedFile = file;
     }
   }
@@ -94,7 +90,6 @@ export class MessageInputComponent implements OnInit, OnDestroy {
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    // Send on Enter (without Shift)
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.sendMessage();
@@ -102,16 +97,84 @@ export class MessageInputComponent implements OnInit, OnDestroy {
   }
 
   toggleEmojiPicker(): void {
-    this.showEmojiPicker = !this.showEmojiPicker;
+    if (this.showEmojiPicker || this.emojiClosing) {
+      this.closeEmojiPicker();
+      return;
+    }
+    this.clearEmojiHideTimer();
+    this.emojiClosing = false;
+    this.showEmojiPicker = true;
+    this.scheduleEmojiHide(4000);
   }
 
   insertEmoji(emoji: string): void {
     const current = this.messageControl.value || '';
     this.messageControl.setValue(current + emoji);
+    this.clearEmojiHideTimer();
+    this.scheduleEmojiHide(4000);
   }
 
-  closeEmojiPicker(): void {
-    this.showEmojiPicker = false;
+  closeEmojiPicker(immediate: boolean = false): void {
+    this.clearEmojiHideTimer();
+    if (!this.showEmojiPicker && !this.emojiClosing) {
+      return;
+    }
+    if (immediate || this.emojiClosing) {
+      this.showEmojiPicker = false;
+      this.emojiClosing = false;
+      return;
+    }
+    this.emojiClosing = true;
+    this.emojiHideTimer = setTimeout(() => {
+      this.showEmojiPicker = false;
+      this.emojiClosing = false;
+      this.emojiHideTimer = null;
+    }, this.emojiFadeMs);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.showEmojiPicker && !this.emojiClosing) {
+      return;
+    }
+    const target = event.target as Node | null;
+    const inBtn = !!this.emojiButton?.nativeElement?.contains(target);
+    const inPanel = !!this.emojiPanel?.nativeElement?.contains(target);
+    if (!inBtn && !inPanel) {
+      this.closeEmojiPicker();
+    }
+  }
+
+  onEmojiPanelEnter(): void {
+    if (!this.showEmojiPicker) {
+      return;
+    }
+    this.clearEmojiHideTimer();
+    this.emojiClosing = false;
+  }
+
+  onEmojiPanelLeave(): void {
+    this.scheduleEmojiHide(600);
+  }
+
+  private scheduleEmojiHide(delay: number): void {
+    this.clearEmojiHideTimer();
+    this.emojiHideTimer = setTimeout(() => this.closeEmojiPicker(), delay);
+  }
+
+  private clearEmojiHideTimer(): void {
+    if (this.emojiHideTimer) {
+      clearTimeout(this.emojiHideTimer);
+      this.emojiHideTimer = null;
+    }
+  }
+
+  autoGrow(event: Event): void {
+    const el = event.target as HTMLTextAreaElement;
+    if (!el) { return; }
+    el.style.height = 'auto';
+    const next = Math.min(el.scrollHeight, 128);
+    el.style.height = String(Math.max(next, 24)) + 'px';
   }
 
   openScheduleDialog(): void {
@@ -129,7 +192,6 @@ export class MessageInputComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // Scheduled message created successfully
         console.log('Message scheduled:', result);
       }
     });
@@ -137,7 +199,6 @@ export class MessageInputComponent implements OnInit, OnDestroy {
 
   private uploadAndSend(): void {
     if (!this.selectedFile) { return; }
-
     this.isUploading = true;
     const file = this.selectedFile;
     const type = this.getMessageType(file);
@@ -166,14 +227,10 @@ export class MessageInputComponent implements OnInit, OnDestroy {
 
   private handleTypingStart(): void {
     this.chatService.startTyping();
-
-    // Auto-stop typing after timeout
     if (this.typingTimeout) {
       clearTimeout(this.typingTimeout);
     }
-    this.typingTimeout = setTimeout(() => {
-      this.handleTypingStop();
-    }, APP_CONSTANTS.TYPING_TIMEOUT);
+    this.typingTimeout = setTimeout(() => this.handleTypingStop(), APP_CONSTANTS.TYPING_TIMEOUT);
   }
 
   private handleTypingStop(): void {

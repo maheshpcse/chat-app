@@ -1,40 +1,49 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
-import { RoleGuard } from './core/guards/role.guard';
-import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
+import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
+import { ChatLayoutComponent } from './layout/chat-layout/chat-layout.component';
 
 /**
  * AppRoutingModule - Root routing configuration with lazy loading.
- *
- * Angular Concepts Used:
- * - Lazy loading with loadChildren (loads modules on demand)
- * - Route guards (AuthGuard, RoleGuard)
- * - PreloadAllModules strategy (preloads after initial load)
- * - Route data for role-based access
- * - Nested routes (children within layout)
- * - Redirect routes
  */
 const routes: Routes = [
-  // Public routes (no auth required)
+  {
+    path: '',
+    pathMatch: 'full',
+    loadChildren: () => import('./landing/landing.module').then(m => m.LandingModule)
+  },
   {
     path: 'auth',
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
-
-  // Protected routes (wrapped in main layout)
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
+  },
+  {
+    path: 'errors',
+    loadChildren: () => import('./errors/errors.module').then(m => m.ErrorsModule)
+  },
+  {
+    path: 'chat',
+    component: ChatLayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: '',
+        loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule)
+      }
+    ]
+  },
   {
     path: '',
-    component: MainLayoutComponent,
+    component: AppLayoutComponent,
     canActivate: [AuthGuard],
     children: [
       {
         path: 'dashboard',
         loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
-      },
-      {
-        path: 'chat',
-        loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule)
       },
       {
         path: 'conversations',
@@ -63,15 +72,13 @@ const routes: Routes = [
       }
     ]
   },
-
-  // Wildcard redirect
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: 'errors/404' }
 ];
 
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {
-      preloadingStrategy: PreloadAllModules // Preload lazy modules after app loads
+      preloadingStrategy: PreloadAllModules
     })
   ],
   exports: [RouterModule]

@@ -1,0 +1,13 @@
+<div class="err-shell tone-offline">
+  <div class="err-card">
+    <div class="badge">OFFLINE</div>
+    <div class="icon-wrap"><mat-icon>wifi_off</mat-icon></div>
+    <h1>You are offline</h1>
+    <p>Cannot reach the API. Check your network connection, then retry.</p>
+    <div class="actions">
+      <button type="button" class="btn ghost" (click)="retry()">Retry</button>
+      <button type="button" class="btn ghost" (click)="goBack()">Go back</button>
+      <button type="button" class="btn primary" (click)="goHome()">Home</button>
+    </div>
+  </div>
+</div>

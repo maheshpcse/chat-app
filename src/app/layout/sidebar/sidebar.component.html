@@ -48,23 +48,34 @@
       </div>
     </div>
 
-    <mat-divider></mat-divider>
-
     <!-- TAB: CHATS -->
     <div class="tab-content" *ngIf="activeTab === 'chats'">
       <div class="search-box">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-icon matPrefix>search</mat-icon>
-          <input matInput placeholder="Filter conversations..." [(ngModel)]="conversationFilter">
-        </mat-form-field>
+        <div class="input-wrapper">
+          <mat-icon class="input-icon">search</mat-icon>
+          <input type="text" placeholder="Filter conversations..." [(ngModel)]="conversationFilter">
+        </div>
       </div>
       <div class="list-container">
+        <!-- Shimmer while conversations load from the API -->
+        <app-shimmer *ngIf="isLoadingConversations" variant="list" [rows]="6"></app-shimmer>
+
+        <ng-container *ngIf="!isLoadingConversations">
         <div *ngFor="let conv of filteredConversations(); trackBy: trackByConversationId"
-             class="list-item" (click)="selectConversation(conv)">
-          <app-avatar [imageUrl]="conv.avatarUrl" [name]="conv.displayName" size="md"></app-avatar>
+             class="list-item"
+             [class.is-active]="isConversationActive(conv)"
+             [class.is-selected]="isConversationActive(conv)"
+             (click)="selectConversation(conv)">
+          <app-avatar
+            [imageUrl]="conv.avatarUrl"
+            [name]="conversationLabel(conv)"
+            size="md"
+            [showStatus]="!!conv.participantId"
+            [isOnline]="!!conv.participantId && isUserOnline(conv.participantId)">
+          </app-avatar>
           <div class="item-info">
             <div class="item-row">
-              <span class="item-name">{{ conv.displayName }}</span>
+              <span class="item-name">{{ conversationLabel(conv) }}</span>
               <small class="item-time" *ngIf="conv.lastMessageAt">{{ conv.lastMessageAt | timeAgo }}</small>
             </div>
             <div class="item-row">
@@ -80,25 +91,30 @@
             Start chatting with contacts
           </button>
         </div>
+        </ng-container>
       </div>
     </div>
 
     <!-- TAB: CONTACTS -->
     <div class="tab-content" *ngIf="activeTab === 'contacts'">
       <div class="list-container">
-        <div *ngFor="let contact of contacts; trackBy: trackByContactId"
-             class="list-item" (click)="startChatWithContact(contact)">
+        <div *ngFor="let contact of displayContacts; trackBy: trackByContactId"
+             class="list-item" [class.is-pending]="isPending(contact)"
+             (click)="!isPending(contact) && startChatWithContact(contact)">
           <app-avatar [imageUrl]="contact.avatarUrl"
                       [name]="contact.firstName + ' ' + contact.lastName"
-                      [isOnline]="isUserOnline(contact.contactUserId)" size="md">
+                      [showStatus]="!isPending(contact)"
+                      [isOnline]="!isPending(contact) && isUserOnline(contact.contactUserId)" size="md">
           </app-avatar>
           <div class="item-info">
             <span class="item-name">{{ contact.firstName }} {{ contact.lastName }}</span>
-            <small class="item-subtitle">@{{ contact.username }}</small>
+            <small class="item-subtitle" *ngIf="!isPending(contact)">@{{ contact.username }}</small>
+            <small class="item-subtitle pending-label" *ngIf="isPending(contact)">Request Sent</small>
           </div>
-          <mat-icon class="chat-action" color="primary">chat</mat-icon>
+          <mat-icon class="chat-action" color="primary" *ngIf="!isPending(contact)">chat</mat-icon>
+          <span class="pending-chip" *ngIf="isPending(contact)">Pending</span>
         </div>
-        <div class="empty-state" *ngIf="contacts.length === 0">
+        <div class="empty-state" *ngIf="displayContacts.length === 0">
           <mat-icon>people_outline</mat-icon>
           <p>No contacts yet</p>
           <button mat-stroked-button color="primary" (click)="setTab('search')">Search and add users</button>
@@ -110,7 +126,8 @@
     <div class="tab-content" *ngIf="activeTab === 'requests'">
       <h5 class="section-title" *ngIf="receivedRequests.length > 0">Received ({{ receivedRequests.length }})</h5>
       <div *ngFor="let request of receivedRequests; trackBy: trackByRequestId" class="list-item request-item">
-        <app-avatar [imageUrl]="request.avatarUrl" [name]="request.firstName + ' ' + request.lastName" size="sm"></app-avatar>
+        <app-avatar [imageUrl]="request.avatarUrl || ''" [name]="request.firstName + ' ' + request.lastName" size="sm"
+                    [showStatus]="true" [isOnline]="isUserOnline(request.senderUserId)"></app-avatar>
         <div class="item-info">
           <span class="item-name">{{ request.firstName }} {{ request.lastName }}</span>
           <small class="item-subtitle">@{{ request.username }}</small>
@@ -126,7 +143,8 @@
       </div>
       <h5 class="section-title" *ngIf="sentRequests.length > 0">Sent ({{ sentRequests.length }})</h5>
       <div *ngFor="let request of sentRequests; trackBy: trackByRequestId" class="list-item request-item">
-        <app-avatar [imageUrl]="request.avatarUrl" [name]="request.firstName + ' ' + request.lastName" size="sm"></app-avatar>
+        <app-avatar [imageUrl]="request.avatarUrl || ''" [name]="request.firstName + ' ' + request.lastName" size="sm"
+                    [showStatus]="true" [isOnline]="isUserOnline(request.receiverUserId)"></app-avatar>
         <div class="item-info">
           <span class="item-name">{{ request.firstName }} {{ request.lastName }}</span>
           <small class="item-subtitle">Pending...</small>
@@ -144,18 +162,19 @@
     <!-- TAB: SEARCH -->
     <div class="tab-content" *ngIf="activeTab === 'search'">
       <div class="search-box">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-icon matPrefix>search</mat-icon>
-          <input matInput placeholder="Search by name or username..."
-                 [value]="searchQuery" (input)="onSearchInput($event.target.value)" autofocus>
-        </mat-form-field>
+        <div class="input-wrapper">
+          <mat-icon class="input-icon">search</mat-icon>
+          <input type="text" placeholder="Search by name or username..."
+                 [value]="searchQuery" (input)="onSearchInput($any($event.target).value)" autofocus>
+        </div>
       </div>
       <div class="text-center py-3" *ngIf="isSearching">
         <mat-spinner diameter="28"></mat-spinner>
       </div>
       <div class="list-container" *ngIf="!isSearching">
         <div *ngFor="let user of searchResults; trackBy: trackByUserId" class="list-item">
-          <app-avatar [imageUrl]="user.avatarUrl" [name]="user.firstName + ' ' + user.lastName" size="md"></app-avatar>
+          <app-avatar [imageUrl]="user.avatarUrl || ''" [name]="user.firstName + ' ' + user.lastName" size="md"
+                      [showStatus]="true" [isOnline]="isUserOnline(user.userId || user.id || '')"></app-avatar>
           <div class="item-info">
             <span class="item-name">{{ user.firstName }} {{ user.lastName }}</span>
             <small class="item-subtitle">@{{ user.username }}</small>

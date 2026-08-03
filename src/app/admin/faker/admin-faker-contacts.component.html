@@ -1,0 +1,88 @@
+<div class="admin-page">
+  <a class="back-link" routerLink="/admin/faker"><mat-icon>arrow_back</mat-icon> Data Studio</a>
+  <div class="page-head">
+    <div>
+      <h2>Data Studio · Contacts</h2>
+      <p>Needs at least two active users. Creates accepted friendships or pending requests.</p>
+    </div>
+  </div>
+
+  <div class="card controls">
+    <div class="row">
+      <div class="field">
+        <label for="faker-contact-count">Count (1–200)</label>
+        <input id="faker-contact-count" type="number" min="1" max="200" [(ngModel)]="count">
+      </div>
+      <div class="field">
+        <label id="faker-contact-mode-label">Mode</label>
+        <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+          <mat-select aria-labelledby="faker-contact-mode-label" [(ngModel)]="mode" placeholder="Mixed">
+            <mat-option *ngFor="let o of modeOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn primary" (click)="generate()" [disabled]="loading">
+          Generate preview
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <app-shimmer *ngIf="loading" variant="list" [rows]="6"></app-shimmer>
+
+  <div class="card" *ngIf="contacts.length && !loading">
+    <div class="preview-toolbar">
+      <div>
+        <strong>{{ contacts.length }}</strong> contacts in preview
+        <span class="muted" *ngIf="previewId"> · id {{ previewId | slice:0:8 }}…</span>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" (click)="discard()" [disabled]="saving">Discard</button>
+        <button type="button" class="btn success" (click)="saveToDb()" [disabled]="saving || !contacts.length">
+          <span *ngIf="saving">Saving…</span>
+          <span *ngIf="!saving">Save to database</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Contact</th>
+            <th>Mode</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of contacts; trackBy: trackByTempId">
+            <td>{{ item.userLabel || item.userId }}</td>
+            <td>{{ item.contactLabel || item.contactUserId }}</td>
+            <td>{{ item.mode | titlecase }}</td>
+            <td>{{ item.status | titlecase }}</td>
+            <td class="row-actions">
+              <button type="button" class="icon-action" matTooltip="Regenerate" (click)="regenerate(item)">
+                <mat-icon>autorenew</mat-icon>
+              </button>
+              <button type="button" class="icon-action danger" matTooltip="Remove" (click)="remove(item)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state card" *ngIf="!contacts.length && !loading">
+    <mat-icon>contacts</mat-icon>
+    <h3>No preview yet</h3>
+    <p>Generate contact pairs from active users, review, then save.</p>
+  </div>
+</div>

@@ -1,0 +1,150 @@
+// ====================================================
+// Admin-only design tokens
+// Allowed palette: Arctic Powder, Forsytha, Mystic Mint,
+// Deep Saffron, Crimson (+ white / soft neutrals derived)
+// ====================================================
+
+$admin-arctic: #f1f6f4;
+$admin-forsytha: #ffc801;
+$admin-mint: #d9e8e2;
+$admin-saffron: #ff9932;
+$admin-crimson: #dc143c;
+$admin-white: #ffffff;
+$admin-ink: #1f2524;
+$admin-ink-soft: #4a5250;
+$admin-muted: #6b7572;
+$admin-border: #d0d5d3;
+$admin-border-light: #e8eceb;
+
+$admin-bg-app: $admin-arctic;
+// Sidemenu: light mint / arctic console (admin-only palette)
+$admin-bg-sidebar: linear-gradient(180deg, #e7f2ed 0%, $admin-mint 42%, darken($admin-mint, 4%) 100%);
+$admin-sidebar-ink: $admin-ink;
+$admin-sidebar-muted: $admin-ink-soft;
+$admin-sidebar-border: rgba(31, 37, 36, 0.08);
+$admin-sidebar-hover: rgba($admin-white, 0.55);
+$admin-sidebar-active-bg: rgba($admin-forsytha, 0.28);
+$admin-sidebar-active-ink: darken($admin-saffron, 18%);
+$admin-bg-topbar: $admin-white;
+$admin-bg-card: $admin-white;
+$admin-bg-login: linear-gradient(
+  145deg,
+  $admin-arctic 0%,
+  $admin-mint 48%,
+  lighten($admin-arctic, 1%) 100%
+);
+
+$admin-gradient-accent: linear-gradient(135deg, $admin-forsytha 0%, $admin-saffron 100%);
+$admin-gradient-btn: linear-gradient(135deg, $admin-saffron 0%, darken($admin-saffron, 6%) 100%);
+$admin-gradient-avatar: linear-gradient(135deg, $admin-forsytha 0%, $admin-saffron 100%);
+
+$admin-shadow-sm: 0 2px 6px rgba(31, 37, 36, 0.06);
+$admin-shadow-md: 0 6px 18px rgba(31, 37, 36, 0.08);
+$admin-radius: 12px;
+$admin-radius-lg: 16px;
+$admin-header-h: 64px;
+$admin-sidenav-w: 248px;
+$admin-sidenav-collapsed-w: 76px;
+$admin-panel-h: 360px;
+
+// Shared form control look (parity with user auth inputs)
+@mixin admin-control {
+  height: 48px;
+  border: 1.5px solid $admin-border;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 0.875rem;
+  color: $admin-ink;
+  background: $admin-white;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  font-family: inherit;
+
+  &::placeholder {
+    color: #a8b0ad;
+  }
+
+  &:focus {
+    border-color: $admin-saffron;
+    box-shadow: 0 0 0 3px rgba($admin-saffron, 0.16);
+  }
+}
+
+@mixin admin-select {
+  @include admin-control;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, $admin-muted 50%),
+    linear-gradient(135deg, $admin-muted 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% - 3px), calc(100% - 11px) calc(50% - 3px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+@mixin admin-btn-primary {
+  height: 48px;
+  border: none;
+  border-radius: 8px;
+  padding: 0 18px;
+  background: $admin-gradient-btn;
+  color: $admin-white;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba($admin-saffron, 0.28);
+    filter: brightness(1.03);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+@mixin admin-btn-ghost {
+  height: 48px;
+  border: 1.5px solid $admin-border;
+  border-radius: 8px;
+  padding: 0 16px;
+  background: $admin-white;
+  color: $admin-ink;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:hover:not(:disabled) {
+    background: $admin-arctic;
+    border-color: darken($admin-border, 6%);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+@mixin admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  height: 100%;
+}
+
+@mixin admin-card {
+  background: $admin-bg-card;
+  border: 1px solid $admin-border-light;
+  border-radius: $admin-radius-lg;
+  box-shadow: $admin-shadow-sm;
+}

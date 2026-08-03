@@ -20,12 +20,17 @@ export class TypingIndicatorComponent {
 
   getTypingText(): string {
     if (this.typingUsers.length === 1) {
-      return `${this.typingUsers[0].username} is typing`;
+      return `${this.displayName(this.typingUsers[0])} is typing`;
     } else if (this.typingUsers.length === 2) {
-      return `${this.typingUsers[0].username} and ${this.typingUsers[1].username} are typing`;
+      return `${this.displayName(this.typingUsers[0])} and ${this.displayName(this.typingUsers[1])} are typing`;
     } else if (this.typingUsers.length > 2) {
       return 'Several people are typing';
     }
     return '';
+  }
+
+  private displayName(user: ITypingEvent): string {
+    const name = (user?.username || (user as any)?.userName || (user as any)?.displayName || '').trim();
+    return name || 'Someone';
   }
 }

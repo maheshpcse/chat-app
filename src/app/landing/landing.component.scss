@@ -1,0 +1,316 @@
+@import '../../app/shared/styles/theme.variables';
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $arctic-powder;
+  // NOTE: no overflow-x here — an ancestor overflow breaks position:sticky.
+  // Horizontal overflow is already clipped globally on html/body.
+}
+
+.landing-container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+/* ============ Top Bar ============ */
+.landing-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: $oceanic-noir;
+  box-shadow: 0 2px 8px rgba($oceanic-noir, 0.25);
+
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: $white;
+    font-family: $font-heading;
+    font-size: 20px;
+    font-weight: $fw-bold;
+
+    mat-icon { color: $forsytha; }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .login-link { color: $white; }
+
+    a.mat-raised-button,
+    a.mat-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      padding: 0 18px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: normal;
+
+      ::ng-deep .mat-button-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+/* ============ Hero ============ */
+.hero {
+  background: linear-gradient(160deg, $oceanic-noir 0%, $nocturnal 65%, #16606f 100%);
+  color: $white;
+  padding: 72px 0 88px;
+
+  .hero-row {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .hero-text { flex: 1 1 460px; min-width: 0; }
+
+  h1 {
+    font-family: $font-heading;
+    font-size: 44px;
+    line-height: 1.15;
+    margin: 0 0 16px;
+    color: $white;
+
+    .accent { color: $forsytha; }
+  }
+
+  .hero-sub {
+    font-size: $fs-lg;
+    line-height: 1.6;
+    color: rgba($white, 0.85);
+    margin: 0 0 28px;
+    max-width: 540px;
+  }
+}
+
+.hero-cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  // Anchor-based Material buttons keep their default 36px line-height, which
+  // mis-centers labels once a custom height is set. Center them with flex.
+  a.mat-raised-button,
+  a.mat-stroked-button,
+  a.mat-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 18px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: normal;
+
+    ::ng-deep .mat-button-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+  }
+
+  .cta-main { height: 48px; padding: 0 26px; font-size: $fs-md; }
+
+  .cta-secondary {
+    height: 48px;
+    padding: 0 22px;
+    color: $white;
+    border-color: rgba($white, 0.5);
+
+    &:hover { background: rgba($white, 0.08); }
+  }
+}
+
+/* Illustrative chat mock */
+.hero-visual {
+  flex: 1 1 380px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  .mock-bubble {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 18px;
+    max-width: 85%;
+    font-size: $fs-base;
+    box-shadow: 0 4px 14px rgba($oceanic-noir, 0.25);
+    animation: floatIn 500ms ease both;
+
+    &.left {
+      background: $white;
+      color: $text-primary;
+      border-bottom-left-radius: 6px;
+      align-self: flex-start;
+    }
+
+    &.right {
+      background: $forsytha;
+      color: $oceanic-noir;
+      border-bottom-right-radius: 6px;
+      align-self: flex-end;
+      animation-delay: 150ms;
+    }
+
+    &.small { animation-delay: 300ms; }
+
+    .mock-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: $nocturnal;
+      color: $white;
+      font-size: 11px;
+      font-weight: $fw-semibold;
+      flex-shrink: 0;
+    }
+  }
+}
+
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ Features ============ */
+.features {
+  padding: 72px 0;
+
+  h2 {
+    text-align: center;
+    font-family: $font-heading;
+    color: $oceanic-noir;
+    font-size: 30px;
+    margin: 0 0 40px;
+  }
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.feature-card {
+  background: $white;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  padding: 26px 22px;
+  box-shadow: $shadow-sm;
+  transition: transform $transition-fast, box-shadow $transition-fast;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: $shadow-md;
+  }
+
+  .feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: $radius-md;
+    background: rgba($nocturnal, 0.1);
+    color: $nocturnal;
+    margin-bottom: 14px;
+
+    mat-icon { font-size: 24px; }
+  }
+
+  h3 {
+    font-family: $font-heading;
+    font-size: $fs-lg;
+    color: $oceanic-noir;
+    margin: 0 0 8px;
+  }
+
+  p {
+    margin: 0;
+    color: $text-secondary;
+    line-height: 1.55;
+  }
+}
+
+/* ============ Bottom CTA ============ */
+.bottom-cta {
+  padding: 0 0 72px;
+
+  .cta-box {
+    background: $mystic-mint;
+    border-radius: $radius-lg;
+    text-align: center;
+    padding: 48px 24px;
+
+    h2 {
+      font-family: $font-heading;
+      color: $oceanic-noir;
+      margin: 0 0 8px;
+    }
+
+    p { color: $text-secondary; margin: 0 0 22px; }
+
+    .hero-cta { justify-content: center; }
+
+    .login-link-dark { color: $nocturnal; font-weight: $fw-semibold; }
+  }
+}
+
+/* ============ Footer ============ */
+.landing-footer {
+  background: $oceanic-noir;
+  color: rgba($white, 0.75);
+  padding: 18px 0;
+  font-size: $fs-sm;
+
+  .footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .footer-links a {
+    color: $forsytha;
+    margin-left: 16px;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 860px) {
+  .hero { padding: 48px 0 56px; }
+  .hero .hero-row { flex-direction: column; align-items: flex-start; }
+  .hero h1 { font-size: 34px; }
+  .hero-visual { width: 100%; }
+}

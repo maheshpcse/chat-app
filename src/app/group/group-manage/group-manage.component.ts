@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { GroupService } from '../../core/services/group.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PresenceService } from '../../core/services/presence.service';
 import { IGroup, IGroupMember } from '../../core/models/group.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -30,8 +31,14 @@ export class GroupManageComponent implements OnInit {
     private route: ActivatedRoute,
     private groupService: GroupService,
     private authService: AuthService,
+    private presenceService: PresenceService,
     private dialog: MatDialog
   ) {}
+
+  isMemberOnline(member: IGroupMember): boolean {
+    const id = (member as any)?.userId || (member as any)?.id;
+    return !!id && this.presenceService.isOnline(String(id));
+  }
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUser()?.id;

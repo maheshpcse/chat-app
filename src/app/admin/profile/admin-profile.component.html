@@ -1,0 +1,85 @@
+<div class="admin-page">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h2>Admin Profile</h2>
+      <p>Signed-in administrator identity and session actions</p>
+    </div>
+    <button type="button" class="btn ghost head-action" (click)="load()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <ng-container *ngIf="loading; else profileLoaded">
+    <div class="profile-hero card shimmer-card">
+      <div class="avatar sk-block sk-avatar"></div>
+      <div class="hero-body">
+        <div class="sk-line w-40"></div>
+        <div class="sk-line w-55"></div>
+        <div class="sk-pill"></div>
+      </div>
+      <div class="hero-actions">
+        <div class="sk-btn"></div>
+        <div class="sk-btn short"></div>
+      </div>
+    </div>
+
+    <div class="card shimmer-card">
+      <div class="sk-line w-30 title-line"></div>
+      <div class="meta-grid">
+        <div *ngFor="let _ of [1,2,3,4,5]">
+          <div class="sk-line w-35 thin"></div>
+          <div class="sk-line w-70"></div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #profileLoaded>
+    <ng-container *ngIf="admin as a">
+      <div class="profile-hero card">
+        <div class="avatar">{{ a.firstName?.charAt(0) }}{{ a.lastName?.charAt(0) }}</div>
+        <div class="hero-body">
+          <h3>{{ a.firstName }} {{ a.lastName }}</h3>
+          <p>{{ a.email }}</p>
+          <span class="pill">{{ a.role }}</span>
+        </div>
+        <div class="hero-actions">
+          <a routerLink="/admin/settings" class="btn primary">Open settings</a>
+          <button type="button" class="btn danger" (click)="confirmLogout()">
+            <mat-icon>logout</mat-icon>
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Account details</h3>
+        <dl class="meta-grid">
+          <div class="meta-item meta-item--id">
+            <dt>Admin ID</dt>
+            <dd><code>{{ a.adminId }}</code></dd>
+          </div>
+          <div class="meta-item">
+            <dt>Email</dt>
+            <dd>{{ a.email }}</dd>
+          </div>
+          <div class="meta-item">
+            <dt>Role</dt>
+            <dd>{{ a.role }}</dd>
+          </div>
+          <div class="meta-item" *ngIf="a.status">
+            <dt>Status</dt>
+            <dd>{{ a.status }}</dd>
+          </div>
+          <div class="meta-item" *ngIf="a.lastLoginAt">
+            <dt>Last login</dt>
+            <dd>{{ a.lastLoginAt | date:'medium' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </ng-container>
+  </ng-template>
+</div>

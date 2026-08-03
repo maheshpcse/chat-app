@@ -1,0 +1,97 @@
+@import '../../../app/shared/styles/theme.variables';
+
+// Host must be a block flex-item so the width truly shrinks on collapse and the
+// main content expands into the freed space (no leftover empty column).
+:host {
+  display: block;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.app-side-menu {
+  box-sizing: border-box;
+  height: 100%;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: $bg-sidebar;
+  border-right: 1px solid $border-light;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition: width $transition-smooth;
+
+  &.collapsed {
+    width: 64px;
+
+    .menu-label { opacity: 0; width: 0; }
+    .menu-link { justify-content: center; }
+  }
+}
+
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: $spacing-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: 10px 12px;
+  border-radius: $radius-md;
+  color: $text-secondary;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background-color $transition-fast, color $transition-fast;
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+
+  .menu-label {
+    font-family: $font-primary;
+    font-size: $fs-base;
+    font-weight: $fw-medium;
+    transition: opacity $transition-fast;
+  }
+
+  &:hover {
+    background-color: rgba($nocturnal, 0.05);
+    color: $nocturnal;
+  }
+
+  &.active {
+    background-color: rgba($nocturnal, 0.1);
+    color: $nocturnal;
+    font-weight: $fw-semibold;
+  }
+}
+
+.menu-footer {
+  padding: $spacing-sm;
+  border-top: 1px solid $border-light;
+  display: flex;
+  justify-content: flex-end;
+
+  .app-side-menu.collapsed & {
+    justify-content: center;
+  }
+}
+
+.collapse-toggle {
+  color: $gray-400;
+  transition: color $transition-fast, background-color $transition-fast;
+
+  &:hover {
+    color: $nocturnal;
+    background-color: rgba($nocturnal, 0.05);
+  }
+}

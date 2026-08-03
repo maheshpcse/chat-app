@@ -1,37 +1,37 @@
-<div class="notifications-page">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-left">
-      <h1><mat-icon>notifications</mat-icon> Notifications</h1>
-      <span class="unread-badge-lg" *ngIf="unreadCount > 0">{{ unreadCount }} unread</span>
-    </div>
-    <div class="header-actions">
+<div class="notifications-page page-shell">
+  <!-- Page Header (clean, consistent with Settings/Contacts) -->
+  <app-page-header title="Notifications" icon="notifications"
+                   [subtitle]="unreadCount > 0 ? (unreadCount + ' unread') : 'You are all caught up'">
+  </app-page-header>
+
+  <!-- Toolbar: actions + view toggles (below the header) -->
+  <div class="page-toolbar">
+    <div class="toolbar-actions">
       <button mat-stroked-button (click)="markAllAsRead()" *ngIf="unreadCount > 0">
         <mat-icon>done_all</mat-icon> Mark All Read
       </button>
       <button mat-stroked-button color="warn" (click)="clearAll()" *ngIf="notifications.length > 0">
         <mat-icon>delete_sweep</mat-icon> Clear All
       </button>
+    </div>
 
-      <!-- View Toggle -->
-      <div class="view-toggle">
-        <button mat-icon-button [class.active]="viewMode === 'timeline'" (click)="setViewMode('timeline')"
-                matTooltip="Timeline">
-          <mat-icon>timeline</mat-icon>
-        </button>
-        <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
-                matTooltip="List">
-          <mat-icon>view_list</mat-icon>
-        </button>
-        <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
-                matTooltip="Grid">
-          <mat-icon>view_module</mat-icon>
-        </button>
-        <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')"
-                matTooltip="Table">
-          <mat-icon>table_chart</mat-icon>
-        </button>
-      </div>
+    <div class="view-toggle">
+      <button mat-icon-button [class.active]="viewMode === 'timeline'" (click)="setViewMode('timeline')"
+              matTooltip="Timeline">
+        <mat-icon>timeline</mat-icon>
+      </button>
+      <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
+              matTooltip="List">
+        <mat-icon>view_list</mat-icon>
+      </button>
+      <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
+              matTooltip="Grid">
+        <mat-icon>view_module</mat-icon>
+      </button>
+      <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')"
+              matTooltip="Table">
+        <mat-icon>table_chart</mat-icon>
+      </button>
     </div>
   </div>
 
@@ -46,6 +46,20 @@
     </button>
   </div>
 
+  <div class="page-scroll">
+  <!-- Page-context shimmer (min 0.5s) -->
+  <div class="notif-page-shimmer" *ngIf="isLoading">
+    <div class="sk-row" *ngFor="let r of [1,2,3,4,5,6,7]">
+      <div class="sk-icon"></div>
+      <div class="sk-lines">
+        <div class="sk-line w50"></div>
+        <div class="sk-line w70 thin"></div>
+        <div class="sk-line w25 thin"></div>
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
   <!-- ===================== TIMELINE VIEW ===================== -->
   <div class="timeline-view" *ngIf="viewMode === 'timeline'">
     <div class="timeline-item" *ngFor="let notif of filteredNotifications"
@@ -142,5 +156,7 @@
     <h3>No notifications</h3>
     <p *ngIf="filterType !== 'all'">Try changing the filter to see more notifications.</p>
     <p *ngIf="filterType === 'all'">You're all caught up!</p>
+  </div>
+  </ng-container>
   </div>
 </div>

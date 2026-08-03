@@ -1,0 +1,38 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-body {
+  flex: 1;
+  display: flex;
+  margin-top: 56px;
+  overflow: hidden;
+}
+
+.app-nav {
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.app-main-content {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;   // pages own their scroll (.page-scroll / settings-content)
+}
+
+/* Anchor for the child-route slide animation (pages overlay while crossing).
+   Definite height so page :host { height: 100% } resolves and inner scroll +
+   pinned headers work. */
+.route-animation-host {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}

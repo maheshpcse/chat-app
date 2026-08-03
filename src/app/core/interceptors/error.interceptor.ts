@@ -10,17 +10,6 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
-/**
- * ErrorInterceptor - Global HTTP error handler.
- *
- * Angular Concepts Used:
- * - HttpInterceptor for centralized error handling
- * - catchError operator
- * - Different handling per HTTP status code
- *
- * Registration in CoreModule:
- *   { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
- */
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
@@ -30,21 +19,27 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
         let errorMessage = 'An unexpected error occurred';
+        const url = request.url || '';
+        const isAdminApi = url.indexOf('/admin/') !== -1;
 
         if (error.error instanceof ErrorEvent) {
-          // Client-side error
           errorMessage = error.error.message;
         } else {
-          // Server-side error
           switch (error.status) {
             case 400:
               errorMessage = error.error?.message || 'Bad request';
               break;
+            case 401:
+              errorMessage = error.error?.message || 'Unauthorized';
+              break;
             case 403:
-              errorMessage = 'You do not have permission to perform this action';
+              errorMessage = error.error?.message || 'You do not have permission to perform this action';
+              if (!isAdminApi && !this.router.url.startsWith('/admin') && !this.router.url.startsWith('/auth')) {
+                this.router.navigate(['/errors/403']);
+              }
               break;
             case 404:
-              errorMessage = 'Resource not found';
+              errorMessage = error.error?.message || 'Resource not found';
               break;
             case 409:
               errorMessage = error.error?.message || 'Conflict';
@@ -54,18 +49,22 @@ export class ErrorInterceptor implements HttpInterceptor {
               break;
             case 500:
               errorMessage = 'Internal server error. Please try again later.';
+              if (!isAdminApi && !this.router.url.startsWith('/admin')) {
+                this.router.navigate(['/errors/500']);
+              }
               break;
             case 0:
               errorMessage = 'Unable to connect to server. Check your network connection.';
+              if (!isAdminApi && !this.router.url.startsWith('/admin')) {
+                this.router.navigate(['/errors/offline']);
+              }
               break;
             default:
               errorMessage = error.error?.message || `Error: ${error.status}`;
           }
         }
 
-        // You can use a toast/notification service here
         console.error('HTTP Error:', errorMessage, error);
-
         return throwError({ message: errorMessage, status: error.status, errors: error.error?.errors });
       })
     );

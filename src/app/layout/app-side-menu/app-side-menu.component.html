@@ -1,0 +1,23 @@
+<nav class="app-side-menu" [ngClass]="{ 'collapsed': (collapsed$ | async) }">
+  <ul class="menu-list">
+    <li *ngFor="let item of navItems">
+      <a [routerLink]="item.route"
+         routerLinkActive="active"
+         [matTooltip]="(collapsed$ | async) ? item.label : ''"
+         matTooltipPosition="right"
+         class="menu-link">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span class="menu-label">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="menu-footer" *ngIf="!railMode">
+    <button mat-icon-button class="collapse-toggle"
+            (click)="toggle()"
+            [matTooltip]="(collapsed$ | async) ? 'Expand menu' : 'Collapse menu'"
+            matTooltipPosition="right">
+      <mat-icon>{{ (collapsed$ | async) ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+    </button>
+  </div>
+</nav>

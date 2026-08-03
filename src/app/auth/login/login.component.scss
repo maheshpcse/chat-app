@@ -3,6 +3,22 @@
 // ==========================================
 // Auth Page Layout
 // ==========================================
+
+// Password label row with inline forgot-password link
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .forgot-link {
+    font-size: $fs-sm;
+    color: $nocturnal;
+    font-weight: $fw-medium;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
 :host {
   display: block;
   height: 100vh;

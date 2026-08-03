@@ -102,6 +102,29 @@ export class AuthService {
     );
   }
 
+  /**
+   * Forgot-password step 1: verifies the email against the database and
+   * returns a short-lived reset token for the reset step.
+   */
+  forgotPassword(email: string): Observable<{ resetToken: string; expiresInMinutes: number }> {
+    return this.http.post<IApiResponse<{ resetToken: string; expiresInMinutes: number }>>(
+      `${environment.apiBaseUrl}${API_ENDPOINTS.AUTH.FORGOT_PASSWORD}`,
+      { email }
+    ).pipe(
+      map(response => response.data)
+    );
+  }
+
+  /** Forgot-password step 2: sets the new password using the reset token. */
+  resetPassword(resetToken: string, newPassword: string): Observable<any> {
+    return this.http.post<IApiResponse<any>>(
+      `${environment.apiBaseUrl}${API_ENDPOINTS.AUTH.RESET_PASSWORD}`,
+      { resetToken, newPassword }
+    ).pipe(
+      map(response => response.data)
+    );
+  }
+
   // ===========================
   // Token Management
   // ===========================

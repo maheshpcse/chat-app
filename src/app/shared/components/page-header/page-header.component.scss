@@ -1,0 +1,79 @@
+@import '../../../../app/shared/styles/theme.variables';
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  margin: 0 0 $spacing-lg;   // shell controls outer spacing; only bottom gap here
+  padding: $spacing-lg $spacing-xl;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  background: $white;
+  box-shadow: $shadow-sm;
+}
+
+.page-header-main {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  min-width: 0;
+}
+
+.page-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: $radius-md;
+  background: rgba($nocturnal, 0.08);
+  color: $nocturnal;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.page-header-text {
+  min-width: 0;
+}
+
+.page-title {
+  margin: 0;
+  font-family: $font-heading;
+  font-size: $fs-xl;
+  font-weight: $fw-bold;
+  color: $oceanic-noir;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  margin: 2px 0 0;
+  font-size: $fs-sm;
+  color: $text-secondary;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: $spacing-md $spacing-lg;
+  }
+
+  .page-header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

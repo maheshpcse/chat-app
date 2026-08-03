@@ -30,6 +30,8 @@ import { LoaderComponent } from './components/loader/loader.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { AvatarComponent } from './components/avatar/avatar.component';
 import { EmojiPickerComponent } from './components/emoji-picker/emoji-picker.component';
+import { PageHeaderComponent } from './components/page-header/page-header.component';
+import { ShimmerComponent } from './components/shimmer/shimmer.component';
 
 // Shared Pipes
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
@@ -83,6 +85,8 @@ const MATERIAL_MODULES = [
     ConfirmDialogComponent,
     AvatarComponent,
     EmojiPickerComponent,
+    PageHeaderComponent,
+    ShimmerComponent,
     // Pipes
     TimeAgoPipe,
     TruncatePipe,
@@ -113,6 +117,8 @@ const MATERIAL_MODULES = [
     ConfirmDialogComponent,
     AvatarComponent,
     EmojiPickerComponent,
+    PageHeaderComponent,
+    ShimmerComponent,
     // Pipes
     TimeAgoPipe,
     TruncatePipe,

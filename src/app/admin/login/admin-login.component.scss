@@ -1,0 +1,171 @@
+﻿@import '../styles/admin-theme';
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.admin-auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background:
+    radial-gradient(circle at 14% 18%, rgba($admin-forsytha, 0.22), transparent 34%),
+    radial-gradient(circle at 86% 82%, rgba($admin-saffron, 0.16), transparent 38%),
+    $admin-bg-login;
+}
+
+.admin-auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: $admin-white;
+  border-radius: 18px;
+  box-shadow: $admin-shadow-md;
+  border: 1px solid rgba($admin-mint, 0.9);
+  padding: 36px 28px;
+}
+
+.card-brand {
+  text-align: center;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 8px;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: $admin-ink;
+  }
+
+  p {
+    margin: 0;
+    color: $admin-ink-soft;
+    font-size: 0.9375rem;
+  }
+}
+
+.brand-badge {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $admin-gradient-accent;
+  box-shadow: 0 10px 24px rgba($admin-saffron, 0.28);
+
+  mat-icon {
+    color: $admin-ink;
+    font-size: 34px;
+    width: 34px;
+    height: 34px;
+  }
+}
+
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: rgba($admin-crimson, 0.08);
+  border: 1px solid rgba($admin-crimson, 0.18);
+  color: $admin-crimson;
+  font-size: 0.8125rem;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.admin-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $admin-ink;
+  }
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border: 1.5px solid $admin-border;
+  border-radius: 8px;
+  padding: 0 12px;
+  gap: 8px;
+  background: $admin-white;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  &:focus-within {
+    border-color: $admin-saffron;
+    box-shadow: 0 0 0 3px rgba($admin-saffron, 0.16);
+  }
+
+  &.error {
+    border-color: $admin-crimson;
+  }
+
+  .input-icon {
+    color: $admin-muted;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    height: 100%;
+    font-size: 0.875rem;
+    color: $admin-ink;
+    background: transparent;
+  }
+
+  .toggle-password {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    color: $admin-muted;
+    display: flex;
+  }
+}
+
+.error-text {
+  color: $admin-crimson;
+  font-size: 0.6875rem;
+}
+
+.submit-btn {
+  @include admin-btn-primary;
+  width: 100%;
+
+  ::ng-deep .mat-progress-spinner circle {
+    stroke: $admin-white;
+  }
+}
+
+.admin-footnote {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 0.6875rem;
+  color: $admin-muted;
+}

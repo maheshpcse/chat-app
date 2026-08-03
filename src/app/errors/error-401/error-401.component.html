@@ -1,0 +1,13 @@
+<div class="err-shell tone-401">
+  <div class="err-card">
+    <div class="badge">401</div>
+    <div class="icon-wrap"><mat-icon>lock</mat-icon></div>
+    <h1>Authentication required</h1>
+    <p>Your session is missing or expired. Sign in again to continue.</p>
+    <div class="actions">
+      <a class="btn ghost" routerLink="/auth/login">Sign in</a>
+      <button type="button" class="btn ghost" (click)="goBack()">Go back</button>
+      <button type="button" class="btn primary" (click)="goHome()">Home</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<div class="admin-auth-page">
+  <div class="admin-auth-card">
+    <div class="card-brand">
+      <div class="brand-badge">
+        <mat-icon>admin_panel_settings</mat-icon>
+      </div>
+      <h1>Admin Console</h1>
+      <p>Secure access for platform operators only</p>
+    </div>
+
+    <div class="alert-error" *ngIf="errorMessage">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="admin-auth-form">
+      <div class="form-group">
+        <label for="admin-email">Email</label>
+        <div class="input-wrapper" [class.error]="f.email.touched && f.email.invalid">
+          <mat-icon class="input-icon">email</mat-icon>
+          <input id="admin-email" type="email" formControlName="email" placeholder="admin@chatapp.com" autocomplete="username">
+        </div>
+        <span class="error-text" *ngIf="f.email.touched && f.email.hasError('required')">Email required</span>
+        <span class="error-text" *ngIf="f.email.touched && f.email.hasError('email')">Valid email required</span>
+      </div>
+
+      <div class="form-group">
+        <label for="admin-password">Password</label>
+        <div class="input-wrapper" [class.error]="f.password.touched && f.password.invalid">
+          <mat-icon class="input-icon">lock</mat-icon>
+          <input id="admin-password" formControlName="password"
+                 [type]="hidePassword ? 'password' : 'text'"
+                 placeholder="Enter password"
+                 autocomplete="current-password">
+          <button type="button" class="toggle-password" (click)="hidePassword = !hidePassword">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+        <span class="error-text" *ngIf="f.password.touched && f.password.hasError('required')">Password required</span>
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="isLoading">
+        <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+        <span *ngIf="!isLoading">Sign in to Admin</span>
+      </button>
+    </form>
+
+    <p class="admin-footnote">Isolated admin session. Chat user tokens never accepted here.</p>
+  </div>
+</div>

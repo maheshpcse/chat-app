@@ -30,6 +30,9 @@ export interface IContact {
   contactId: string;
   contactUserId: string;
   status: string;
+  nickname?: string;
+  muted?: boolean;
+  pinned?: boolean;
   createdAt: Date;
   firstName: string;
   lastName: string;

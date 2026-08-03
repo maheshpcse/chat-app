@@ -1,0 +1,13 @@
+<div class="err-shell tone-500">
+  <div class="err-card">
+    <div class="badge">500</div>
+    <div class="icon-wrap"><mat-icon>report_problem</mat-icon></div>
+    <h1>Something went wrong</h1>
+    <p>The server hit an unexpected error. Try again in a moment.</p>
+    <div class="actions">
+      <button type="button" class="btn ghost" (click)="retry()">Retry</button>
+      <button type="button" class="btn ghost" (click)="goBack()">Go back</button>
+      <button type="button" class="btn primary" (click)="goHome()">Home</button>
+    </div>
+  </div>
+</div>

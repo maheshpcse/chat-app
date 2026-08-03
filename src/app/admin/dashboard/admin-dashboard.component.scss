@@ -1,0 +1,269 @@
+﻿@import '../styles/admin-theme';
+
+.admin-page {
+  @include admin-page;
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+
+  h2 {
+    margin: 0 0 4px;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    color: $admin-ink;
+  }
+
+  p {
+    margin: 0;
+    color: $admin-ink-soft;
+    font-size: 0.9375rem;
+  }
+}
+
+.refresh-btn {
+  @include admin-btn-ghost;
+  height: 42px;
+}
+
+.alert-error {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba($admin-crimson, 0.08);
+  color: $admin-crimson;
+  flex-shrink: 0;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.stat-card {
+  @include admin-card;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($admin-mint, 0.7);
+  color: darken($admin-saffron, 12%);
+}
+
+.stat-card[data-tone='success'] .stat-icon {
+  background: rgba($admin-mint, 0.95);
+  color: darken($admin-mint, 45%);
+}
+
+.stat-card[data-tone='warn'] .stat-icon {
+  background: rgba($admin-crimson, 0.12);
+  color: $admin-crimson;
+}
+
+.stat-card[data-tone='saffron'] .stat-icon {
+  background: rgba($admin-saffron, 0.16);
+  color: darken($admin-saffron, 10%);
+}
+
+.stat-card[data-tone='forsytha'] .stat-icon {
+  background: rgba($admin-forsytha, 0.28);
+  color: darken($admin-forsytha, 28%);
+}
+
+.stat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: $admin-ink-soft;
+}
+
+.stat-value {
+  font-size: 24px;
+  color: $admin-ink;
+  font-weight: 700;
+}
+
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  min-height: 0;
+  flex: 1;
+}
+
+.panel {
+  @include admin-card;
+  display: flex;
+  flex-direction: column;
+  height: $admin-panel-h;
+  max-height: $admin-panel-h;
+  overflow: hidden;
+  min-height: 0;
+
+  > header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 14px 16px;
+    border-bottom: 1px solid $admin-border-light;
+    background: linear-gradient(180deg, $admin-white 0%, mix($admin-mint, $admin-white, 35%) 100%);
+    flex-shrink: 0;
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: $admin-ink;
+    }
+  }
+}
+
+.panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid $admin-border-light;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    strong {
+      display: block;
+      color: $admin-ink;
+      font-size: 0.9375rem;
+    }
+
+    span {
+      display: block;
+      color: $admin-muted;
+      font-size: 0.75rem;
+      margin-top: 2px;
+    }
+
+    time {
+      color: $admin-muted;
+      font-size: 0.6875rem;
+      white-space: nowrap;
+    }
+  }
+}
+
+.empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: $admin-ink-soft;
+}
+
+/* Dashboard-context shimmer (matches stat cards + activity panels) */
+.shimmer-block {
+  .sk-line,
+  .sk-icon {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #e8eceb 0%, #f7f9f8 45%, #e8eceb 100%);
+    background-size: 200% 100%;
+    animation: adminDashSk 1.2s ease-in-out infinite;
+    border-radius: 8px;
+  }
+}
+
+.sk-stat {
+  pointer-events: none;
+
+  .sk-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .sk-label {
+    width: 72%;
+    height: 10px;
+    margin-bottom: 10px;
+  }
+
+  .sk-value {
+    width: 48%;
+    height: 22px;
+  }
+}
+
+.sk-panel {
+  pointer-events: none;
+
+  .sk-panel-title {
+    width: 46%;
+    height: 16px;
+  }
+
+  .sk-list {
+    li {
+      align-items: center;
+    }
+  }
+
+  .sk-row-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sk-title {
+    width: 58%;
+    height: 13px;
+  }
+
+  .sk-sub {
+    width: 42%;
+    height: 10px;
+  }
+
+  .sk-time {
+    width: 72px;
+    height: 10px;
+    flex-shrink: 0;
+  }
+}
+
+@keyframes adminDashSk {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}

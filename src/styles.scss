@@ -117,11 +117,129 @@ a {
   }
 }
 
+/* ====================================================
+   GLOBAL: Theme primary buttons (replaces Material indigo)
+   Applies to every raised/flat primary button app-wide.
+   ==================================================== */
+.mat-raised-button.mat-primary,
+.mat-flat-button.mat-primary,
+.mat-fab.mat-primary,
+.mat-mini-fab.mat-primary {
+  background-color: $nocturnal !important;
+  color: $white !important;
+  box-shadow: 0 2px 6px rgba($nocturnal, 0.25);
+  transition: background-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover:not([disabled]) {
+    background-color: $nocturnal-dark !important;
+    box-shadow: 0 4px 12px rgba($nocturnal, 0.32);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($nocturnal, 0.28);
+  }
+
+  &[disabled] {
+    background-color: rgba($nocturnal, 0.35) !important;
+    color: rgba($white, 0.85) !important;
+    box-shadow: none;
+  }
+}
+
+.mat-stroked-button.mat-primary,
+.mat-button.mat-primary {
+  color: $nocturnal !important;
+
+  &:hover:not([disabled]) {
+    background-color: rgba($nocturnal, 0.06);
+  }
+}
+
 /* Toast overrides */
 .toast-container {
   .ngx-toastr {
     border-radius: $radius-md;
     font-family: $font-primary;
+  }
+}
+
+/* ====================================================
+   GLOBAL: Common page shell — identical width/spacing for
+   Contacts, Notifications, Settings (and any standard page).
+   The page header, toolbar and content all share this one
+   max-width + horizontal rhythm so the three pages look the same.
+   ==================================================== */
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1120px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 24px 24px 32px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .page-shell {
+    padding: 16px;
+  }
+}
+
+/* Page header should span the full shell width uniformly */
+.page-shell app-page-header {
+  display: block;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.page-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ====================================================
+   GLOBAL: Page toolbar (search + actions below page header)
+   ==================================================== */
+.page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: 12px;
+  margin: 0 0 16px;
+
+  .toolbar-search {
+    flex: 1 1 260px;
+    max-width: 360px;
+    min-height: 42px;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+
+    .active { color: $nocturnal; background: rgba($nocturnal, 0.08); }
   }
 }
 
@@ -234,4 +352,35 @@ a {
 @keyframes fadeInDown {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Admin mat-select overlay */
+.cdk-overlay-pane {
+  .mat-select-panel {
+    border-radius: 10px !important;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16) !important;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    min-width: 160px !important;
+
+    .mat-option {
+      font-family: inherit;
+      font-size: 0.875rem;
+      height: 42px;
+      line-height: 42px;
+      color: #1f2524;
+
+      &:hover:not(.mat-option-disabled),
+      &:focus:not(.mat-option-disabled) {
+        background: #f1f6f4;
+      }
+
+      &.mat-selected:not(.mat-option-multiple):not(.mat-option-disabled) {
+        background: rgba(255, 200, 1, 0.22);
+        color: #1f2524;
+        font-weight: 600;
+      }
+    }
+  }
 }

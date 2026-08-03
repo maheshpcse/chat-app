@@ -1,0 +1,114 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.err-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 200, 1, 0.18), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(217, 232, 226, 0.9), transparent 40%),
+    radial-gradient(circle at 70% 88%, rgba(255, 153, 50, 0.16), transparent 36%),
+    linear-gradient(160deg, #f1f6f4 0%, #ffffff 48%, #d9e8e2 100%);
+  color: #1f2524;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.err-card {
+  width: min(560px, 100%);
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(208, 213, 211, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 18px 48px rgba(31, 37, 36, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 36px 28px 28px;
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #ffc801, #ff9932);
+  color: #1f2524;
+}
+
+.icon-wrap {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, rgba(255, 200, 1, 0.22), rgba(255, 153, 50, 0.18));
+  color: #dc143c;
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+  line-height: 1.25;
+}
+
+p {
+  margin: 0 auto 22px;
+  max-width: 42ch;
+  color: #4a5250;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn {
+  height: 46px;
+  border-radius: 10px;
+  padding: 0 18px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+
+  &.primary {
+    background: linear-gradient(135deg, #ff9932, #e67e12);
+    color: #fff;
+  }
+
+  &.ghost {
+    background: #fff;
+    color: #1f2524;
+    border: 1.5px solid #d0d5d3;
+  }
+}
+
+.tone-401 .badge { background: linear-gradient(135deg, #ffc801, #ff9932); }
+.tone-403 .badge { background: linear-gradient(135deg, #ff9932, #dc143c); color: #fff; }
+.tone-404 .badge { background: linear-gradient(135deg, #d9e8e2, #ffc801); }
+.tone-500 .badge { background: linear-gradient(135deg, #dc143c, #ff9932); color: #fff; }
+.tone-offline .badge { background: linear-gradient(135deg, #4a5250, #1f2524); color: #fff; }

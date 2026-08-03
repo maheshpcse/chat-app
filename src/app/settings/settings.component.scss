@@ -3,16 +3,20 @@
 :host {
   display: block;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   background: $bg-primary;
 }
 
+.settings-shell {
+  // width / centering / padding come from the shared .page-shell
+}
+
 .settings-page {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: $spacing-xl $spacing-lg;
   display: flex;
   gap: $spacing-xl;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 // ==========================================
@@ -21,9 +25,8 @@
 .settings-sidebar {
   width: 240px;
   flex-shrink: 0;
-  position: sticky;
-  top: $spacing-xl;
-  align-self: flex-start;
+  // No sticky/self-alignment needed: the layout no longer scrolls at page
+  // level (only .settings-content scrolls), so tabs and card stay level.
 
   h2 {
     font-family: $font-heading;
@@ -92,14 +95,33 @@
 .settings-content {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;    // scroll INSIDE the content pane; tabs + header stay fixed
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  // Hidden-by-default scrollbar (matches the shared .page-scroll behavior)
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar { display: none; }
 }
 
 .settings-section {
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   background: $white;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
   padding: $spacing-xl $spacing-2xl;
   animation: fadeIn 300ms ease-out;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .section-header {
@@ -210,6 +232,17 @@
   font-size: $fs-base;
   font-weight: $fw-semibold;
   margin-top: $spacing-md;
+}
+
+// Bio uses a textarea: align the prefix icon to the top line, not the middle.
+.bio-field {
+  ::ng-deep {
+    .mat-form-field-prefix,
+    .mat-mdc-form-field-icon-prefix {
+      align-self: flex-start !important;
+      padding-top: 14px !important;
+    }
+  }
 }
 
 // ==========================================
@@ -457,7 +490,6 @@
 @media (max-width: 768px) {
   .settings-page {
     flex-direction: column;
-    padding: $spacing-md;
   }
 
   .settings-sidebar {

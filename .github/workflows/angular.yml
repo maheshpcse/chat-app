@@ -1,0 +1,156 @@
+# =============================================================================
+# Angular Frontend CI/CD — chat-app (GitHub Pages)
+# Repo: https://github.com/maheshpcse/chat-app
+# Triggers on every push/PR to main. Builds, lints, tests, deploys dist/ to Pages.
+# =============================================================================
+name: Angular CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Manual re-run from Actions tab
+  workflow_dispatch:
+
+# Cancel in-progress runs on the same branch (saves minutes on rapid pushes)
+concurrency:
+  group: angular-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  # Angular 10 + modern OpenSSL (Node 18)
+  NODE_OPTIONS: --openssl-legacy-provider
+  # Must match GitHub Pages project URL path: https://<user>.github.io/chat-app/
+  ANGULAR_BASE_HREF: /chat-app/
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Install → Lint → Test → Production build
+  # ---------------------------------------------------------------------------
+  build:
+    name: Lint, Test & Build
+    runs-on: ubuntu-latest
+    # Pin Node 18 LTS — matches project README engines guidance
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      # Step: fetch source at the commit that triggered the workflow
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step: install Node (npm comes with it)
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Step: cache npm download cache — keyed by OS + package-lock hash
+      # Speeds install when dependencies did not change
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      # Step: clean, reproducible install from package-lock.json
+      - name: Install dependencies
+        run: npm ci
+
+      # Step: TSLint via Angular CLI (ng lint)
+      - name: Run lint
+        run: npm run lint
+        continue-on-error: false
+
+      # Step: Karma unit tests headless (Chrome). single-run for CI.
+      # ChromeHeadlessCI launcher defined in karma.conf.js (--no-sandbox for GHA).
+      - name: Run unit tests
+        run: >
+          npx ng test
+          --watch=false
+          --browsers=ChromeHeadlessCI
+          --code-coverage=false
+        continue-on-error: false
+
+      # Step: AOT production build → dist/chat-app
+      # base-href required so assets resolve under GitHub Pages subpath
+      # Angular 10: --prod enables production configuration/fileReplacements
+      - name: Build production bundle
+        run: >
+          npx ng build
+          --prod
+          --base-href=${{ env.ANGULAR_BASE_HREF }}
+
+      # Step: SPA fallback — GitHub Pages serves 404.html for unknown paths
+      - name: Prepare GitHub Pages SPA fallback
+        run: |
+          cp dist/chat-app/index.html dist/chat-app/404.html
+          # Optional .nojekyll so folders starting with _ are not ignored
+          touch dist/chat-app/.nojekyll
+
+      # Step: upload artifact for deploy job (and for PR inspection)
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-dist
+          path: dist/chat-app
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Deploy to GitHub Pages (main branch pushes only)
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    # Never deploy from PRs — only after merge/push to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: angular-dist
+          path: dist/chat-app
+
+      # Official Pages deploy (uses OIDC; no personal access token required)
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/chat-app
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ---------------------------------------------------------------------------
+  # Optional summary (always runs after build)
+  # ---------------------------------------------------------------------------
+  notify:
+    name: Workflow summary
+    needs: [build, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write job summary
+        run: |
+          echo "## Angular CI/CD result" >> $GITHUB_STEP_SUMMARY
+          echo "- Build: \`${{ needs.build.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy: \`${{ needs.deploy.result }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY

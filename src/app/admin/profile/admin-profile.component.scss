@@ -1,0 +1,231 @@
+@import '../styles/admin-theme';
+
+.admin-page { @include admin-page; }
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .page-head-text {
+    min-width: 0;
+    flex: 1;
+  }
+
+  h2 { margin: 0 0 4px; color: $admin-ink; font-size: 1.35rem; }
+  p { margin: 0; color: $admin-muted; font-size: 0.875rem; }
+
+  .head-action {
+    flex-shrink: 0;
+    align-self: center;
+  }
+}
+
+.card {
+  @include admin-card;
+  padding: 20px 22px;
+
+  h3 {
+    margin: 0 0 14px;
+    font-size: 1rem;
+    color: $admin-ink;
+  }
+}
+
+.profile-hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 18px;
+  row-gap: 14px;
+
+  .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: $admin-gradient-avatar;
+    color: $admin-ink;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .hero-body {
+    min-width: 0;
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 1.25rem;
+      line-height: 1.25;
+    }
+
+    p {
+      margin: 0 0 8px;
+      color: $admin-muted;
+      word-break: break-word;
+    }
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+  }
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba($admin-mint, 0.8);
+  color: darken($admin-mint, 45%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px 18px;
+  margin: 0;
+  align-items: start;
+
+  .meta-item {
+    min-width: 0;
+  }
+
+  /* Wider first cell so full Admin ID stays one line; siblings reflow left */
+  .meta-item--id {
+    grid-column: span 2;
+    min-width: min(100%, 340px);
+  }
+
+  dt {
+    font-size: 0.75rem;
+    color: $admin-muted;
+    margin-bottom: 4px;
+  }
+
+  dd {
+    margin: 0;
+    color: $admin-ink;
+    font-weight: 600;
+  }
+
+  code {
+    background: $admin-arctic;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    display: inline-block;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 560px) {
+  .meta-grid .meta-item--id {
+    grid-column: 1 / -1;
+    min-width: 0;
+
+    code {
+      white-space: normal;
+      word-break: break-all;
+    }
+  }
+}
+
+.btn {
+  &.primary { @include admin-btn-primary; text-decoration: none; }
+  &.ghost { @include admin-btn-ghost; }
+  &.danger {
+    @include admin-btn-ghost;
+    border-color: rgba($admin-crimson, 0.4);
+    color: $admin-crimson;
+    &:hover:not(:disabled) {
+      background: rgba($admin-crimson, 0.08);
+    }
+  }
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+
+  &.error {
+    background: rgba($admin-crimson, 0.08);
+    color: $admin-crimson;
+  }
+}
+
+.shimmer-card {
+  .sk-block,
+  .sk-line,
+  .sk-pill,
+  .sk-btn {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #e8eceb 0%, #f7f9f8 45%, #e8eceb 100%);
+    background-size: 200% 100%;
+    animation: adminSkSweep 1.2s ease-in-out infinite;
+    border-radius: 8px;
+  }
+
+  .sk-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+  }
+
+  .sk-line {
+    height: 14px;
+    margin-bottom: 10px;
+
+    &.thin { height: 10px; width: 42%; margin-bottom: 6px; }
+    &.title-line { height: 16px; margin-bottom: 18px; }
+    &.w-30 { width: 30%; }
+    &.w-35 { width: 35%; }
+    &.w-40 { width: 40%; }
+    &.w-55 { width: 55%; }
+    &.w-70 { width: 70%; margin-bottom: 0; }
+  }
+
+  .sk-pill {
+    width: 72px;
+    height: 22px;
+    border-radius: 999px;
+  }
+
+  .sk-btn {
+    width: 128px;
+    height: 48px;
+    border-radius: 8px;
+
+    &.short { width: 108px; }
+  }
+}
+
+@keyframes adminSkSweep {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (max-width: 820px) {
+  .profile-hero {
+    grid-template-columns: auto 1fr;
+
+    .hero-actions {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+    }
+  }
+}

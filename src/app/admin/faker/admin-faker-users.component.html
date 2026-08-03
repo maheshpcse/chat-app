@@ -1,0 +1,145 @@
+<div class="admin-page">
+  <a class="back-link" routerLink="/admin/faker"><mat-icon>arrow_back</mat-icon> Data Studio</a>
+  <div class="page-head">
+    <div>
+      <h2>Data Studio · Users</h2>
+      <p>Preview-first generator. Plain passwords shown only in preview; bcrypt on save.</p>
+    </div>
+  </div>
+
+  <div class="card controls">
+    <div class="row">
+      <div class="field">
+        <label for="faker-user-count">Count (1–200)</label>
+        <input id="faker-user-count" type="number" min="1" max="200" [(ngModel)]="count">
+      </div>
+      <div class="field grow">
+        <label for="faker-user-password">Default password</label>
+        <input id="faker-user-password" type="text" [(ngModel)]="defaultPassword" placeholder="User@12345">
+      </div>
+      <div class="field">
+        <label id="faker-user-role-label">Role</label>
+        <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+          <mat-select aria-labelledby="faker-user-role-label" [(ngModel)]="role" placeholder="Mixed">
+            <mat-option *ngFor="let o of roleOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="field">
+        <label id="faker-user-status-label">Status</label>
+        <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+          <mat-select aria-labelledby="faker-user-status-label" [(ngModel)]="status" placeholder="Mixed">
+            <mat-option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn primary" (click)="generate()" [disabled]="loading">
+          Generate preview
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <app-shimmer *ngIf="loading" variant="list" [rows]="6"></app-shimmer>
+
+  <div class="card" *ngIf="users.length && !loading">
+    <div class="preview-toolbar">
+      <div>
+        <strong>{{ users.length }}</strong> users in preview
+        <span class="muted" *ngIf="previewId"> · id {{ previewId | slice:0:8 }}…</span>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" (click)="discard()" [disabled]="saving">Discard</button>
+        <button type="button" class="btn success" (click)="saveToDb()" [disabled]="saving || !users.length">
+          <span *ngIf="saving">Saving…</span>
+          <span *ngIf="!saving">Save to database</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users; trackBy: trackByTempId">
+            <ng-container *ngIf="editingTempId !== user.tempId; else editRow">
+              <td>{{ user.firstName }} {{ user.lastName }}</td>
+              <td>@{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td><code>{{ user.password }}</code></td>
+              <td>{{ user.phoneNumber }}</td>
+              <td>{{ user.role | titlecase }}</td>
+              <td>{{ user.status | titlecase }}</td>
+              <td class="row-actions">
+                <button type="button" class="icon-action" matTooltip="Edit" (click)="startEdit(user)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button type="button" class="icon-action" matTooltip="Regenerate" (click)="regenerate(user)">
+                  <mat-icon>autorenew</mat-icon>
+                </button>
+                <button type="button" class="icon-action danger" matTooltip="Remove" (click)="remove(user)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <ng-template #editRow>
+              <td colspan="8" class="edit-panel">
+                <div class="edit-grid">
+                  <label class="sr-only" [attr.for]="'edit-fn-' + user.tempId">First name</label>
+                  <input [id]="'edit-fn-' + user.tempId" [(ngModel)]="editDraft.firstName" placeholder="First name">
+                  <label class="sr-only" [attr.for]="'edit-ln-' + user.tempId">Last name</label>
+                  <input [id]="'edit-ln-' + user.tempId" [(ngModel)]="editDraft.lastName" placeholder="Last name">
+                  <label class="sr-only" [attr.for]="'edit-un-' + user.tempId">Username</label>
+                  <input [id]="'edit-un-' + user.tempId" [(ngModel)]="editDraft.username" placeholder="Username">
+                  <label class="sr-only" [attr.for]="'edit-em-' + user.tempId">Email</label>
+                  <input [id]="'edit-em-' + user.tempId" [(ngModel)]="editDraft.email" placeholder="Email">
+                  <label class="sr-only" [attr.for]="'edit-pw-' + user.tempId">Password</label>
+                  <input [id]="'edit-pw-' + user.tempId" [(ngModel)]="editDraft.password" placeholder="Password">
+                  <label class="sr-only" [attr.for]="'edit-ph-' + user.tempId">Phone</label>
+                  <input [id]="'edit-ph-' + user.tempId" [(ngModel)]="editDraft.phoneNumber" placeholder="Phone">
+                  <label class="sr-only" [id]="'edit-role-label-' + user.tempId">Role</label>
+                  <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+                    <mat-select [(ngModel)]="editDraft.role" [attr.aria-labelledby]="'edit-role-label-' + user.tempId">
+                      <mat-option *ngFor="let r of editRoleOptions" [value]="r.value">{{ r.label }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <label class="sr-only" [id]="'edit-st-label-' + user.tempId">Status</label>
+                  <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+                    <mat-select [(ngModel)]="editDraft.status" [attr.aria-labelledby]="'edit-st-label-' + user.tempId">
+                      <mat-option *ngFor="let s of editStatusOptions" [value]="s.value">{{ s.label }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="actions">
+                  <button type="button" class="btn ghost" (click)="cancelEdit()">Cancel</button>
+                  <button type="button" class="btn primary" (click)="saveEdit()">Save row</button>
+                </div>
+              </td>
+            </ng-template>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state card" *ngIf="!users.length && !loading">
+    <mat-icon>person_add</mat-icon>
+    <h3>No preview yet</h3>
+    <p>Choose count and generate sample users. Review, edit, then save.</p>
+  </div>
+</div>

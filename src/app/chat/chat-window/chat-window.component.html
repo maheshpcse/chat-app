@@ -3,9 +3,10 @@
     <!-- Chat Header -->
     <div class="chat-header">
       <app-avatar
-        [imageUrl]="activeConversation?.avatarUrl"
+        [imageUrl]="activeConversation?.avatarUrl || ''"
         [name]="getOtherParticipantName()"
         [isOnline]="isOtherParticipantOnline()"
+        [showStatus]="!isGroupConversation()"
         size="sm">
       </app-avatar>
       <div class="chat-header-info">
@@ -15,26 +16,33 @@
         <small *ngIf="typingUsers.length === 0 && !isOtherParticipantOnline()" class="text-muted last-seen-text">{{ getLastSeenStatus() }}</small>
       </div>
       <span class="spacer"></span>
-      <button mat-icon-button matTooltip="View Profile" (click)="toggleProfileSidebar()">
+      <button mat-icon-button matTooltip="View Profile"
+              [class.active]="showProfileSidebar" (click)="toggleProfileSidebar()">
         <mat-icon>info</mat-icon>
       </button>
-      <button mat-icon-button [matMenuTriggerFor]="chatMenu">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <mat-menu #chatMenu="matMenu">
-        <button mat-menu-item (click)="toggleProfileSidebar()">
-          <mat-icon>person</mat-icon>
-          <span>View Profile</span>
-        </button>
-        <button mat-menu-item>
-          <mat-icon>block</mat-icon>
-          <span>Block User</span>
-        </button>
-      </mat-menu>
     </div>
 
     <!-- Messages Area - flex-direction: column ensures messages flow top to bottom -->
     <div class="messages-area" #messagesContainer (scroll)="onScroll()">
+
+      <!-- Older messages (scroll up): bubble-shaped loaders -->
+      <div class="messages-loader top" *ngIf="isLoadingOlder">
+        <div class="chat-msg-shimmer compact">
+          <div class="sk-msg other"><div class="sk-bubble w55"></div></div>
+          <div class="sk-msg own"><div class="sk-bubble w40"></div></div>
+        </div>
+      </div>
+
+      <!-- Initial conversation load: message-thread context shimmer -->
+      <div class="chat-msg-shimmer" *ngIf="isInitialLoading">
+        <div class="sk-msg other" *ngFor="let row of [1,2,3,4,5,6]; let i = index"
+             [class.own]="i % 3 === 1"
+             [class.other]="i % 3 !== 1">
+          <div class="sk-bubble" [class.w70]="i % 3 === 0" [class.w55]="i % 3 === 1" [class.w40]="i % 3 === 2"></div>
+        </div>
+      </div>
+
+      <ng-container *ngIf="!isInitialLoading">
       <div *ngFor="let message of messages; trackBy: trackByMessageId"
            class="message-wrapper"
            [ngClass]="{'own-message': isOwnMessage(message), 'other-message': !isOwnMessage(message)}">
@@ -50,31 +58,32 @@
         *ngIf="typingUsers.length > 0"
         [typingUsers]="typingUsers">
       </app-typing-indicator>
+      </ng-container>
     </div>
 
-    <!-- Message Input - Sticky at bottom -->
-    <div class="message-input-wrapper">
+    <!-- Composer footer (input IS the footer surface) -->
+    <footer class="chat-composer-footer">
       <app-message-input></app-message-input>
-    </div>
+    </footer>
   </div>
 
   <!-- Right Profile Sidebar -->
-  <div class="profile-sidebar" *ngIf="showProfileSidebar">
+  <div class="profile-sidebar" [class.open]="showProfileSidebar" [attr.aria-hidden]="!showProfileSidebar">
     <div class="profile-sidebar-header">
       <h5>{{ isGroupConversation() ? 'Group Info' : 'Contact Info' }}</h5>
       <button mat-icon-button (click)="toggleProfileSidebar()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
-    <mat-divider></mat-divider>
 
     <!-- ==================== PRIVATE CHAT SIDEBAR ==================== -->
     <div class="profile-sidebar-content" *ngIf="!isGroupConversation()">
       <div class="profile-avatar-section">
         <app-avatar
-          [imageUrl]="sidebarUser?.avatarUrl || activeConversation?.avatarUrl"
+          [imageUrl]="sidebarUser?.avatarUrl || activeConversation?.avatarUrl || ''"
           [name]="getOtherParticipantName()"
           [isOnline]="isOtherParticipantOnline()"
+          [showStatus]="true"
           size="lg">
         </app-avatar>
         <h4 class="profile-name">{{ sidebarUser?.firstName ? (sidebarUser.firstName + ' ' + sidebarUser.lastName) : getOtherParticipantName() }}</h4>
@@ -125,13 +134,13 @@
       </div>
       <mat-divider></mat-divider>
       <div class="profile-actions">
-        <button mat-button color="warn" class="profile-action-btn">
+        <button mat-stroked-button class="profile-action-btn action-block" (click)="onBlockContact()">
           <mat-icon>block</mat-icon>
-          <span>Block Contact</span>
+          <span>Block</span>
         </button>
-        <button mat-button color="warn" class="profile-action-btn">
-          <mat-icon>delete_outline</mat-icon>
-          <span>Remove Contact</span>
+        <button mat-stroked-button class="profile-action-btn action-remove" (click)="onRemoveContact()">
+          <mat-icon>person_remove</mat-icon>
+          <span>Remove</span>
         </button>
       </div>
     </div>

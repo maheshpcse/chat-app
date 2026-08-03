@@ -1,0 +1,364 @@
+@import '../styles/admin-theme';
+
+.admin-page {
+  @include admin-page;
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0 0 4px;
+    color: $admin-ink;
+    font-size: 1.35rem;
+  }
+
+  p {
+    margin: 0;
+    color: $admin-muted;
+    font-size: 0.875rem;
+  }
+}
+
+.card {
+  @include admin-card;
+  padding: 18px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+
+  &.grow {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $admin-ink-soft;
+  }
+
+  input,
+  select,
+  textarea {
+    @include admin-control;
+  }
+
+  select {
+    @include admin-select;
+  }
+
+  textarea {
+    height: auto;
+    min-height: 72px;
+    padding: 10px 12px;
+    resize: vertical;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.btn {
+  &.primary {
+    @include admin-btn-primary;
+  }
+
+  &.ghost {
+    @include admin-btn-ghost;
+  }
+
+  &.success {
+    @include admin-btn-primary;
+    background: linear-gradient(135deg, darken($admin-mint, 28%) 0%, darken($admin-mint, 38%) 100%);
+  }
+
+  &.linkish {
+    @include admin-btn-ghost;
+    height: 40px;
+  }
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+
+  &.success {
+    background: rgba(darken($admin-mint, 18%), 0.18);
+    color: darken($admin-mint, 42%);
+    border: 1px solid rgba(darken($admin-mint, 18%), 0.35);
+  }
+
+  &.error {
+    background: rgba($admin-crimson, 0.08);
+    color: $admin-crimson;
+    border: 1px solid rgba($admin-crimson, 0.2);
+  }
+}
+
+.preview-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+
+  .muted {
+    color: $admin-muted;
+    font-size: 0.8125rem;
+  }
+}
+
+.table-wrap {
+  overflow: auto;
+  max-height: min(56vh, 560px);
+  border: 1px solid $admin-border-light;
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 1px solid $admin-border-light;
+    font-size: 0.8125rem;
+    vertical-align: middle;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: $admin-arctic;
+    color: $admin-ink-soft;
+    white-space: nowrap;
+  }
+
+  code {
+    background: $admin-arctic;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+  }
+}
+
+.row-actions {
+  white-space: nowrap;
+}
+
+.icon-action {
+  border: none;
+  background: transparent;
+  color: $admin-ink;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+
+  &:hover {
+    background: $admin-arctic;
+  }
+
+  &.danger {
+    color: $admin-crimson;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.edit-panel {
+  background: rgba($admin-mint, 0.35);
+}
+
+.edit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+
+  input,
+  select,
+  textarea {
+    @include admin-control;
+  }
+
+  select {
+    @include admin-select;
+  }
+
+  textarea {
+    height: auto;
+    min-height: 64px;
+    padding: 10px 12px;
+  }
+}
+
+.empty-state {
+  position: relative;
+  text-align: center;
+  color: $admin-muted;
+  padding: 48px 20px;
+
+  mat-icon {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: $admin-saffron;
+    background: rgba($admin-forsytha, 0.28);
+    border-radius: 10px;
+    padding: 8px;
+    box-sizing: content-box;
+  }
+
+  h3 {
+    margin: 12px 0 8px;
+    color: $admin-ink;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.members {
+  color: $admin-muted;
+  font-size: 0.75rem;
+}
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.hub-card {
+  @include admin-card;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 150ms ease, border-color 150ms ease, background 150ms ease;
+  cursor: pointer;
+  border: 1px solid $admin-border-light;
+  background: $admin-white;
+  text-align: left;
+
+  &:hover {
+    box-shadow: $admin-shadow-md;
+    border-color: darken($admin-border-light, 6%);
+    background: lighten($admin-arctic, 1%);
+  }
+
+  .hub-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba($admin-forsytha, 0.25), rgba($admin-saffron, 0.2));
+    color: darken($admin-saffron, 8%);
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: $admin-ink;
+  }
+
+  p {
+    margin: 0;
+    color: $admin-muted;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+
+  .go {
+    margin-top: auto;
+    color: darken($admin-saffron, 10%);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: $admin-ink-soft;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  margin-bottom: 6px;
+
+  &:hover {
+    color: $admin-saffron;
+  }
+}
+
+
+.admin-mat-field {
+  width: 100%;
+  font-size: 0.875rem;
+
+  ::ng-deep {
+    .mat-form-field-wrapper { padding-bottom: 0; margin: 0; }
+    .mat-form-field-outline { color: $admin-border; }
+    .mat-form-field-flex { height: 48px; align-items: center; background: $admin-white; }
+    .mat-form-field-infix { border-top: 0; padding: 0.6em 0; width: auto; }
+    .mat-select-value { color: $admin-ink; }
+    .mat-select-arrow { color: $admin-muted; }
+  }
+}

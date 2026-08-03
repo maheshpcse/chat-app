@@ -1,7 +1,10 @@
-<div class="settings-page">
+<div class="settings-shell page-shell">
+  <app-page-header title="Settings" icon="settings"
+                   subtitle="Manage your account and preferences"></app-page-header>
+
+  <div class="settings-page">
   <!-- Settings Sidebar -->
   <div class="settings-sidebar">
-    <h2><mat-icon>settings</mat-icon> Settings</h2>
     <nav class="settings-nav">
       <button *ngFor="let section of sections"
               class="nav-item"
@@ -53,10 +56,10 @@
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width bio-field">
           <mat-label>Bio</mat-label>
-          <textarea matInput formControlName="bio" rows="3" placeholder="Tell people about yourself..."></textarea>
           <mat-icon matPrefix>info</mat-icon>
+          <textarea matInput formControlName="bio" rows="3" placeholder="Tell people about yourself..."></textarea>
           <mat-hint align="end">{{ profileForm.get('bio').value?.length || 0 }}/200</mat-hint>
         </mat-form-field>
 
@@ -362,5 +365,6 @@
         </button>
       </form>
     </div>
+  </div>
   </div>
 </div>

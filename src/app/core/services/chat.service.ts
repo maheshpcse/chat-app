@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription, of } from 'rxjs';
+import { switchMap, map, catchError, finalize } from 'rxjs/operators';
 import { IMessage, ISendMessage, ITypingEvent, MessageType } from '../models/message.model';
 import { IConversation, ConversationType } from '../models/conversation.model';
 import { SocketService } from './socket.service';
@@ -37,6 +38,14 @@ export class ChatService {
   private typingUsersSubject = new BehaviorSubject<ITypingEvent[]>([]);
   public typingUsers$ = this.typingUsersSubject.asObservable();
 
+  // Message-history loading state (RxJS-driven; consumed by the chat window)
+  private messagesLoadingSubject = new BehaviorSubject<boolean>(false);
+  public messagesLoading$ = this.messagesLoadingSubject.asObservable();
+  private olderLoadingSubject = new BehaviorSubject<boolean>(false);
+  public olderLoading$ = this.olderLoadingSubject.asObservable();
+  private loadRequestSubject = new Subject<{ conversationId: string; page: number }>();
+  private activeRequestKey: string | null = null;
+
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -46,6 +55,7 @@ export class ChatService {
     private authService: AuthService
   ) {
     this.setupSocketListeners();
+    this.setupMessageLoading();
   }
 
   // ===========================
@@ -53,42 +63,88 @@ export class ChatService {
   // ===========================
 
   loadConversations(): void {
-    this.conversationService.getConversations().subscribe(conversations => {
-      this.conversationsSubject.next(conversations);
-    });
+    this.conversationService.getConversations().subscribe(
+      conversations => this.conversationsSubject.next(
+        (conversations || []).map(c => this.normalizeConversation(c))
+      ),
+      () => this.conversationsSubject.next(this.conversationsSubject.value) // re-emit so loading shimmers resolve
+    );
+  }
+
+  /** Ensure ids + displayName filled (create/find often omit displayName). */
+  private normalizeConversation(conv: IConversation, seed?: Partial<IConversation>): IConversation {
+    if (!conv) { return conv; }
+    const merged: IConversation = { ...conv, ...(seed || {}) };
+    if (seed?.participantId && !merged.participantId) {
+      merged.participantId = seed.participantId;
+    }
+    const participantId = merged.participantId != null && merged.participantId !== ''
+      ? String(merged.participantId)
+      : merged.participantId;
+
+    const first = (merged.firstName || seed?.firstName || '').trim();
+    const last = (merged.lastName || seed?.lastName || '').trim();
+    const fromParts = [first, last].filter(Boolean).join(' ').trim();
+    const rawName = (merged.displayName || seed?.displayName || fromParts || merged.username || seed?.username || '').trim();
+    // Guard against literal "undefined" from bad string concat
+    const safeName = rawName && !/^undefined(\s+undefined)?$/i.test(rawName)
+      ? rawName
+      : (fromParts || merged.username || seed?.username || 'Unknown');
+
+    return {
+      ...merged,
+      conversationId: merged.conversationId != null ? String(merged.conversationId) : merged.conversationId,
+      participantId,
+      displayName: safeName,
+      firstName: first || merged.firstName,
+      lastName: last || merged.lastName,
+      username: merged.username || seed?.username,
+      avatarUrl: merged.avatarUrl || seed?.avatarUrl
+    };
   }
 
   /**
    * Start or open a private conversation with a user.
-   * Calls POST /api/v1/conversations to create (or retrieve existing).
-   * Then sets it as active conversation.
+   * Optional seed fills displayName/avatar when API find/create omits them.
    */
-  startPrivateConversation(participantId: string): Observable<IConversation> {
+  startPrivateConversation(
+    participantId: string,
+    seed?: Partial<IConversation>
+  ): Observable<IConversation> {
+    const peerId = participantId != null ? String(participantId) : '';
+    const seedNorm: Partial<IConversation> = {
+      ...(seed || {}),
+      participantId: peerId,
+      conversationType: ConversationType.PRIVATE
+    };
+
     return new Observable(observer => {
       // Check if conversation already exists locally
       const existing = this.conversationsSubject.value.find(conv =>
         conv.conversationType === ConversationType.PRIVATE &&
-        conv.participantId === participantId
+        String(conv.participantId || '') === peerId
       );
 
       if (existing) {
-        this.setActiveConversation(existing);
-        observer.next(existing);
+        const enriched = this.normalizeConversation(existing, seedNorm);
+        this.patchConversationInList(enriched);
+        this.setActiveConversation(enriched);
+        observer.next(enriched);
         observer.complete();
         return;
       }
 
       // Create new conversation via API
       this.conversationService.createConversation({
-        participantId
+        participantId: peerId
       }).subscribe(
         (conversation) => {
-          // Add to conversations list
+          const enriched = this.normalizeConversation(conversation, seedNorm);
           const current = this.conversationsSubject.value;
-          this.conversationsSubject.next([conversation, ...current]);
-          // Set as active
-          this.setActiveConversation(conversation);
-          observer.next(conversation);
+          const withoutDup = current.filter(c => c.conversationId !== enriched.conversationId);
+          this.conversationsSubject.next([enriched, ...withoutDup]);
+          this.setActiveConversation(enriched);
+          observer.next(enriched);
           observer.complete();
         },
         (error) => {
@@ -98,11 +154,30 @@ export class ChatService {
     });
   }
 
+  private patchConversationInList(conversation: IConversation): void {
+    const current = this.conversationsSubject.value;
+    let found = false;
+    const updated = current.map(c => {
+      if (c.conversationId === conversation.conversationId) {
+        found = true;
+        return { ...c, ...conversation };
+      }
+      return c;
+    });
+    this.conversationsSubject.next(found ? updated : [conversation, ...current]);
+  }
+
   /**
    * Get display name for a conversation.
    */
   getDisplayName(conversation: IConversation): string {
-    return conversation.displayName || conversation.username || 'Unknown';
+    if (!conversation) { return 'Unknown'; }
+    const name = (conversation.displayName
+      || [conversation.firstName, conversation.lastName].filter(Boolean).join(' ')
+      || conversation.username
+      || '').trim();
+    if (!name || /^undefined/i.test(name)) { return 'Unknown'; }
+    return name;
   }
 
   /**
@@ -120,19 +195,26 @@ export class ChatService {
     }
 
     // Set new active conversation
-    this.activeConversationSubject.next(conversation);
+    const active = this.normalizeConversation(conversation);
+    this.activeConversationSubject.next(active);
     this.messagesSubject.next([]); // Clear messages
     this.typingUsersSubject.next([]); // Clear typing indicators
+    this.messagesLoadingSubject.next(false);
+    this.olderLoadingSubject.next(false);
+    this.activeRequestKey = null;
 
     // Join new conversation room
-    this.socketService.joinConversation(conversation.conversationId);
+    this.socketService.joinConversation(active.conversationId);
+
+    // Refresh presence so Online/Offline is current for this peer
+    this.socketService.getOnlineUsers();
 
     // Load messages
-    this.loadMessages(conversation.conversationId);
+    this.loadMessages(active.conversationId);
 
     // Mark as read
-    this.messageService.markAsRead(conversation.conversationId).subscribe();
-    this.socketService.markAsRead(conversation.conversationId);
+    this.messageService.markAsRead(active.conversationId).subscribe();
+    this.socketService.markAsRead(active.conversationId);
   }
 
   // ===========================
@@ -140,8 +222,49 @@ export class ChatService {
   // ===========================
 
   loadMessages(conversationId: string, page: number = 1): void {
-    this.messageService.getMessages(conversationId, page).subscribe(messages => {
-      if (page === 1) {
+    const requestKey = `${conversationId}:${page}`;
+    if (this.activeRequestKey === requestKey) {
+      return;
+    }
+
+    this.activeRequestKey = requestKey;
+    this.loadRequestSubject.next({ conversationId, page });
+  }
+
+  /**
+   * RxJS pipeline for chat history fetching.
+   * - switchMap: only the latest requested page/conversation wins
+   * - catchError: a failed page never kills the stream
+   * - finalize: loading flags always reset, success or error
+   */
+  private setupMessageLoading(): void {
+    const loadSub = this.loadRequestSubject.pipe(
+      switchMap(req => {
+        const requestKey = `${req.conversationId}:${req.page}`;
+        if (req.page === 1) {
+          this.messagesLoadingSubject.next(true);
+          this.olderLoadingSubject.next(false);
+        } else {
+          this.olderLoadingSubject.next(true);
+          this.messagesLoadingSubject.next(false);
+        }
+        return this.messageService.getMessages(req.conversationId, req.page).pipe(
+          map(messages => ({ req, messages })),
+          catchError(() => of({ req, messages: [] as IMessage[] })),
+          finalize(() => {
+            if (this.activeRequestKey === requestKey) {
+              this.activeRequestKey = null;
+            }
+            if (req.page === 1) {
+              this.messagesLoadingSubject.next(false);
+            } else {
+              this.olderLoadingSubject.next(false);
+            }
+          })
+        );
+      })
+    ).subscribe(({ req, messages }) => {
+      if (req.page === 1) {
         this.messagesSubject.next(messages);
       } else {
         // Prepend older messages for pagination
@@ -149,6 +272,7 @@ export class ChatService {
         this.messagesSubject.next([...messages, ...current]);
       }
     });
+    this.subscriptions.push(loadSub);
   }
 
   sendMessage(content: string, messageType: MessageType = MessageType.TEXT, attachmentUrl?: string): void {
@@ -162,22 +286,55 @@ export class ChatService {
       attachmentUrl
     };
 
-    // Send via HTTP (persists to DB)
-    this.messageService.sendMessage(messageData).subscribe(message => {
-      // Also emit via socket for real-time delivery
-      this.socketService.sendMessage(message);
-      // Add to local messages
-      const current = this.messagesSubject.value;
-      this.messagesSubject.next([...current, message]);
+    // Send via HTTP (persists to DB). The backend now broadcasts the saved
+    // message over the socket, so we do NOT re-emit it here (avoids duplicates).
+    this.messageService.sendMessage(messageData).subscribe(
+      message => {
+        // Add own message locally; the echoed socket copy is de-duplicated by id.
+        const current = this.messagesSubject.value;
+        this.messagesSubject.next([...current, message]);
+      },
+      () => {
+        // Surface a failed send so the bubble can show the error/retry state.
+        const failed: IMessage = {
+          messageId: 'failed-' + Date.now(),
+          conversationId: conversation.conversationId,
+          senderId: this.authService.getCurrentUser()?.id,
+          content,
+          messageType,
+          status: 'failed',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        } as IMessage;
+        const current = this.messagesSubject.value;
+        this.messagesSubject.next([...current, failed]);
+      }
+    );
+  }
+
+  /**
+   * Applies a delivery/read status to a single message by id (immutable update).
+   */
+  private applyStatusToMessage(messageId: string, status: string): void {
+    const messages = this.messagesSubject.value;
+    let changed = false;
+    const updated = messages.map(m => {
+      if (m.messageId === messageId && m.status !== status) {
+        changed = true;
+        return { ...m, status };
+      }
+      return m;
     });
+    if (changed) {
+      this.messagesSubject.next(updated);
+    }
   }
 
   // ===========================
   // Typing Indicators
   // ===========================
 
-  startTyping(): void {
-    const conversation = this.activeConversationSubject.value;
+  startTyping(): void {    const conversation = this.activeConversationSubject.value;
     if (conversation) {
       this.socketService.emitTypingStart(conversation.conversationId);
     }
@@ -211,6 +368,7 @@ export class ChatService {
   private setupSocketListeners(): void {
     // Listen for incoming messages (with deduplication)
     const msgSub = this.socketService.messageReceived$.subscribe(message => {
+      const currentUserId = this.authService.getCurrentUser()?.id;
       const activeConv = this.activeConversationSubject.value;
       if (activeConv && message.conversationId === activeConv.conversationId) {
         const current = this.messagesSubject.value;
@@ -219,11 +377,38 @@ export class ChatService {
         if (!exists) {
           this.messagesSubject.next([...current, message]);
         }
+        // Acknowledge delivery for messages from other users.
+        if (message.senderId !== currentUserId) {
+          this.socketService.markDelivered(message.messageId, message.conversationId);
+        }
       }
       // Update conversation list (last message)
       this.updateConversationLastMessage(message);
     });
     this.subscriptions.push(msgSub);
+
+    // Delivery receipts: advance our own sent messages to "delivered".
+    const deliveredSub = this.socketService.deliveredReceipt$.subscribe(receipt => {
+      this.applyStatusToMessage(receipt.messageId, receipt.status || 'delivered');
+    });
+    this.subscriptions.push(deliveredSub);
+
+    // Read receipts: mark our sent messages in this conversation as "seen".
+    const readSub = this.socketService.readReceipt$.subscribe(receipt => {
+      if (receipt.messageIds && receipt.messageIds.length) {
+        receipt.messageIds.forEach(id => this.applyStatusToMessage(id, 'seen'));
+      } else if (receipt.conversationId) {
+        // Fallback: mark all own sent messages in the conversation as seen.
+        const currentUserId = this.authService.getCurrentUser()?.id;
+        const updated = this.messagesSubject.value.map(m =>
+          m.conversationId === receipt.conversationId && m.senderId === currentUserId
+            ? { ...m, status: 'seen' }
+            : m
+        );
+        this.messagesSubject.next(updated);
+      }
+    });
+    this.subscriptions.push(readSub);
 
     // Listen for typing events
     const typingSub = this.socketService.typing$.subscribe(typingEvent => {
@@ -237,12 +422,53 @@ export class ChatService {
 
   private handleTypingEvent(event: ITypingEvent): void {
     const current = this.typingUsersSubject.value;
-    if (event.isTyping) {
-      if (!current.find(t => t.userId === event.userId)) {
-        this.typingUsersSubject.next([...current, event]);
+    const userId = event?.userId != null ? String(event.userId) : '';
+    if (!userId) { return; }
+
+    // Prefer First+Last (displayName) over username / email local-part
+    const active = this.activeConversationSubject.value;
+    const fromEvent = (
+      (event as any).displayName ||
+      event.username ||
+      (event as any).userName ||
+      ''
+    ).toString().trim();
+    const looksLikeHandle = !!fromEvent && (
+      fromEvent === 'Someone' ||
+      fromEvent === 'Undefined' ||
+      fromEvent.toLowerCase() === 'undefined' ||
+      !fromEvent.includes(' ')
+    );
+    const fromActive =
+      (active && String(active.participantId || '') === userId
+        ? (active.displayName ||
+          [active.firstName, active.lastName].filter(Boolean).join(' ').trim() ||
+          '')
+        : '') ||
+      (active?.displayName || '') ||
+      '';
+    const username = (!looksLikeHandle && fromEvent
+      ? fromEvent
+      : (fromActive || fromEvent || 'Someone')).trim();
+
+    const normalized: ITypingEvent = {
+      ...event,
+      userId,
+      username,
+      conversationId: event.conversationId,
+      isTyping: !!event.isTyping
+    };
+
+    if (normalized.isTyping) {
+      if (!current.find(t => String(t.userId) === userId)) {
+        this.typingUsersSubject.next([...current, normalized]);
+      } else {
+        this.typingUsersSubject.next(
+          current.map(t => String(t.userId) === userId ? { ...t, ...normalized } : t)
+        );
       }
     } else {
-      this.typingUsersSubject.next(current.filter(t => t.userId !== event.userId));
+      this.typingUsersSubject.next(current.filter(t => String(t.userId) !== userId));
     }
   }
 

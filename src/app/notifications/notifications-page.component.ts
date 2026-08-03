@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NotificationService } from '../core/services/notification.service';
 import { INotification } from '../core/models/notification.model';
+import { withMinLoading, MIN_LOADING_PAGE_MS } from '../shared/utilities/min-loading.util';
 
 /**
  * NotificationsPageComponent - Full notifications page with 4 view modes:
@@ -17,6 +18,7 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
 
   notifications: INotification[] = [];
   filteredNotifications: INotification[] = [];
+  isLoading = true;
   viewMode: 'timeline' | 'list' | 'grid' | 'table' = 'timeline';
   filterType: string = 'all';
   unreadCount: number = 0;
@@ -34,6 +36,17 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   constructor(private notificationService: NotificationService) {}
 
   ngOnInit(): void {
+    // Load full history; keep page shimmer at least 0.5s.
+    this.isLoading = true;
+    withMinLoading(
+      this.notificationService.loadNotifications(1, 100),
+      MIN_LOADING_PAGE_MS
+    ).subscribe(
+      () => { this.isLoading = false; },
+      () => { this.isLoading = false; }
+    );
+    this.notificationService.loadUnreadCount().subscribe();
+
     const notifSub = this.notificationService.notifications$.subscribe(notifications => {
       this.notifications = notifications;
       this.applyFilter();
@@ -86,6 +99,10 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
       case 'group_removed': return 'group_remove';
       case 'user_online': return 'person';
       case 'mention': return 'alternate_email';
+      case 'contactRequest': return 'person_add';
+      case 'contactAccepted': return 'how_to_reg';
+      case 'contactRequestWithdrawn':
+      case 'contactRequestCancelled': return 'person_remove';
       default: return 'notifications';
     }
   }
@@ -97,6 +114,10 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
       case 'group_removed': return 'Group';
       case 'user_online': return 'Contact';
       case 'mention': return 'Mention';
+      case 'contactRequest': return 'Request';
+      case 'contactAccepted': return 'Accepted';
+      case 'contactRequestWithdrawn':
+      case 'contactRequestCancelled': return 'Withdrawn';
       default: return 'System';
     }
   }

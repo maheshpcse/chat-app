@@ -10,10 +10,12 @@ import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, filter, take, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 /**
  * JwtInterceptor - Attaches JWT token to outgoing HTTP requests.
  * Also handles token refresh on 401 errors.
+ * Skips /admin API paths (handled by AdminJwtInterceptor).
  *
  * Angular Concepts Used:
  * - HttpInterceptor interface (intercepts all HTTP calls)
@@ -36,6 +38,10 @@ export class JwtInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Admin API uses dedicated interceptor + tokens
+    if (request.url.includes(`${environment.apiBaseUrl}/admin`)) {
+      return next.handle(request);
+    }
 
     // Attach token to request
     const token = this.authService.getToken();

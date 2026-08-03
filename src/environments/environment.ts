@@ -5,5 +5,7 @@ export const environment = {
   socketUrl: 'http://localhost:3000',
   uploadMaxSize: 10485760, // 10MB
   tokenKey: 'chat_access_token',
-  refreshTokenKey: 'chat_refresh_token'
+  refreshTokenKey: 'chat_refresh_token',
+  adminTokenKey: 'admin_access_token',
+  adminRefreshTokenKey: 'admin_refresh_token'
 };

@@ -1,62 +1,50 @@
-<div class="message-input-container">
-  <!-- Selected File Preview -->
+<div class="message-input-container" (click)="$event.stopPropagation()">
   <div class="file-preview" *ngIf="selectedFile">
     <mat-icon>attach_file</mat-icon>
     <span class="file-name">{{ selectedFile.name }}</span>
-    <button mat-icon-button (click)="removeSelectedFile()" class="remove-file">
+    <button mat-icon-button type="button" (click)="removeSelectedFile()" class="remove-file">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <!-- Upload Progress -->
   <mat-progress-bar *ngIf="isUploading" mode="indeterminate" color="accent"></mat-progress-bar>
 
-  <!-- Input Area -->
-  <div class="input-row">
-    <!-- File Upload Button -->
-    <button mat-icon-button (click)="fileInput.click()" [disabled]="isUploading"
-            matTooltip="Attach file" class="action-btn">
-      <mat-icon>attach_file</mat-icon>
-    </button>
-    <input #fileInput type="file" hidden (change)="onFileSelected($event)"
-           accept="image/*,.pdf,.doc,.docx,.txt">
-
-    <!-- Emoji Picker Button -->
-    <div class="emoji-wrapper">
-      <button mat-icon-button (click)="toggleEmojiPicker()"
-              matTooltip="Emoji" class="action-btn"
-              [class.active]="showEmojiPicker">
-        <mat-icon>emoji_emotions</mat-icon>
+  <div class="composer-bar">
+    <div class="composer-tools">
+      <button mat-icon-button type="button" (click)="fileInput.click()" [disabled]="isUploading"
+              matTooltip="Attach file" class="action-btn">
+        <mat-icon>attach_file</mat-icon>
       </button>
-      <div class="emoji-picker-anchor" *ngIf="showEmojiPicker">
-        <app-emoji-picker
-          (emojiSelected)="insertEmoji($event)"
-          (closePicker)="closeEmojiPicker()">
-        </app-emoji-picker>
+      <input #fileInput type="file" hidden (change)="onFileSelected($event)"
+             accept="image/*,.pdf,.doc,.docx,.txt">
+
+      <div class="emoji-wrapper">
+        <button #emojiButton mat-icon-button type="button"
+                (click)="toggleEmojiPicker(); $event.stopPropagation()"
+                matTooltip="Emoji" class="action-btn"
+                [class.active]="showEmojiPicker || emojiClosing">
+          <mat-icon>emoji_emotions</mat-icon>
+        </button>
       </div>
+
+      <button mat-icon-button type="button" (click)="openScheduleDialog()"
+              matTooltip="Schedule message" class="action-btn">
+        <mat-icon>schedule_send</mat-icon>
+      </button>
     </div>
 
-    <!-- Schedule Message Button -->
-    <button mat-icon-button (click)="openScheduleDialog()"
-            matTooltip="Schedule message" class="action-btn">
-      <mat-icon>schedule_send</mat-icon>
-    </button>
+    <div class="composer-field">
+      <textarea
+        class="composer-textarea"
+        [formControl]="messageControl"
+        placeholder="Type a message..."
+        rows="1"
+        (keydown)="onKeyDown($event)"
+        (input)="autoGrow($event)"
+        autocomplete="off"></textarea>
+    </div>
 
-    <!-- Text Input -->
-    <mat-form-field appearance="outline" class="message-field">
-      <textarea matInput
-                [formControl]="messageControl"
-                placeholder="Type a message..."
-                (keydown)="onKeyDown($event)"
-                cdkTextareaAutosize
-                [cdkAutosizeMinRows]="1"
-                [cdkAutosizeMaxRows]="4"
-                autocomplete="off">
-      </textarea>
-    </mat-form-field>
-
-    <!-- Send Button -->
-    <button mat-icon-button (click)="sendMessage()"
+    <button mat-icon-button type="button" (click)="sendMessage()"
             [disabled]="isUploading || (!messageControl.value?.trim() && !selectedFile)"
             class="send-btn"
             [class.active]="messageControl.value?.trim() || selectedFile"
@@ -64,4 +52,16 @@
       <mat-icon>send</mat-icon>
     </button>
   </div>
+</div>
+
+<div #emojiPanel class="emoji-panel"
+     *ngIf="showEmojiPicker || emojiClosing"
+     [class.closing]="emojiClosing"
+     (click)="$event.stopPropagation()"
+     (mouseenter)="onEmojiPanelEnter()"
+     (mouseleave)="onEmojiPanelLeave()">
+  <app-emoji-picker
+    (emojiSelected)="insertEmoji($event)"
+    (closePicker)="closeEmojiPicker()">
+  </app-emoji-picker>
 </div>

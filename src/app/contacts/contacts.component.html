@@ -1,72 +1,197 @@
-<div class="contacts-page">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-left">
-      <h1><mat-icon>contacts</mat-icon> Contacts</h1>
-      <span class="contact-count">{{ contacts.length }} contacts</span>
-    </div>
-    <div class="header-right">
-      <!-- Search -->
-      <div class="search-wrapper">
-        <mat-icon class="search-icon">search</mat-icon>
+﻿<div class="contacts-page page-shell">
+  <!-- Page Header (clean, consistent with Settings/Notifications) -->
+  <app-page-header title="Contacts" icon="contacts"
+                   [subtitle]="contacts.length + ' contact' + (contacts.length === 1 ? '' : 's')">
+    <button mat-raised-button color="primary" class="add-contact-btn" (click)="toggleAddPanel()">
+      <mat-icon>{{ showAddPanel ? 'close' : 'person_add' }}</mat-icon>
+      {{ showAddPanel ? 'Close' : 'Add Contact' }}
+    </button>
+  </app-page-header>
+
+  <!-- Toolbar: search + view toggles â€” hidden while Add Contact panel is open -->
+  <div class="page-toolbar" *ngIf="!showAddPanel">
+    <div class="toolbar-search-wrap">
+      <div class="input-wrapper toolbar-search">
+        <mat-icon class="input-icon">search</mat-icon>
         <input type="text" placeholder="Search contacts..."
                [value]="searchTerm"
-               (input)="onSearch($event.target.value)">
+               (input)="onSearch($any($event.target).value)"
+               (focus)="showSearchDropdown = true"
+               (blur)="onSearchBlur()">
       </div>
 
-      <!-- View Toggle -->
-      <div class="view-toggle">
-        <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
-                matTooltip="List View">
-          <mat-icon>view_list</mat-icon>
-        </button>
-        <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
-                matTooltip="Grid View">
-          <mat-icon>view_module</mat-icon>
-        </button>
-        <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')"
-                matTooltip="Table View">
-          <mat-icon>table_chart</mat-icon>
-        </button>
+      <!-- Autocomplete dropdown -->
+      <div class="search-autocomplete" *ngIf="showSearchDropdown && searchTerm.length >= 1 && filteredContacts.length > 0">
+        <div class="autocomplete-item" *ngFor="let contact of filteredContacts | slice:0:6"
+             (mousedown)="startChat(contact); $event.preventDefault()">
+          <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl || ''" size="sm"
+                      [showStatus]="true" [isOnline]="isOnline(contact.contactUserId)"></app-avatar>
+          <div class="autocomplete-info">
+            <span class="autocomplete-name">{{ getFullName(contact) }}</span>
+            <small class="autocomplete-username">&#64;{{ contact.username }}</small>
+          </div>
+          <mat-icon class="autocomplete-action">chat</mat-icon>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="isLoading">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Loading contacts...</p>
-  </div>
-
-  <!-- Alphabet Sidebar -->
-  <div class="contacts-body" *ngIf="!isLoading">
-    <div class="alphabet-nav" *ngIf="viewMode !== 'table'">
-      <button *ngFor="let letter of getAlphabetLetters()"
-              class="letter-btn"
-              (click)="scrollToLetter(letter)">
-        {{ letter }}
+    <div class="view-toggle">
+      <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
+              matTooltip="List View">
+        <mat-icon>view_list</mat-icon>
+      </button>
+      <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
+              matTooltip="Grid View">
+        <mat-icon>view_module</mat-icon>
+      </button>
+      <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')"
+              matTooltip="Table View">
+        <mat-icon>table_chart</mat-icon>
       </button>
     </div>
+  </div>
+
+  <div class="page-scroll" [class.add-mode]="showAddPanel">
+  <!-- ===================== ADD PEOPLE / REQUESTS PANEL ===================== -->
+  <div class="add-panel" *ngIf="showAddPanel">
+    <!-- User search â€” results in-flow (avoids overflow/z-index clip) -->
+    <div class="add-search-wrap">
+      <div class="add-search">
+        <mat-icon>search</mat-icon>
+        <input type="text" placeholder="Search people by name or username..."
+               [value]="userSearchQuery"
+               (input)="onUserSearch($any($event.target).value)"
+               autocomplete="off">
+        <mat-spinner *ngIf="searching" diameter="18"></mat-spinner>
+      </div>
+
+      <div class="add-results" *ngIf="userSearchQuery.length >= 2">
+        <div class="add-results-inner">
+          <div class="add-hint" *ngIf="searching">Searchingâ€¦</div>
+          <div class="add-hint" *ngIf="!searching && searchResults.length === 0">No users found.</div>
+          <div class="user-row" *ngFor="let u of searchResults">
+            <div class="user-main">
+              <app-avatar [name]="getUserFullName(u)" [imageUrl]="u.avatarUrl || ''" size="sm"
+                          [showStatus]="true" [isOnline]="isOnline($any(u).userId || $any(u).id || '')"></app-avatar>
+              <div class="user-text">
+                <span class="user-name">{{ getUserFullName(u) }}</span>
+                <small>&#64;{{ u.username }}</small>
+              </div>
+            </div>
+            <div class="user-action" [ngSwitch]="getRelation(u)">
+              <button *ngSwitchCase="'none'" mat-stroked-button color="primary" (click)="sendRequest(u)">
+                <mat-icon>person_add</mat-icon> Add
+              </button>
+              <span *ngSwitchCase="'sent'" class="rel-chip sent">Request Sent</span>
+              <span *ngSwitchCase="'received'" class="rel-chip received">Requested You</span>
+              <span *ngSwitchCase="'contact'" class="rel-chip contact"><mat-icon>check</mat-icon> Contact</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /add-search-wrap -->
+
+    <!-- Incoming requests -->
+    <div class="requests-block" *ngIf="receivedRequests.length > 0">
+      <h4>Received Requests ({{ receivedRequests.length }})</h4>
+      <div class="user-row" *ngFor="let r of receivedRequests">
+        <div class="user-main">
+          <app-avatar [name]="(r.firstName || '') + ' ' + (r.lastName || '')" [imageUrl]="r.avatarUrl || ''" size="sm"
+                      [showStatus]="true" [isOnline]="isOnline(r.senderUserId)"></app-avatar>
+          <div class="user-text">
+            <span class="user-name">{{ r.firstName }} {{ r.lastName }}</span>
+            <small>&#64;{{ r.username }}</small>
+          </div>
+        </div>
+        <div class="user-action">
+          <button mat-raised-button color="primary" (click)="acceptRequest(r)">Accept</button>
+          <button mat-stroked-button (click)="rejectRequest(r)">Reject</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outgoing requests -->
+    <div class="requests-block" *ngIf="sentRequests.length > 0">
+      <h4>Sent Requests ({{ sentRequests.length }})</h4>
+      <div class="user-row" *ngFor="let r of sentRequests">
+        <div class="user-main">
+          <app-avatar [name]="(r.firstName || '') + ' ' + (r.lastName || '')" [imageUrl]="r.avatarUrl || ''" size="sm"
+                      [showStatus]="true" [isOnline]="isOnline(r.receiverUserId)"></app-avatar>
+          <div class="user-text">
+            <span class="user-name">{{ r.firstName }} {{ r.lastName }}</span>
+            <small>&#64;{{ r.username }}</small>
+          </div>
+        </div>
+        <div class="user-action">
+          <span class="rel-chip sent">Request Sent</span>
+          <button mat-stroked-button color="warn" class="withdraw-btn" (click)="cancelRequest(r)">
+            <mat-icon>undo</mat-icon> Withdraw
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State: contacts list context shimmer -->
+  <div class="loading-state contacts-shimmer" *ngIf="isLoading && !showAddPanel">
+    <div class="sk-group" *ngFor="let g of [1,2,3]">
+      <div class="sk-letter"></div>
+      <div class="sk-row" *ngFor="let r of [1,2,3]">
+        <div class="sk-avatar"></div>
+        <div class="sk-lines">
+          <div class="sk-line w55"></div>
+          <div class="sk-line w35 thin"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contacts body â€” single letter section headers (no side alphabet strip) -->
+  <div class="contacts-body" *ngIf="!isLoading && !showAddPanel">
 
     <!-- ===================== LIST VIEW ===================== -->
     <div class="contacts-content" *ngIf="viewMode === 'list'">
       <div *ngFor="let group of groupedContacts" class="contact-group" [id]="'group-' + group.letter">
         <div class="group-header">
           <span class="group-letter">{{ group.letter }}</span>
-          <span class="group-count">{{ group.contacts.length }}</span>
+          <span class="group-count">{{ group.contacts.length }}
+            contact{{ group.contacts.length === 1 ? '' : 's' }}</span>
         </div>
 
-        <div class="contact-list-item" *ngFor="let contact of group.contacts"
-             (click)="startChat(contact)">
+        <div class="contact-list-item" *ngFor="let contact of group.contacts" [class.is-pending]="isPending(contact)"
+             (click)="!isPending(contact) && startChat(contact)">
           <div class="contact-avatar">
-            <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl" [size]="44"></app-avatar>
-            <span class="status-dot" [class.online]="isOnline(contact.contactUserId)"></span>
+            <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl || ''" size="md"
+                        [showStatus]="!isPending(contact)"
+                        [isOnline]="!isPending(contact) && isOnline(contact.contactUserId)"></app-avatar>
           </div>
           <div class="contact-info">
             <span class="contact-name">{{ getFullName(contact) }}</span>
-            <span class="contact-username">@{{ contact.username }}</span>
+            <span class="contact-username">&#64;{{ contact.username }}</span>
           </div>
-          <div class="contact-actions">
+
+          <!-- Pending (request sent) -->
+          <div class="contact-actions" *ngIf="isPending(contact)">
+            <span class="rel-chip sent">Request Sent</span>
+            <button mat-stroked-button color="warn" class="withdraw-btn"
+                    (click)="withdrawPendingContact(contact, $event)">
+              <mat-icon>undo</mat-icon> Withdraw
+            </button>
+          </div>
+
+          <!-- Accepted contact actions -->
+          <div class="contact-actions" *ngIf="!isPending(contact)">
+            <button mat-icon-button [matTooltip]="contact.pinned ? 'Unpin' : 'Pin'"
+                    [class.active]="contact.pinned"
+                    (click)="togglePin(contact); $event.stopPropagation()">
+              <mat-icon>push_pin</mat-icon>
+            </button>
+            <button mat-icon-button [matTooltip]="contact.muted ? 'Unmute' : 'Mute'"
+                    [class.active]="contact.muted"
+                    (click)="toggleMute(contact); $event.stopPropagation()">
+              <mat-icon>{{ contact.muted ? 'notifications_off' : 'notifications' }}</mat-icon>
+            </button>
             <button mat-icon-button matTooltip="Start Chat" (click)="startChat(contact); $event.stopPropagation()">
               <mat-icon>chat</mat-icon>
             </button>
@@ -83,17 +208,28 @@
         </div>
         <div class="grid-cards">
           <div class="contact-card" *ngFor="let contact of group.contacts"
-               (click)="startChat(contact)">
+               [class.is-pending]="isPending(contact)"
+               (click)="!isPending(contact) && startChat(contact)">
             <div class="card-avatar">
-              <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl" [size]="56"></app-avatar>
-              <span class="status-dot-lg" [class.online]="isOnline(contact.contactUserId)"></span>
+              <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl || ''" size="lg"
+                          [showStatus]="!isPending(contact)"
+                          [isOnline]="!isPending(contact) && isOnline(contact.contactUserId)"></app-avatar>
             </div>
             <span class="card-name">{{ getFullName(contact) }}</span>
             <span class="card-username">@{{ contact.username }}</span>
-            <button mat-stroked-button color="primary" class="card-chat-btn"
-                    (click)="startChat(contact); $event.stopPropagation()">
-              <mat-icon>chat</mat-icon> Chat
-            </button>
+            <ng-container *ngIf="isPending(contact); else gridChat">
+              <span class="rel-chip sent grid-pending">Request Sent</span>
+              <button mat-stroked-button color="warn" class="card-chat-btn withdraw-btn"
+                      (click)="withdrawPendingContact(contact, $event)">
+                <mat-icon>undo</mat-icon> Withdraw
+              </button>
+            </ng-container>
+            <ng-template #gridChat>
+              <button mat-stroked-button color="primary" class="card-chat-btn"
+                      (click)="startChat(contact); $event.stopPropagation()">
+                <mat-icon>chat</mat-icon> Chat
+              </button>
+            </ng-template>
           </div>
         </div>
       </div>
@@ -112,20 +248,33 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let contact of filteredContacts" (click)="startChat(contact)">
+          <tr *ngFor="let contact of filteredContacts"
+              [class.is-pending]="isPending(contact)"
+              (click)="!isPending(contact) && startChat(contact)">
             <td class="name-cell">
-              <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl" [size]="32"></app-avatar>
+              <app-avatar [name]="getFullName(contact)" [imageUrl]="contact.avatarUrl || ''" size="sm"
+                          [showStatus]="!isPending(contact)"
+                          [isOnline]="!isPending(contact) && isOnline(contact.contactUserId)"></app-avatar>
               <span>{{ getFullName(contact) }}</span>
             </td>
             <td class="username-cell">@{{ contact.username }}</td>
             <td>
-              <span class="status-badge" [class.online]="isOnline(contact.contactUserId)">
+              <span class="rel-chip sent" *ngIf="isPending(contact)">Request Sent</span>
+              <span class="status-badge" *ngIf="!isPending(contact)"
+                    [class.online]="isOnline(contact.contactUserId)">
                 {{ isOnline(contact.contactUserId) ? 'Online' : 'Offline' }}
               </span>
             </td>
-            <td class="time-cell">{{ contact.lastSeenAt | lastSeen }}</td>
+            <td class="time-cell">
+              <ng-container *ngIf="!isPending(contact)">{{ (contact.lastSeenAt || '') | lastSeen }}</ng-container>
+              <span *ngIf="isPending(contact)" class="pending-muted">—</span>
+            </td>
             <td class="actions-cell">
-              <button mat-icon-button color="primary" matTooltip="Start Chat"
+              <button *ngIf="isPending(contact)" mat-stroked-button color="warn" class="withdraw-btn"
+                      (click)="withdrawPendingContact(contact, $event)">
+                <mat-icon>undo</mat-icon> Withdraw
+              </button>
+              <button *ngIf="!isPending(contact)" mat-icon-button color="primary" matTooltip="Start Chat"
                       (click)="startChat(contact); $event.stopPropagation()">
                 <mat-icon>chat</mat-icon>
               </button>
@@ -137,7 +286,7 @@
   </div>
 
   <!-- Empty State -->
-  <div class="empty-state" *ngIf="!isLoading && contacts.length === 0">
+  <div class="empty-state" *ngIf="!isLoading && !showAddPanel && contacts.length === 0">
     <mat-icon>people_outline</mat-icon>
     <h3>No contacts yet</h3>
     <p>Start by searching for users and sending contact requests.</p>
@@ -148,5 +297,6 @@
     <mat-icon>search_off</mat-icon>
     <h3>No matches found</h3>
     <p>Try a different search term.</p>
+  </div>
   </div>
 </div>

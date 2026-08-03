@@ -1,14 +1,16 @@
-@import '../../styles/theme.variables';
+﻿@import '../../styles/theme.variables';
 
 .emoji-picker {
   width: 320px;
-  max-width: calc(100vw - 32px);
+  max-width: min(320px, calc(100vw - 32px));
   background: $white;
   border-radius: $radius-lg;
   box-shadow: $shadow-lg;
   border: 1px solid $border-light;
   overflow: hidden;
+  overflow-x: hidden;
   z-index: $z-emoji-picker;
+  box-sizing: border-box;
 }
 
 .picker-header {
@@ -50,10 +52,26 @@
 
 .category-tabs {
   display: flex;
+  flex-wrap: nowrap;
   padding: $spacing-xs $spacing-sm;
   gap: 2px;
   border-bottom: 1px solid $border-light;
   overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba($nocturnal, 0.25) transparent;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba($nocturnal, 0.22);
+    border-radius: 4px;
+  }
 }
 
 .tab-btn {
@@ -81,14 +99,15 @@
 
 .emoji-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 2px;
   padding: $spacing-sm;
   max-height: 240px;
+  overflow-x: hidden;
   overflow-y: auto;
   scroll-behavior: smooth;
+  box-sizing: border-box;
 
-  // Custom scrollbar
   &::-webkit-scrollbar {
     width: 4px;
   }
@@ -102,8 +121,11 @@
 }
 
 .emoji-btn {
-  width: 36px;
-  height: 36px;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1;
+  height: auto;
+  max-height: 36px;
   border: none;
   background: transparent;
   border-radius: $radius-sm;

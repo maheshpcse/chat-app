@@ -1,5 +1,66 @@
-<div class="dashboard-page">
-  <!-- Welcome Card -->
+﻿<div class="dashboard-page page-shell">
+  <!-- Full-page context shimmer (1s min) -->
+  <ng-container *ngIf="isPageLoading; else dashboardLoaded">
+    <div class="dash-shimmer">
+      <div class="sk-welcome">
+        <div class="sk-avatar"></div>
+        <div class="sk-welcome-text">
+          <div class="sk-line w40"></div>
+          <div class="sk-line w60 thin"></div>
+        </div>
+        <div class="sk-date"></div>
+      </div>
+
+      <div class="sk-stats">
+        <div class="sk-stat" *ngFor="let _ of [1,2,3,4]">
+          <div class="sk-stat-icon"></div>
+          <div class="sk-stat-body">
+            <div class="sk-line w50"></div>
+            <div class="sk-line w70 thin"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sk-content">
+        <div class="sk-card">
+          <div class="sk-card-head">
+            <div class="sk-line w45"></div>
+            <div class="sk-line w15 thin"></div>
+          </div>
+          <div class="sk-list-row" *ngFor="let __ of [1,2,3,4]">
+            <div class="sk-row-avatar"></div>
+            <div class="sk-row-lines">
+              <div class="sk-line w55"></div>
+              <div class="sk-line w40 thin"></div>
+            </div>
+          </div>
+        </div>
+        <div class="sk-card sk-actions">
+          <div class="sk-card-head">
+            <div class="sk-line w40"></div>
+          </div>
+          <div class="sk-actions-grid">
+            <div class="sk-action" *ngFor="let a of [1,2,3,4]"></div>
+          </div>
+        </div>
+        <div class="sk-card">
+          <div class="sk-card-head">
+            <div class="sk-line w50"></div>
+            <div class="sk-line w15 thin"></div>
+          </div>
+          <div class="sk-list-row" *ngFor="let n of [1,2,3,4]">
+            <div class="sk-row-avatar sm"></div>
+            <div class="sk-row-lines">
+              <div class="sk-line w50"></div>
+              <div class="sk-line w65 thin"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #dashboardLoaded>
   <div class="welcome-card">
     <div class="welcome-content">
       <div class="welcome-avatar">
@@ -10,7 +71,7 @@
         <span class="online-dot"></span>
       </div>
       <div class="welcome-text">
-        <h1>{{ greeting }}, {{ currentUser?.firstName || 'User' }}</h1>
+        <h1>{{ greeting }}, {{ currentUser?.lastName || 'User' }}</h1>
         <p class="welcome-subtitle">Here's what's happening with your conversations today.</p>
       </div>
     </div>
@@ -20,7 +81,7 @@
     </div>
   </div>
 
-  <!-- Stats Row -->
+  <div class="page-scroll">
   <div class="stats-grid">
     <div class="stat-card stat-messages" (click)="navigateTo('/chat')">
       <div class="stat-icon-wrapper">
@@ -63,9 +124,7 @@
     </div>
   </div>
 
-  <!-- Main Content Grid -->
   <div class="content-grid">
-    <!-- Recent Conversations -->
     <div class="dashboard-card conversations-card">
       <div class="card-header">
         <h3><mat-icon>chat_bubble_outline</mat-icon> Recent Conversations</h3>
@@ -75,14 +134,16 @@
       <div class="card-body">
         <div class="conversation-item" *ngFor="let conv of recentConversations"
              (click)="openConversation(conv)">
-          <app-avatar [name]="conv.displayName" [imageUrl]="conv.avatarUrl" size="sm"></app-avatar>
+          <app-avatar [name]="conv.displayName || 'Unknown'" [imageUrl]="conv.avatarUrl || ''" size="sm"
+                      [showStatus]="!!conv.participantId"
+                      [isOnline]="!!conv.participantId && isConversationOnline(conv)"></app-avatar>
           <div class="conv-info">
             <span class="conv-name">{{ conv.displayName || 'Unknown' }}</span>
-            <span class="conv-preview">{{ conv.lastMessageContent | truncate:40 }}</span>
+            <span class="conv-preview">{{ (conv.lastMessageContent || '') | truncate:40 }}</span>
           </div>
           <div class="conv-meta">
-            <small class="conv-time">{{ conv.lastMessageAt | timeAgo }}</small>
-            <span class="unread-badge" *ngIf="conv.unreadCount > 0">{{ conv.unreadCount }}</span>
+            <small class="conv-time" *ngIf="conv.lastMessageAt">{{ conv.lastMessageAt | timeAgo }}</small>
+            <span class="unread-badge" *ngIf="(conv.unreadCount || 0) > 0">{{ conv.unreadCount }}</span>
           </div>
         </div>
 
@@ -94,7 +155,6 @@
       </div>
     </div>
 
-    <!-- Quick Actions -->
     <div class="dashboard-card actions-card">
       <div class="card-header">
         <h3><mat-icon>flash_on</mat-icon> Quick Actions</h3>
@@ -131,7 +191,6 @@
       </div>
     </div>
 
-    <!-- Notifications Timeline -->
     <div class="dashboard-card notifications-card">
       <div class="card-header">
         <h3><mat-icon>notifications_none</mat-icon> Recent Notifications</h3>
@@ -160,4 +219,6 @@
       </div>
     </div>
   </div>
+  </div>
+  </ng-template>
 </div>

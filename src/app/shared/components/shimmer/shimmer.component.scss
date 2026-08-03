@@ -1,0 +1,75 @@
+@import '../../../../app/shared/styles/theme.variables';
+
+// Smooth, theme-tinted shimmer sweep
+.sh {
+  border-radius: $radius-md;
+  background: rgba($nocturnal, 0.07);
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba($white, 0.55) 50%,
+    transparent 100%
+  );
+  animation: shimmerSweep 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmerSweep {
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-wrap {
+  width: 100%;
+  padding: $spacing-sm 0;
+}
+
+/* list variant */
+.sh-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-sm 0;
+}
+
+.sh-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sh-lines {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sh-line {
+  height: 12px;
+
+  &.w-40 { width: 40%; }
+  &.w-70 { width: 70%; }
+  &.block { width: 100%; margin-bottom: 12px; }
+}
+
+/* cards variant */
+.variant-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: $spacing-md;
+}
+
+.sh-card {
+  height: 110px;
+  border-radius: $radius-lg;
+}

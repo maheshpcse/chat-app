@@ -3,14 +3,12 @@
 :host {
   display: block;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   background: $bg-primary;
 }
 
 .dashboard-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: $spacing-xl $spacing-lg;
+  // width / centering / padding come from the shared .page-shell
 }
 
 // ==========================================
@@ -206,24 +204,45 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $spacing-lg $spacing-xl;
+  gap: $spacing-md;
+  min-height: 64px;               // equal header height across all cards
+  padding: 0 $spacing-lg;
+  border-bottom: 1px solid $border-light;
+  background: linear-gradient(180deg, rgba($mystic-mint, 0.35) 0%, rgba($mystic-mint, 0) 100%);
 
   h3 {
     font-family: $font-heading;
     font-size: $fs-lg;
     font-weight: $fw-semibold;
-    color: $text-primary;
+    color: $oceanic-noir;
     margin: 0;
     display: flex;
     align-items: center;
     gap: $spacing-sm;
+    min-width: 0;
 
+    // Icon in a themed badge for a clear visual hierarchy
     mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      border-radius: $radius-md;
+      background: rgba($nocturnal, 0.1);
       color: $nocturnal;
+      font-size: 20px;
     }
+  }
+
+  // "View All" action stays vertically centered + theme-colored
+  .mat-button {
+    color: $nocturnal;
+    font-weight: $fw-semibold;
+    flex-shrink: 0;
+
+    &:hover { background: rgba($nocturnal, 0.06); }
   }
 }
 
@@ -505,10 +524,6 @@
 }
 
 @media (max-width: 768px) {
-  .dashboard-page {
-    padding: $spacing-md;
-  }
-
   .stats-grid {
     grid-template-columns: 1fr 1fr;
     gap: $spacing-md;
@@ -522,4 +537,196 @@
 // Notifications card spans full width
 .notifications-card {
   grid-column: 1 / -1;
+}
+
+// ==========================================
+// Dashboard context shimmer (min 1s boot)
+// ==========================================
+@mixin dash-sk {
+  background: linear-gradient(90deg, #e8eceb 0%, #f4f7f6 45%, #e8eceb 100%);
+  background-size: 200% 100%;
+  animation: dashSk 1.15s ease-in-out infinite;
+}
+
+@keyframes dashSk {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.dash-shimmer {
+  pointer-events: none;
+
+  .sk-line {
+    height: 14px;
+    border-radius: 7px;
+    @include dash-sk;
+
+    &.thin { height: 11px; }
+    &.w15 { width: 15%; }
+    &.w40 { width: 40%; }
+    &.w45 { width: 45%; }
+    &.w50 { width: 50%; }
+    &.w55 { width: 55%; }
+    &.w60 { width: 60%; }
+    &.w65 { width: 65%; }
+    &.w70 { width: 70%; }
+  }
+
+  .sk-welcome {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    padding: $spacing-xl $spacing-2xl;
+    margin-bottom: $spacing-xl;
+    border-radius: $dashboard-card-radius;
+    background: linear-gradient(135deg, rgba($nocturnal, 0.12), rgba($nocturnal-light, 0.08));
+    min-height: 112px;
+  }
+
+  .sk-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    @include dash-sk;
+  }
+
+  .sk-welcome-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .sk-date {
+    width: 180px;
+    height: 18px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    @include dash-sk;
+  }
+
+  .sk-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+  }
+
+  .sk-stat {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-lg;
+    background: $white;
+    border-radius: $dashboard-card-radius;
+    box-shadow: $shadow-sm;
+    border: 1px solid $border-light;
+  }
+
+  .sk-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    @include dash-sk;
+  }
+
+  .sk-stat-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .sk-content {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: $spacing-lg;
+  }
+
+  .sk-card {
+    background: $white;
+    border: 1px solid $border-light;
+    border-radius: $dashboard-card-radius;
+    box-shadow: $shadow-sm;
+    padding: $spacing-lg;
+    min-height: 280px;
+
+    &.sk-actions {
+      grid-column: auto;
+    }
+
+    &:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .sk-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid $border-light;
+  }
+
+  .sk-list-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-sm 0;
+  }
+
+  .sk-row-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    @include dash-sk;
+
+    &.sm {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .sk-row-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .sk-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-md;
+  }
+
+  .sk-action {
+    height: 88px;
+    border-radius: $radius-md;
+    @include dash-sk;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dash-shimmer {
+    .sk-stats { grid-template-columns: repeat(2, 1fr); }
+    .sk-content { grid-template-columns: 1fr; }
+    .sk-card:last-child { grid-column: auto; }
+  }
+}
+
+@media (max-width: 768px) {
+  .dash-shimmer {
+    .sk-welcome { flex-wrap: wrap; }
+    .sk-date { width: 140px; }
+    .sk-stats { grid-template-columns: 1fr 1fr; }
+  }
 }

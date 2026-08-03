@@ -1,5 +1,5 @@
-<div class="notification-list-container">
-  <!-- Panel Header -->
+﻿<div class="notification-list-container">
+  <!-- Card Header -->
   <div class="notif-panel-header">
     <div class="header-left">
       <h4>Notifications</h4>
@@ -10,43 +10,48 @@
               (click)="markAllAsRead()" *ngIf="unreadCount > 0">
         <mat-icon>done_all</mat-icon>
       </button>
-      <a mat-icon-button matTooltip="View all" routerLink="/notifications">
-        <mat-icon>open_in_new</mat-icon>
-      </a>
     </div>
   </div>
 
-  <mat-divider></mat-divider>
+  <!-- Card Body: list only, vertical scroll on overflow -->
+  <div class="notif-panel-body">
+    <div class="notif-list-shimmer" *ngIf="isLoading">
+      <div class="sk-row" *ngFor="let r of [1,2,3,4,5,6]">
+        <div class="sk-icon"></div>
+        <div class="sk-lines">
+          <div class="sk-line w55"></div>
+          <div class="sk-line w70 thin"></div>
+          <div class="sk-line w30 thin"></div>
+        </div>
+      </div>
+    </div>
 
-  <!-- Notification Items -->
-  <div class="notif-items">
-    <div class="notif-item" *ngFor="let notification of notifications"
-         [class.unread]="!notification.isRead"
-         (click)="markAsRead(notification)">
-      <div class="notif-icon" [class.unread-icon]="!notification.isRead">
-        <mat-icon>{{ getNotificationIcon(notification.type) }}</mat-icon>
+    <div class="notif-items" *ngIf="!isLoading">
+      <div class="notif-item" *ngFor="let notification of notifications"
+           [class.unread]="!notification.isRead"
+           (click)="onItemClick(notification, $event)">
+        <div class="notif-icon" [class.unread-icon]="!notification.isRead">
+          <mat-icon>{{ getNotificationIcon(notification.type) }}</mat-icon>
+        </div>
+        <div class="notif-content">
+          <span class="notif-title">{{ notification.title }}</span>
+          <span class="notif-message">{{ notification.message | truncate:80 }}</span>
+          <small class="notif-time">{{ notification.createdAt | timeAgo }}</small>
+        </div>
+        <div class="notif-unread-dot" *ngIf="!notification.isRead"></div>
       </div>
-      <div class="notif-content">
-        <span class="notif-title">{{ notification.title }}</span>
-        <span class="notif-message">{{ notification.message | truncate:80 }}</span>
-        <small class="notif-time">{{ notification.createdAt | timeAgo }}</small>
-      </div>
-      <div class="notif-unread-dot" *ngIf="!notification.isRead"></div>
+    </div>
+
+    <div class="empty-notifications" *ngIf="!isLoading && notifications.length === 0">
+      <mat-icon>notifications_none</mat-icon>
+      <p>No notifications yet</p>
+      <small>You're all caught up!</small>
     </div>
   </div>
 
-  <!-- Empty State -->
-  <div class="empty-notifications" *ngIf="notifications.length === 0">
-    <mat-icon>notifications_none</mat-icon>
-    <p>No notifications yet</p>
-    <small>You're all caught up!</small>
-  </div>
-
-  <!-- Footer -->
-  <div class="notif-panel-footer" *ngIf="notifications.length > 0">
-    <a routerLink="/notifications" class="view-all-link">
-      View All Notifications
-      <mat-icon>arrow_forward</mat-icon>
-    </a>
-  </div>
+  <!-- Footer: close popup + route to full notifications page -->
+  <button type="button" class="notif-panel-footer" (click)="onViewAll($event)" aria-label="View all notifications">
+    <span>View All Notifications</span>
+    <mat-icon>arrow_forward</mat-icon>
+  </button>
 </div>

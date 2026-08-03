@@ -18,12 +18,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   padding-top: $spacing-sm;
   gap: $spacing-xs;
+  overflow: hidden;
   animation: fadeIn 250ms ease forwards;
 
   button {
     color: $nocturnal;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: rgba($nocturnal, 0.08);
+      color: $nocturnal;
+    }
   }
 }
 
@@ -32,19 +42,28 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
   overflow: hidden;
   animation: fadeIn 250ms ease forwards;
 }
 
 // Header
 .sidebar-header {
-  padding: $spacing-sm $spacing-sm 0;
+  display: flex;
+  align-items: center;
+  height: $chat-header-height;
+  min-height: $chat-header-height;
+  padding: 0 $spacing-sm;
+  box-sizing: border-box;
+  border-bottom: 1px solid $border-light;
   overflow: hidden;
 }
 
 // Tab navigation
 .sidebar-tabs {
   display: flex;
+  width: 100%;
   gap: 2px;
 
   button {
@@ -68,16 +87,12 @@
     }
 
     &:hover:not(.active) {
-      background-color: rgba($nocturnal, 0.04);
+      background-color: rgba($nocturnal, 0.08);
+      color: $nocturnal;
     }
 
     &.collapse-btn {
-      flex: 0 0 auto;
-      color: $gray-400;
-
-      &:hover {
-        color: $nocturnal;
-      }
+      color: $text-secondary;
     }
   }
 }
@@ -154,15 +169,18 @@
 // Tab content
 .tab-content {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;          // critical: let the list scroll instead of growing the sidebar
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-// List container
+// List container — the ONLY area that scrolls
 .list-container {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 // List items
@@ -172,10 +190,27 @@
   padding: 10px $spacing-lg;
   cursor: pointer;
   border-bottom: 1px solid $gray-100;
-  transition: background-color $transition-fast;
+  border-left: 3px solid transparent;
+  transition: background-color $transition-fast, border-color $transition-fast;
 
   &:hover {
     background-color: $arctic-hover;
+  }
+
+  // Active chat in window — selected row
+  &.is-active,
+  &.is-selected {
+    background: rgba($nocturnal, 0.1);
+    border-left-color: $nocturnal;
+
+    .item-name {
+      color: $nocturnal;
+      font-weight: $fw-semibold;
+    }
+
+    &:hover {
+      background: rgba($nocturnal, 0.14);
+    }
   }
 }
 
@@ -318,6 +353,30 @@
     font-size: $fs-base;
     color: $text-secondary;
   }
+}
+
+// Pending contacts
+.is-pending {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.pending-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: $radius-pill;
+  font-family: $font-meta;
+  font-size: 10px;
+  font-weight: $fw-semibold;
+  background: rgba($forsytha, 0.18);
+  color: darken($forsytha, 25%);
+  flex-shrink: 0;
+}
+
+.pending-label {
+  color: darken($forsytha, 20%) !important;
+  font-style: italic;
 }
 
 @keyframes fadeIn {

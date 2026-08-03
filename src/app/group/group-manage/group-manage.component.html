@@ -18,7 +18,8 @@
                       [imageUrl]="member.avatar"
                       [name]="member.fullName"
                       size="sm"
-                      [showStatus]="false">
+                      [showStatus]="true"
+                      [isOnline]="isMemberOnline(member)">
           </app-avatar>
           <h4 matLine>{{ member.fullName }}</h4>
           <p matLine>

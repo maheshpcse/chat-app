@@ -82,6 +82,13 @@
   margin-left: 4px;
 }
 
+.header-avatar-wrap {
+  position: relative;
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+}
+
 .header-avatar {
   width: 32px;
   height: 32px;
@@ -106,25 +113,121 @@
   border: 2px solid rgba($white, 0.2);
 }
 
+.header-online-dot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid $nocturnal;
+  background: #9e9e9e;
+  box-sizing: border-box;
+
+  &.is-online {
+    background: #4caf50;
+  }
+}
+
+// Shared overlay motion (bell + profile)
+// Open = keyframes on mount. Close = .closing transitions from base opacity/transform.
+// Transition MUST live on base rule or fade-out snaps (no from-state).
+@mixin header-fade-panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transform-origin: top right;
+  pointer-events: auto;
+  animation: header-panel-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transition: opacity 420ms cubic-bezier(0.22, 0.61, 0.36, 1),
+              transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+  backdrop-filter: blur(14px);
+
+  &.closing {
+    // Drop mount keyframes so base transition can drive a slow fade-out.
+    animation: none !important;
+    opacity: 0;
+    transform: translateY(-12px) scale(0.97);
+    pointer-events: none;
+  }
+}
+
+@keyframes header-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@mixin header-panel-caret($right: 18px) {
+  position: absolute;
+  top: -8px;
+  right: $right;
+  width: 16px;
+  height: 16px;
+  background: $white;
+  transform: rotate(45deg);
+  box-shadow: -2px -2px 6px rgba($oceanic-noir, 0.06);
+  z-index: 1;
+}
+
 // ==========================================
 // User Info Panel in Dropdown
 // ==========================================
 .user-info-panel {
-  padding: 12px 16px;
+  padding: 14px 16px 10px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 
   strong {
     font-family: $font-heading;
-    font-size: $fs-sm;
+    font-size: 0.9375rem; // 15px — restore readable profile name
+    font-weight: $fw-semibold;
     color: $text-primary;
+    line-height: 1.35;
   }
 
   small {
     font-family: $font-meta;
-    font-size: $fs-xs;
+    font-size: 0.8125rem; // 13px
     color: $gray-400;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.35;
+  }
+
+  .self-presence {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-family: $font-meta;
+    font-size: 0.75rem;
+    font-weight: $fw-medium;
+    color: $gray-400;
+
+    &.is-online {
+      color: #2e7d32;
+    }
+
+    .self-presence-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #9e9e9e;
+      flex-shrink: 0;
+    }
+
+    &.is-online .self-presence-dot {
+      background: #4caf50;
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18);
+    }
   }
 }
 
@@ -133,35 +236,93 @@
 // ==========================================
 .notification-panel {
   position: fixed;
-  top: 56px;
-  right: 16px;
-  width: 380px;
-  max-height: 460px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: $white;
-  border-radius: $radius-lg;
-  box-shadow: 0 8px 32px rgba($oceanic-noir, 0.18);
+  top: 62px;
+  right: 18px;
+  bottom: 16px;
+  width: min(94vw, 420px);
+  height: auto;
+  max-height: none;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba($white, 0.98) 0%, rgba($white, 0.95) 100%);
+  border: 1px solid rgba($nocturnal, 0.08);
+  border-radius: $radius-xl;
+  box-shadow: 0 18px 48px rgba($oceanic-noir, 0.16);
   z-index: 1000;
-  animation: fadeInDown 250ms ease forwards;
-}
-
-.notif-panel-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
+  flex-direction: column;
+  @include header-fade-panel;
 
-  h5 {
-    font-family: $font-heading;
-    font-size: $fs-md;
-    font-weight: $fw-semibold;
-    color: $text-primary;
-    margin: 0;
+  // Child host fills full card height so body/footer layout works.
+  > app-notification-list {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
   }
 }
 
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+.notification-caret {
+  @include header-panel-caret(18px);
 }
+
+// ==========================================
+// Profile Panel (same fade language as bell)
+// ==========================================
+.profile-panel {
+  position: fixed;
+  top: 62px;
+  right: 12px;
+  width: min(92vw, 260px);
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba($white, 0.98) 0%, rgba($white, 0.95) 100%);
+  border: 1px solid rgba($nocturnal, 0.08);
+  border-radius: $radius-xl;
+  box-shadow: 0 18px 48px rgba($oceanic-noir, 0.16);
+  z-index: 1000;
+  padding-bottom: 6px;
+  @include header-fade-panel;
+}
+
+.profile-caret {
+  @include header-panel-caret(18px);
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
+  color: $text-primary;
+  font-family: $font-primary;
+  font-size: 0.9375rem; // 15px
+  font-weight: $fw-medium;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $text-muted;
+  }
+
+  &:hover {
+    background: rgba($nocturnal, 0.06);
+    color: $nocturnal;
+
+    mat-icon {
+      color: $nocturnal;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($nocturnal, 0.35);
+    outline-offset: -2px;
+  }
+}
+

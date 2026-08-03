@@ -72,7 +72,10 @@ export class ContactService {
     return this.http.put<IApiResponse<IContactRequest>>(
       `${environment.apiBaseUrl}/contacts/requests/${requestId}/cancel`,
       {}
-    ).pipe(map(res => res.data));
+    ).pipe(
+      map(res => res.data),
+      tap(() => this.removeSentRequest(requestId))
+    );
   }
 
   // ===========================
@@ -94,9 +97,44 @@ export class ContactService {
     ).pipe(map(res => res.data));
   }
 
+  /**
+   * Block a contact. Prevents further messaging and hides presence.
+   * (Backend endpoint added in the contact-block phase.)
+   */
+  blockContact(contactUserId: string, reason?: string): Observable<any> {
+    return this.http.post<IApiResponse<any>>(
+      `${environment.apiBaseUrl}/contacts/${contactUserId}/block`,
+      { reason: reason || null }
+    ).pipe(map(res => res.data));
+  }
+
+  /** Unblock a previously blocked contact. */
+  unblockContact(contactUserId: string): Observable<any> {
+    return this.http.post<IApiResponse<any>>(
+      `${environment.apiBaseUrl}/contacts/${contactUserId}/unblock`,
+      {}
+    ).pipe(map(res => res.data));
+  }
+
+  /** Update per-contact settings (nickname / mute / pin). */
+  updateContactSettings(
+    contactUserId: string,
+    settings: { nickname?: string; muted?: boolean; pinned?: boolean }
+  ): Observable<any> {
+    return this.http.put<IApiResponse<any>>(
+      `${environment.apiBaseUrl}/contacts/${contactUserId}/settings`,
+      settings
+    ).pipe(map(res => res.data));
+  }
+
   // ===========================
   // Local State Helpers
   // ===========================
+
+  /** Sync snapshot of accepted contacts (presence / peer id fallback). */
+  getContactsSnapshot(): IContact[] {
+    return this.contactsSubject.value || [];
+  }
 
   addContactLocally(contact: IContact): void {
     const current = this.contactsSubject.value;

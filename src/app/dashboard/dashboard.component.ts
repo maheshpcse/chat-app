@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, of, timer } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../core/services/auth.service';
 import { ChatService } from '../core/services/chat.service';
 import { ContactService } from '../core/services/contact.service';
@@ -9,6 +10,7 @@ import { PresenceService } from '../core/services/presence.service';
 import { IUser } from '../core/models/user.model';
 import { IConversation } from '../core/models/conversation.model';
 import { INotification } from '../core/models/notification.model';
+import { MIN_LOADING_DASHBOARD_MS } from '../shared/utilities/min-loading.util';
 
 /**
  * DashboardComponent - Main landing page after login.
@@ -31,6 +33,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   pendingRequestCount: number = 0;
   totalContactCount: number = 0;
 
+  /** Full dashboard context shimmer — min 1s */
+  isPageLoading = true;
+
+  private contactIds: string[] = [];
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -64,45 +70,93 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadDashboardData(): void {
-    // Load recent conversations
-    const convSub = this.chatService.conversations$.subscribe(conversations => {
-      this.recentConversations = conversations.slice(0, 5);
-    });
-    this.subscriptions.push(convSub);
+    this.isPageLoading = true;
 
-    // Load conversations from server
-    this.chatService.loadConversations();
-
-    // Load notifications
-    const notifSub = this.notificationService.notifications$.subscribe(notifs => {
-      this.notifications = notifs.slice(0, 5);
-    });
-    this.subscriptions.push(notifSub);
-
-    // Load unread count
     const unreadSub = this.notificationService.unreadCount$.subscribe(count => {
       this.unreadCount = count;
     });
     this.subscriptions.push(unreadSub);
 
-    // Load contacts data
-    this.contactService.getContacts().subscribe(contacts => {
-      this.totalContactCount = contacts.length;
-      // Count online contacts
-      this.onlineContactCount = contacts.filter(c =>
-        this.presenceService.isOnline(c.contactUserId)
+    const notifLive = this.notificationService.notifications$.subscribe(notifs => {
+      if (!this.isPageLoading) {
+        this.notifications = (notifs || []).slice(0, 5);
+      }
+    });
+    this.subscriptions.push(notifLive);
+
+    const convLive = this.chatService.conversations$.subscribe(conversations => {
+      if (!this.isPageLoading) {
+        this.recentConversations = (conversations || []).slice(0, 5);
+      }
+    });
+    this.subscriptions.push(convLive);
+
+    // Keep online contact count + recent conv dots live while dashboard open
+    const presenceLive = this.presenceService.onlineUsers$.subscribe(() => {
+      if (this.isPageLoading) { return; }
+      this.onlineContactCount = this.contactIds.filter(id =>
+        this.presenceService.isOnline(id)
       ).length;
     });
+    this.subscriptions.push(presenceLive);
 
-    // Load pending requests
-    this.contactService.getReceivedRequests().subscribe(requests => {
-      this.pendingRequestCount = requests.filter(r => r.status === 'pending').length;
+    this.chatService.loadConversations();
+
+    // Min 1s shimmer + parallel API work, then single paint
+    const bootSub = forkJoin({
+      minTime: timer(MIN_LOADING_DASHBOARD_MS),
+      notifications: this.notificationService.loadNotifications(1, 10).pipe(
+        catchError(() => of(null))
+      ),
+      contacts: this.contactService.getContacts().pipe(
+        catchError(() => of([] as any[]))
+      ),
+      requests: this.contactService.getReceivedRequests().pipe(
+        catchError(() => of([] as any[]))
+      )
+    }).subscribe(({ contacts, requests }) => {
+      this.recentConversations = this.snapshotConversations().slice(0, 5);
+      this.notifications = this.snapshotNotifications().slice(0, 5);
+
+      const contactList = contacts || [];
+      this.contactIds = contactList
+        .map((c: any) => String(c.contactUserId || c.userId || ''))
+        .filter((id: string) => !!id);
+      this.totalContactCount = contactList.length;
+      this.onlineContactCount = this.contactIds.filter(id =>
+        this.presenceService.isOnline(id)
+      ).length;
+
+      const reqList = requests || [];
+      this.pendingRequestCount = reqList.filter((r: any) => r.status === 'pending').length;
+
+      this.isPageLoading = false;
     });
+    this.subscriptions.push(bootSub);
+  }
+
+  private snapshotConversations(): IConversation[] {
+    let latest: IConversation[] = [];
+    const sub = this.chatService.conversations$.subscribe(c => latest = c || []);
+    sub.unsubscribe();
+    return latest;
+  }
+
+  private snapshotNotifications(): INotification[] {
+    let latest: INotification[] = [];
+    const sub = this.notificationService.notifications$.subscribe(n => latest = n || []);
+    sub.unsubscribe();
+    return latest;
   }
 
   openConversation(conversation: IConversation): void {
     this.chatService.setActiveConversation(conversation);
     this.router.navigate(['/chat']);
+  }
+
+  isConversationOnline(conv: IConversation): boolean {
+    if (!conv?.participantId) { return false; }
+    return this.presenceService.isOnline(String(conv.participantId));
   }
 
   navigateTo(route: string): void {

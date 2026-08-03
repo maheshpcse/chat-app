@@ -3,65 +3,102 @@
 :host {
   display: block;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   background: $bg-primary;
 }
 
-.contacts-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: $spacing-xl $spacing-lg;
-}
+// .contacts-page width/centering/padding come from shared .page-shell
+// Page header styles come from shared <app-page-header>.
 
 // ==========================================
-// Page Header
+// Toolbar Search Autocomplete
 // ==========================================
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $spacing-xl;
-  flex-wrap: wrap;
-  gap: $spacing-md;
+.toolbar-search-wrap {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 360px;
 }
 
-.header-left {
+.search-autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: $z-emoji-picker; // above page content / side strips
+  margin-top: 4px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: $white;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  padding: 4px;
+  animation: fadeInDown 180ms ease forwards;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $gray-300;
+    border-radius: 2px;
+  }
+}
+
+.autocomplete-item {
   display: flex;
   align-items: center;
   gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition-fast;
 
-  h1 {
-    font-family: $font-heading;
-    font-size: 24px;
-    font-weight: $fw-bold;
-    color: $text-primary;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
+  &:hover {
+    background: rgba($nocturnal, 0.04);
 
-    mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
-      color: $nocturnal;
+    .autocomplete-action {
+      opacity: 1;
     }
   }
+}
 
-  .contact-count {
-    font-family: $font-meta;
+.autocomplete-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+
+  .autocomplete-name {
+    font-family: $font-primary;
     font-size: $fs-sm;
+    font-weight: $fw-semibold;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .autocomplete-username {
+    font-family: $font-meta;
+    font-size: 11px;
     color: $text-muted;
-    background: $arctic-hover;
-    padding: 4px 12px;
-    border-radius: $radius-pill;
   }
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
+.autocomplete-action {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: $nocturnal;
+  opacity: 0.3;
+  flex-shrink: 0;
+  transition: opacity $transition-fast;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 // ==========================================
@@ -143,6 +180,7 @@
 .contacts-body {
   display: flex;
   gap: $spacing-md;
+  min-height: 0;
 }
 
 .contacts-content,
@@ -153,42 +191,7 @@
 }
 
 // ==========================================
-// Alphabet Nav
-// ==========================================
-.alphabet-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  position: sticky;
-  top: $spacing-md;
-  align-self: flex-start;
-  flex-shrink: 0;
-}
-
-.letter-btn {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: transparent;
-  font-family: $font-heading;
-  font-size: 11px;
-  font-weight: $fw-semibold;
-  color: $text-muted;
-  cursor: pointer;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all $transition-fast;
-
-  &:hover {
-    background: $nocturnal;
-    color: $white;
-  }
-}
-
-// ==========================================
-// Group Headers
+// Group Headers (single letter + count label)
 // ==========================================
 .contact-group,
 .grid-section {
@@ -204,22 +207,83 @@
 
   .group-letter {
     font-family: $font-heading;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: $fw-bold;
     color: $nocturnal;
-    width: 32px;
-    height: 32px;
-    display: flex;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     background: rgba($nocturnal, 0.08);
-    border-radius: 50%;
+    border-radius: $radius-pill;
   }
 
   .group-count {
     font-family: $font-meta;
     font-size: $fs-xs;
     color: $text-muted;
+  }
+}
+
+// Contacts context shimmer
+@mixin contacts-sk {
+  background: linear-gradient(90deg, #e8eceb 0%, #f7f9f8 45%, #e8eceb 100%);
+  background-size: 200% 100%;
+  animation: contactsSk 1.15s ease-in-out infinite;
+}
+
+@keyframes contactsSk {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.contacts-shimmer {
+  padding: $spacing-sm 0 $spacing-lg;
+
+  .sk-group {
+    margin-bottom: $spacing-lg;
+  }
+
+  .sk-letter {
+    width: 36px;
+    height: 28px;
+    border-radius: $radius-pill;
+    margin: 0 $spacing-md $spacing-sm;
+    @include contacts-sk;
+  }
+
+  .sk-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-md $spacing-lg;
+  }
+
+  .sk-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    @include contacts-sk;
+  }
+
+  .sk-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sk-line {
+    height: 12px;
+    border-radius: 6px;
+    @include contacts-sk;
+
+    &.thin { height: 10px; }
+    &.w55 { width: 55%; }
+    &.w35 { width: 35%; }
   }
 }
 
@@ -243,6 +307,20 @@
 .contact-avatar {
   position: relative;
   flex-shrink: 0;
+  overflow: visible;
+
+  app-avatar {
+    overflow: visible;
+  }
+}
+
+.card-avatar {
+  position: relative;
+  overflow: visible;
+
+  app-avatar {
+    overflow: visible;
+  }
 }
 
 .status-dot {
@@ -378,7 +456,7 @@
   background: $white;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .contacts-table {
@@ -466,7 +544,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: $spacing-2xl * 2;
+  min-height: 55vh;          // center vertically in the available page area
+  padding: $spacing-2xl;
   text-align: center;
 
   mat-icon {
@@ -494,14 +573,21 @@
 .loading-state {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: $spacing-2xl * 2;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  padding: $spacing-md 0 $spacing-xl;
 
   p {
     margin-top: $spacing-lg;
     font-family: $font-primary;
     color: $text-muted;
+  }
+
+  // Context shimmer must fill page width, not centered spinner box
+  &.contacts-shimmer {
+    align-items: stretch;
+    padding: $spacing-sm 0 $spacing-lg;
   }
 }
 
@@ -509,24 +595,241 @@
 // Responsive
 // ==========================================
 @media (max-width: 768px) {
-  .contacts-page {
-    padding: $spacing-md;
-  }
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .search-wrapper {
     width: 100%;
   }
 
-  .alphabet-nav {
-    display: none;
-  }
-
   .grid-cards {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===================== ADD PEOPLE / REQUESTS PANEL ===================== */
+.add-contact-btn {
+  mat-icon { margin-right: 4px; }
+}
+
+.add-panel {
+  position: relative;
+  z-index: 5;
+  margin: 0 0 $spacing-lg;
+  padding: $spacing-lg;
+  background: $white;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  animation: fadeInDown 220ms ease forwards;
+  overflow: visible;
+}
+
+.add-search-wrap {
+  position: relative;
+  z-index: 20;
+  overflow: visible;
+}
+
+.add-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: 0 $spacing-md;
+  border: 1px solid $gray-300;
+  border-radius: $radius-md;
+  min-height: 46px;
+  background: $white;
+
+  > mat-icon { color: $gray-400; flex-shrink: 0; }
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: $font-primary;
+    font-size: $fs-base;
+    color: $text-primary;
+    min-width: 0;
+  }
+
+  &:focus-within { border-color: $nocturnal; box-shadow: 0 0 0 3px rgba($nocturnal, 0.08); }
+
+  mat-spinner { flex-shrink: 0; }
+}
+
+// In-flow results panel — not clipped by .page-scroll overflow
+.add-results {
+  position: relative;
+  z-index: $z-emoji-picker;
+  margin-top: 8px;
+  max-height: min(42vh, 360px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: $white;
+  border: 1px solid $border-light;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  padding: 4px;
+
+  .add-results-inner {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.page-scroll.add-mode {
+  overflow: visible;
+}
+
+.requests-block { margin-top: $spacing-md; }
+
+.requests-block h4 {
+  margin: $spacing-md 0 $spacing-sm;
+  font-size: $fs-sm;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.add-hint { color: $text-muted; padding: $spacing-sm 0; font-size: $fs-sm; }
+
+.user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  padding: $spacing-sm;
+  border-radius: $radius-md;
+  transition: background-color $transition-fast;
+
+  &:hover { background: rgba($nocturnal, 0.03); }
+
+  .user-main { display: flex; align-items: center; gap: $spacing-md; min-width: 0; }
+
+  .user-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    .user-name { font-weight: $fw-semibold; color: $text-primary; }
+    small { color: $text-muted; }
+  }
+
+  .user-action {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    flex-shrink: 0;
+    mat-icon { vertical-align: middle; }
+  }
+}
+
+.rel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 10px;
+  border-radius: $radius-pill;
+  font-size: $fs-xs;
+  font-weight: $fw-semibold;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+
+  &.sent { background: rgba($forsytha, 0.18); color: darken($forsytha, 25%); }
+  &.received { background: rgba($nocturnal, 0.1); color: $nocturnal; }
+  &.contact { background: rgba($success, 0.15); color: $success; }
+}
+
+// Pending request + withdraw actions (list / grid / table)
+.withdraw-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px !important;
+  border-radius: $radius-pill !important;
+  font-family: $font-primary;
+  font-size: $fs-sm;
+  font-weight: $fw-medium;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  border-color: rgba($warn, 0.45) !important;
+  color: $warn !important;
+  background: rgba($warn, 0.06) !important;
+  transition: background-color $transition-fast, border-color $transition-fast,
+    box-shadow $transition-fast, transform $transition-fast;
+
+  mat-icon {
+    margin: 0 !important;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+
+  &:hover {
+    background: rgba($warn, 0.12) !important;
+    border-color: $warn !important;
+    box-shadow: 0 2px 8px rgba($warn, 0.16);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.contact-list-item.is-pending,
+.contact-card.is-pending,
+tr.is-pending {
+  cursor: default;
+}
+
+.contact-list-item.is-pending {
+  .contact-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+.contact-card {
+  .grid-pending {
+    margin: 4px 0 10px;
+  }
+
+  .withdraw-btn {
+    width: 100%;
+    margin-top: 2px;
+  }
+}
+
+.user-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  .withdraw-btn {
+    flex-shrink: 0;
+  }
+}
+
+.pending-muted {
+  color: $text-muted;
+  font-family: $font-meta;
+  font-size: $fs-sm;
+}
+
+.actions-cell {
+  .withdraw-btn {
+    white-space: nowrap;
   }
 }

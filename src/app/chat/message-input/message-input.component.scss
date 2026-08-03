@@ -1,122 +1,194 @@
 @import '../../../app/shared/styles/theme.variables';
 
-.message-input-container {
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
   background: $white;
-  padding: $spacing-md $spacing-md;
-  border-top: 1px solid $border-light;
 }
 
-.input-row {
+.message-input-container {
+  background: transparent;
+  padding: 8px 12px 10px;
+  box-sizing: border-box;
+}
+
+/* Flat footer row — tools + field + send (no nested gray pill card) */
+.composer-bar {
   display: flex;
   align-items: flex-end;
-  gap: $spacing-xs;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  box-sizing: border-box;
+}
+
+.composer-tools {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 .action-btn {
   color: $text-secondary;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
-  margin-bottom: 2px;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
 
   mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
   }
 
   &:hover {
     color: $nocturnal-light;
+    background: rgba($nocturnal, 0.06);
   }
 
   &.active {
     color: $forsytha;
+    background: rgba($forsytha, 0.12);
   }
 }
 
 .emoji-wrapper {
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
-.emoji-picker-anchor {
+.emoji-panel {
   position: absolute;
-  bottom: 44px;
-  left: 0;
+  bottom: calc(100% + 8px);
+  left: 12px;
   z-index: $z-emoji-picker;
-  animation: fadeInUp 200ms ease forwards;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transform-origin: bottom left;
+  animation: emojiPanelIn 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transition: opacity 420ms cubic-bezier(0.22, 0.61, 0.36, 1),
+              transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+
+  &.closing {
+    animation: none !important;
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+    pointer-events: none;
+  }
+}
+
+@keyframes emojiPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.composer-field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  align-self: center;
+  min-height: 42px;
+  background: $white;
+  border: 1px solid rgba($nocturnal, 0.12);
+  border-radius: 22px;
+  box-sizing: border-box;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+
+  &:focus-within {
+    border-color: rgba($nocturnal, 0.28);
+    box-shadow: 0 0 0 3px rgba($nocturnal, 0.07);
+  }
+}
+
+.composer-textarea {
+  width: 100%;
+  min-height: 22px;
+  max-height: 128px;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: $text-primary;
+  font-family: $font-chat;
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba($nocturnal, 0.25) transparent;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba($nocturnal, 0.22);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-track { background: transparent; }
+
+  &::placeholder {
+    color: $text-muted;
+    font-family: $font-chat;
+  }
 }
 
 .send-btn {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
-  margin-bottom: 2px;
-  color: $text-muted;
-  transition: color $transition-fast, background-color $transition-fast;
+  align-self: center;
+  width: 42px !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  min-width: 42px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba($nocturnal, 0.08) !important;
+  color: $text-muted !important;
+  box-shadow: none !important;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
 
   mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    margin: 0 !important;
+    transform: translateX(1px);
   }
 
-  &.active {
-    color: $nocturnal;
-    background-color: rgba($nocturnal, 0.08);
-    border-radius: $radius-circle;
+  &.active:not([disabled]) {
+    background: $nocturnal !important;
+    color: $white !important;
 
     &:hover {
-      background-color: rgba($nocturnal, 0.15);
+      transform: translateY(-1px);
+      background: $nocturnal-light !important;
     }
   }
-}
 
-.message-field {
-  flex: 1;
-
-  ::ng-deep {
-    .mat-form-field-wrapper {
-      margin: 0;
-      padding-bottom: 0;
-    }
-
-    .mat-form-field-flex {
-      align-items: center;
-      padding: 4px 12px;
-      background: $gray-100;
-      border-radius: $radius-pill;
-    }
-
-    .mat-form-field-infix {
-      padding: 6px 0;
-      border-top: 0;
-
-      textarea {
-        font-family: $font-chat;
-        font-size: $fs-md;
-        line-height: $lh-normal;
-        resize: none;
-        overflow-y: auto;
-        max-height: 100px;
-      }
-    }
-
-    .mat-form-field-outline {
-      display: none;
-    }
-
-    .mat-form-field-subscript-wrapper {
-      display: none;
-    }
-
-    .mat-form-field-label {
-      font-family: $font-chat;
-      color: $text-muted;
-    }
-  }
+  &[disabled] { opacity: 0.55; }
 }
 
 .file-preview {
@@ -127,12 +199,8 @@
   background: rgba($nocturnal, 0.05);
   border-radius: $radius-md;
   margin-bottom: $spacing-sm;
-  animation: fadeInUp 200ms ease forwards;
 
-  mat-icon {
-    color: $nocturnal-light;
-    font-size: 18px;
-  }
+  mat-icon { color: $nocturnal-light; font-size: 18px; }
 
   .file-name {
     flex: 1;
@@ -145,19 +213,16 @@
   }
 
   .remove-file {
-    width: 24px;
-    height: 24px;
-    line-height: 24px;
-
-    mat-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-    }
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
   }
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+@media (max-width: 600px) {
+  .message-input-container { padding: 8px 10px 10px; }
+  .composer-bar { min-height: 44px; gap: 4px; }
+  .action-btn { width: 36px !important; height: 36px !important; }
+  .send-btn { width: 38px !important; height: 38px !important; min-width: 38px !important; }
+  .emoji-panel { left: 8px; max-width: calc(100vw - 24px); }
 }

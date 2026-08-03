@@ -1,0 +1,89 @@
+<div class="landing">
+
+  <!-- ============ Top Bar ============ -->
+  <header class="landing-header">
+    <div class="landing-container header-row">
+      <div class="brand">
+        <mat-icon>forum</mat-icon>
+        <span>Chat App</span>
+      </div>
+      <nav class="header-actions">
+        <a mat-button routerLink="/auth/login" class="login-link">Login</a>
+        <a mat-raised-button color="primary" routerLink="/auth/register">Sign Up Free</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ Hero ============ -->
+  <section class="hero">
+    <div class="landing-container hero-row">
+      <div class="hero-text">
+        <h1>Talk freely.<br>Connect <span class="accent">instantly</span>.</h1>
+        <p class="hero-sub">
+          A fast, private, real-time chat platform — direct messages, groups,
+          presence, read receipts and smart notifications. All in one place.
+        </p>
+        <div class="hero-cta">
+          <a mat-raised-button color="primary" class="cta-main" routerLink="/auth/register">
+            Get Started — it's free
+          </a>
+          <a mat-stroked-button class="cta-secondary" routerLink="/auth/login">
+            I already have an account
+          </a>
+        </div>
+      </div>
+
+      <!-- Simple illustrative chat mock -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="mock-bubble left">
+          <span class="mock-avatar">JB</span>
+          <span class="mock-text">Hey! Are you on Chat App yet? 👋</span>
+        </div>
+        <div class="mock-bubble right">
+          <span class="mock-text">Just joined — this is fast! ⚡</span>
+        </div>
+        <div class="mock-bubble left small">
+          <span class="mock-avatar">SK</span>
+          <span class="mock-text">Group call later?</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Features ============ -->
+  <section class="features">
+    <div class="landing-container">
+      <h2>Everything you need to stay in touch</h2>
+      <div class="feature-grid">
+        <div class="feature-card" *ngFor="let f of features">
+          <div class="feature-icon"><mat-icon>{{ f.icon }}</mat-icon></div>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.text }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Bottom CTA ============ -->
+  <section class="bottom-cta">
+    <div class="landing-container cta-box">
+      <h2>Ready to start the conversation?</h2>
+      <p>Create your free account in less than a minute.</p>
+      <div class="hero-cta">
+        <a mat-raised-button color="primary" class="cta-main" routerLink="/auth/register">Create Account</a>
+        <a mat-button class="login-link-dark" routerLink="/auth/login">Login</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Footer ============ -->
+  <footer class="landing-footer">
+    <div class="landing-container footer-row">
+      <span>© 2026 Chat App</span>
+      <span class="footer-links">
+        <a routerLink="/auth/login">Login</a>
+        <a routerLink="/auth/register">Sign Up</a>
+      </span>
+    </div>
+  </footer>
+</div>

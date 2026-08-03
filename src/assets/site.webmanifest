@@ -1,0 +1,23 @@
+{
+  "name": "Chat Application",
+  "short_name": "Chat",
+  "description": "Real-time chat application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F1F6F4",
+  "theme_color": "#172B36",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

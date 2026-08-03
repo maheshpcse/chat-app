@@ -1,0 +1,81 @@
+<div class="admin-shell" [class.collapsed]="!sidenavOpen">
+  <aside class="admin-sidenav">
+    <div class="sidenav-brand">
+      <mat-icon>shield</mat-icon>
+      <div class="brand-text" *ngIf="sidenavOpen">
+        <strong>Admin</strong>
+        <span>Console</span>
+      </div>
+    </div>
+
+    <nav class="sidenav-nav">
+      <ng-container *ngFor="let item of navItems">
+        <ng-container *ngIf="item.children; else plainLink">
+          <button
+            type="button"
+            class="nav-item nav-group-toggle"
+            [class.active]="isGroupActive(item)"
+            [class.expanded]="item.expanded && sidenavOpen"
+            (click)="toggleGroup(item, $event)"
+            [matTooltip]="sidenavOpen ? '' : item.label"
+            matTooltipPosition="right">
+            <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+            <span *ngIf="sidenavOpen" class="nav-label">{{ item.label }}</span>
+            <mat-icon *ngIf="sidenavOpen" class="chevron">{{ item.expanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+          </button>
+          <div class="nav-children" [class.open]="item.expanded && sidenavOpen" [attr.aria-hidden]="!(item.expanded && sidenavOpen)">
+            <a *ngFor="let child of item.children"
+               class="nav-item child"
+               [routerLink]="child.route"
+               routerLinkActive="active"
+               [routerLinkActiveOptions]="{ exact: child.route === '/admin/faker' }"
+               [tabIndex]="item.expanded && sidenavOpen ? 0 : -1">
+              <mat-icon class="nav-icon">{{ child.icon }}</mat-icon>
+              <span class="nav-label">{{ child.label }}</span>
+            </a>
+          </div>
+        </ng-container>
+        <ng-template #plainLink>
+          <a class="nav-item"
+             [routerLink]="item.route"
+             routerLinkActive="active"
+             [routerLinkActiveOptions]="{ exact: item.exact === true }"
+             [matTooltip]="sidenavOpen ? '' : item.label"
+             matTooltipPosition="right">
+            <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+            <span *ngIf="sidenavOpen" class="nav-label">{{ item.label }}</span>
+          </a>
+        </ng-template>
+      </ng-container>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <button type="button" class="icon-btn" (click)="toggleSidenav()" aria-label="Toggle menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <div class="topbar-title">Platform Administration</div>
+
+      <div class="topbar-actions" *ngIf="admin as a">
+        <a class="topbar-admin" routerLink="/admin/profile" matTooltip="Admin profile">
+          <div class="admin-avatar">{{ a.firstName?.charAt(0) }}{{ a.lastName?.charAt(0) }}</div>
+          <div class="admin-meta">
+            <strong>{{ a.firstName }} {{ a.lastName }}</strong>
+            <span>{{ a.role }}</span>
+          </div>
+        </a>
+        <button type="button" class="logout-topbar" (click)="logout()" matTooltip="Logout">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <div class="route-animation-host" [@routeSlide]="getRouteKey(outlet)">
+        <router-outlet #outlet="outlet"></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>

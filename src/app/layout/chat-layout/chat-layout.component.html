@@ -1,0 +1,30 @@
+<div class="app-container">
+  <!-- Header -->
+  <app-header></app-header>
+
+  <!-- Body: general app nav (left) + chat-specific sidebar + chat window -->
+  <div class="chat-body">
+    <!-- Primary application navigation (respects the shared collapse state) -->
+    <app-app-side-menu class="app-nav"></app-app-side-menu>
+
+    <div class="chat-shell">
+
+      <!-- Chat Side Menu: conversations / contacts / requests / search -->
+      <aside class="chat-sidenav" [ngClass]="{'minimized': isSidebarMinimized}">
+        <app-sidebar (minimizedChange)="isSidebarMinimized = $event"></app-sidebar>
+      </aside>
+
+      <!-- Main Content: Chat Window -->
+      <main class="main-content">
+        <div class="route-animation-host" [@routeSlide]="getRouteKey(outlet)">
+          <router-outlet #outlet="outlet"></router-outlet>
+        </div>
+      </main>
+
+    </div>
+  </div>
+</div>
+
+<!-- Global Loader -->
+<!-- Global overlay loader disabled: shimmer skeletons are shown per-page instead.
+<app-loader></app-loader> -->

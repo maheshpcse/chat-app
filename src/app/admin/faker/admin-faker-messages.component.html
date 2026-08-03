@@ -1,0 +1,88 @@
+<div class="admin-page">
+  <a class="back-link" routerLink="/admin/faker"><mat-icon>arrow_back</mat-icon> Data Studio</a>
+  <div class="page-head">
+    <div>
+      <h2>Data Studio · Messages</h2>
+      <p>Uses existing conversations when possible; can create private pairs on save.</p>
+    </div>
+  </div>
+
+  <div class="card controls">
+    <div class="row">
+      <div class="field">
+        <label for="faker-msg-count">Count (1–500)</label>
+        <input id="faker-msg-count" type="number" min="1" max="500" [(ngModel)]="count">
+      </div>
+      <div class="field">
+        <label id="faker-msg-type-label">Type</label>
+        <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+          <mat-select aria-labelledby="faker-msg-type-label" [(ngModel)]="messageType">
+            <mat-option *ngFor="let o of typeOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn primary" (click)="generate()" [disabled]="loading">
+          Generate preview
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <app-shimmer *ngIf="loading" variant="list" [rows]="6"></app-shimmer>
+
+  <div class="card" *ngIf="messages.length && !loading">
+    <div class="preview-toolbar">
+      <div>
+        <strong>{{ messages.length }}</strong> messages in preview
+        <span class="muted" *ngIf="previewId"> · id {{ previewId | slice:0:8 }}…</span>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" (click)="discard()" [disabled]="saving">Discard</button>
+        <button type="button" class="btn success" (click)="saveToDb()" [disabled]="saving || !messages.length">
+          <span *ngIf="saving">Saving…</span>
+          <span *ngIf="!saving">Save to database</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Sender</th>
+            <th>Conversation</th>
+            <th>Type</th>
+            <th>Content</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of messages; trackBy: trackByTempId">
+            <td>{{ item.senderLabel || item.senderId }}</td>
+            <td>{{ item.conversationLabel || item.conversationId || 'new pair' }}</td>
+            <td>{{ item.messageType | titlecase }}</td>
+            <td class="clip">{{ item.content }}</td>
+            <td class="row-actions">
+              <button type="button" class="icon-action" matTooltip="Regenerate" (click)="regenerate(item)">
+                <mat-icon>autorenew</mat-icon>
+              </button>
+              <button type="button" class="icon-action danger" matTooltip="Remove" (click)="remove(item)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state card" *ngIf="!messages.length && !loading">
+    <mat-icon>chat</mat-icon>
+    <h3>No preview yet</h3>
+    <p>Generate sample messages, review, then save.</p>
+  </div>
+</div>

@@ -35,10 +35,18 @@ export class ConversationService {
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.http.get<IApiResponse<IConversation[]>>(
+    return this.http.get<any>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.CONVERSATIONS.BASE}`,
       { params }
-    ).pipe(map(response => response.data));
+    ).pipe(
+      map(response => {
+        const payload = response?.data ?? response;
+        if (Array.isArray(payload)) { return payload as IConversation[]; }
+        if (Array.isArray(payload?.conversations)) { return payload.conversations as IConversation[]; }
+        if (Array.isArray(payload?.items)) { return payload.items as IConversation[]; }
+        return [] as IConversation[];
+      })
+    );
   }
 
   getConversationById(conversationId: string): Observable<IConversation> {

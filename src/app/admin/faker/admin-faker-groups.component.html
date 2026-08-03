@@ -1,0 +1,103 @@
+<div class="admin-page">
+  <a class="back-link" routerLink="/admin/faker"><mat-icon>arrow_back</mat-icon> Data Studio</a>
+  <div class="page-head">
+    <div>
+      <h2>Data Studio · Groups</h2>
+      <p>Needs active users. Preview groups with members, then save.</p>
+    </div>
+  </div>
+
+  <div class="card controls">
+    <div class="row">
+      <div class="field">
+        <label for="faker-group-count">Count (1–50)</label>
+        <input id="faker-group-count" type="number" min="1" max="50" [(ngModel)]="count">
+      </div>
+      <div class="field">
+        <label for="faker-group-members">Members / group</label>
+        <input id="faker-group-members" type="number" min="2" max="30" [(ngModel)]="membersPerGroup">
+      </div>
+      <div class="actions">
+        <button type="button" class="btn primary" (click)="generate()" [disabled]="loading">
+          Generate preview
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <app-shimmer *ngIf="loading" variant="list" [rows]="5"></app-shimmer>
+
+  <div class="card" *ngIf="groups.length && !loading">
+    <div class="preview-toolbar">
+      <div>
+        <strong>{{ groups.length }}</strong> groups in preview
+        <span class="muted" *ngIf="previewId"> · id {{ previewId | slice:0:8 }}…</span>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" (click)="discard()" [disabled]="saving">Discard</button>
+        <button type="button" class="btn success" (click)="saveToDb()" [disabled]="saving || !groups.length">
+          <span *ngIf="saving">Saving…</span>
+          <span *ngIf="!saving">Save to database</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Owner</th>
+            <th>Members</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let group of groups; trackBy: trackByTempId">
+            <ng-container *ngIf="editingTempId !== group.tempId; else editRow">
+              <td>{{ group.name }}</td>
+              <td>{{ group.description || '—' }}</td>
+              <td>{{ group.createdByLabel || group.createdBy }}</td>
+              <td class="members">{{ memberSummary(group) }}</td>
+              <td class="row-actions">
+                <button type="button" class="icon-action" matTooltip="Edit" (click)="startEdit(group)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button type="button" class="icon-action" matTooltip="Regenerate" (click)="regenerate(group)">
+                  <mat-icon>autorenew</mat-icon>
+                </button>
+                <button type="button" class="icon-action danger" matTooltip="Remove" (click)="remove(group)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <ng-template #editRow>
+              <td colspan="5" class="edit-panel">
+                <div class="edit-grid">
+                  <label class="sr-only" [attr.for]="'edit-gname-' + group.tempId">Group name</label>
+                  <input [id]="'edit-gname-' + group.tempId" [(ngModel)]="editDraft.name" placeholder="Group name">
+                  <label class="sr-only" [attr.for]="'edit-gdesc-' + group.tempId">Description</label>
+                  <textarea [id]="'edit-gdesc-' + group.tempId" [(ngModel)]="editDraft.description" placeholder="Description"></textarea>
+                </div>
+                <div class="actions">
+                  <button type="button" class="btn ghost" (click)="cancelEdit()">Cancel</button>
+                  <button type="button" class="btn primary" (click)="saveEdit()">Save row</button>
+                </div>
+              </td>
+            </ng-template>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state card" *ngIf="!groups.length && !loading">
+    <mat-icon>groups</mat-icon>
+    <h3>No preview yet</h3>
+    <p>Generate sample groups from active users, review, then save.</p>
+  </div>
+</div>

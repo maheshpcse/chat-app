@@ -1,0 +1,68 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.chat-body {
+  flex: 1;
+  display: flex;
+  margin-top: 56px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-nav {
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.chat-shell {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-sidenav {
+  flex: 0 0 320px;
+  width: 320px;
+  border-right: 1px solid #e8eceb;
+  transition:
+    flex-basis 350ms cubic-bezier(0.25, 0.1, 0.25, 1),
+    width 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  overflow: hidden;
+
+  &.minimized {
+    flex-basis: 60px;
+    width: 60px;
+  }
+}
+
+.main-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  transition: flex-basis 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Anchor for the chat-content slide animation */
+.route-animation-host {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .chat-sidenav {
+    width: 100%;
+  }
+}

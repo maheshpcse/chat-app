@@ -22,24 +22,28 @@ export class PresenceService {
   private lastSeenMap: Map<string, number> = new Map();
 
   constructor(private socketService: SocketService) {
-    // Sync online users list
+    // Sync online users list (normalize ids to string)
     this.socketService.onlineUsers$.subscribe(users => {
-      this.onlineUsersSubject.next(new Set(users));
+      const normalized = (users || []).map(u => String(u));
+      this.onlineUsersSubject.next(new Set(normalized));
     });
 
     // Track when a user goes offline — store their lastSeen timestamp
     this.socketService.userOffline$.subscribe(data => {
-      this.lastSeenMap.set(data.userId, data.timestamp);
+      if (!data?.userId) { return; }
+      this.lastSeenMap.set(String(data.userId), data.timestamp);
     });
 
     // When user comes online, remove their lastSeen entry
     this.socketService.userOnline$.subscribe(data => {
-      this.lastSeenMap.delete(data.userId);
+      if (!data?.userId) { return; }
+      this.lastSeenMap.delete(String(data.userId));
     });
   }
 
   isOnline(userId: string): boolean {
-    return this.onlineUsersSubject.value.has(userId);
+    if (userId == null || userId === '') { return false; }
+    return this.onlineUsersSubject.value.has(String(userId));
   }
 
   getOnlineUserIds(): string[] {
@@ -51,8 +55,10 @@ export class PresenceService {
    * Returns null if the user is currently online or never tracked.
    */
   getLastSeen(userId: string): Date | null {
-    if (this.isOnline(userId)) { return null; }
-    const timestamp = this.lastSeenMap.get(userId);
+    if (userId == null || userId === '') { return null; }
+    const id = String(userId);
+    if (this.isOnline(id)) { return null; }
+    const timestamp = this.lastSeenMap.get(id);
     return timestamp ? new Date(timestamp) : null;
   }
 
@@ -60,9 +66,11 @@ export class PresenceService {
    * Get a human-readable "last seen" string.
    */
   getLastSeenDisplay(userId: string): string {
-    if (this.isOnline(userId)) { return 'Online'; }
+    if (userId == null || userId === '') { return 'Offline'; }
+    const id = String(userId);
+    if (this.isOnline(id)) { return 'Online'; }
 
-    const lastSeen = this.lastSeenMap.get(userId);
+    const lastSeen = this.lastSeenMap.get(id);
     if (!lastSeen) { return 'Offline'; }
 
     const diff = Date.now() - lastSeen;

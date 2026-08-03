@@ -3,67 +3,15 @@
 :host {
   display: block;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   background: $bg-primary;
 }
 
 .notifications-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: $spacing-xl $spacing-lg;
+  // width / centering / padding come from the shared .page-shell
 }
 
-// ==========================================
-// Page Header
-// ==========================================
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $spacing-lg;
-  flex-wrap: wrap;
-  gap: $spacing-md;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-
-  h1 {
-    font-family: $font-heading;
-    font-size: 24px;
-    font-weight: $fw-bold;
-    color: $text-primary;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-
-    mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
-      color: $nocturnal;
-    }
-  }
-}
-
-.unread-badge-lg {
-  font-family: $font-meta;
-  font-size: $fs-xs;
-  font-weight: $fw-semibold;
-  background: $deep-saffron;
-  color: $white;
-  padding: 4px 12px;
-  border-radius: $radius-pill;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-}
+// Page header styles are provided by the shared <app-page-header> component.
 
 .view-toggle {
   display: flex;
@@ -92,6 +40,7 @@
 // ==========================================
 .filter-bar {
   display: flex;
+  flex-shrink: 0;
   gap: $spacing-sm;
   margin-bottom: $spacing-xl;
   overflow-x: auto;
@@ -445,7 +394,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: $spacing-2xl * 2;
+  min-height: 55vh;          // center vertically in the available page area
+  padding: $spacing-2xl;
   text-align: center;
 
   mat-icon {
@@ -474,8 +424,63 @@
 // Responsive
 // ==========================================
 @media (max-width: 768px) {
-  .notifications-page { padding: $spacing-md; }
-  .page-header { flex-direction: column; align-items: flex-start; }
   .grid-view { grid-template-columns: 1fr; }
   .notif-table { font-size: $fs-xs; }
+}
+
+// ==========================================
+// Notifications page context shimmer (0.5s)
+// ==========================================
+@mixin notif-sk {
+  background: linear-gradient(90deg, #e8eceb 0%, #f4f7f6 45%, #e8eceb 100%);
+  background-size: 200% 100%;
+  animation: notifPageSk 1.15s ease-in-out infinite;
+}
+
+@keyframes notifPageSk {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.notif-page-shimmer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: $spacing-sm 0 $spacing-lg;
+  pointer-events: none;
+
+  .sk-row {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-md;
+    padding: $spacing-md $spacing-sm;
+  }
+
+  .sk-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    @include notif-sk;
+  }
+
+  .sk-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding-top: 4px;
+  }
+
+  .sk-line {
+    height: 12px;
+    border-radius: 6px;
+    @include notif-sk;
+
+    &.thin { height: 10px; }
+    &.w25 { width: 25%; }
+    &.w50 { width: 50%; }
+    &.w70 { width: 70%; }
+  }
 }

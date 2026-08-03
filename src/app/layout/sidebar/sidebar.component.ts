@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, skip } from 'rxjs/operators';
 import { ChatService } from '../../core/services/chat.service';
 import { SocketService } from '../../core/services/socket.service';
 import { UserService } from '../../core/services/user.service';
@@ -27,9 +27,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   // Conversations
   conversations: IConversation[] = [];
   conversationFilter: string = '';
+  isLoadingConversations = true;
+  activeConversationId: string | null = null;
 
   // Contacts
   contacts: IContact[] = [];
+  displayContacts: IContact[] = [];
   onlineUsers: string[] = [];
 
   // Requests
@@ -65,12 +68,27 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     // Subscribe to conversations
     this.subscriptions.push(
-      this.chatService.conversations$.subscribe(c => this.conversations = c)
+      this.chatService.conversations$.pipe(skip(1)).subscribe(c => {
+        this.conversations = c;
+        this.isLoadingConversations = false;
+      })
+    );
+
+    // Track active chat for sidemenu highlight / skip re-open
+    this.subscriptions.push(
+      this.chatService.activeConversation$.subscribe(conv => {
+        this.activeConversationId = conv?.conversationId
+          ? String(conv.conversationId)
+          : null;
+      })
     );
 
     // Subscribe to contacts
     this.subscriptions.push(
-      this.contactService.contacts$.subscribe(c => this.contacts = c)
+      this.contactService.contacts$.subscribe(c => {
+        this.contacts = c;
+        this.buildDisplayContacts();
+      })
     );
 
     // Subscribe to requests
@@ -78,12 +96,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.contactService.receivedRequests$.subscribe(r => this.receivedRequests = r)
     );
     this.subscriptions.push(
-      this.contactService.sentRequests$.subscribe(r => this.sentRequests = r)
+      this.contactService.sentRequests$.subscribe(r => {
+        this.sentRequests = r;
+        this.buildDisplayContacts();
+      })
     );
 
-    // Subscribe to online users
+    // Subscribe to online users (string ids)
     this.subscriptions.push(
-      this.socketService.onlineUsers$.subscribe(users => this.onlineUsers = users)
+      this.socketService.onlineUsers$.subscribe(users => {
+        this.onlineUsers = (users || []).map(u => String(u));
+      })
     );
 
     // Subscribe to real-time contact events
@@ -96,6 +119,19 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.socketService.contactAccepted$.subscribe(() => {
         this.contactService.getContacts().subscribe();
         this.chatService.loadConversations();
+      })
+    );
+    // Block / unblock / remove / accept → keep the accepted-contact list in sync.
+    this.subscriptions.push(
+      this.socketService.contactListUpdated$.subscribe(() => {
+        this.contactService.getContacts().subscribe();
+        this.contactService.getReceivedRequests().subscribe();
+        this.contactService.getSentRequests().subscribe();
+      })
+    );
+    this.subscriptions.push(
+      this.socketService.contactRejected$.subscribe(() => {
+        this.contactService.getSentRequests().subscribe();
       })
     );
 
@@ -199,13 +235,39 @@ export class SidebarComponent implements OnInit, OnDestroy {
   // ===========================
 
   selectConversation(conversation: IConversation): void {
+    // Already open — do not re-join room / re-fetch messages
+    const clickedId = conversation?.conversationId != null
+      ? String(conversation.conversationId)
+      : '';
+    if (this.activeConversationId && clickedId && clickedId === String(this.activeConversationId)) {
+      if (!this.router.url.startsWith('/chat')) {
+        this.router.navigate(['/chat']);
+      }
+      return;
+    }
     this.chatService.setActiveConversation(conversation);
-    // Navigate to chat page if not already there
     this.router.navigate(['/chat']);
   }
 
+  isConversationActive(conversation: IConversation): boolean {
+    if (!this.activeConversationId || !conversation?.conversationId) {
+      return false;
+    }
+    return String(conversation.conversationId) === String(this.activeConversationId);
+  }
+
   startChatWithContact(contact: IContact): void {
-    this.chatService.startPrivateConversation(contact.contactUserId).subscribe(
+    const displayName = `${contact.firstName || ''} ${contact.lastName || ''}`.trim()
+      || contact.username
+      || 'Unknown';
+    this.chatService.startPrivateConversation(contact.contactUserId, {
+      participantId: contact.contactUserId,
+      displayName,
+      firstName: contact.firstName,
+      lastName: contact.lastName,
+      username: contact.username,
+      avatarUrl: contact.avatarUrl
+    }).subscribe(
       () => {
         this.setTab('chats');
         // Navigate to chat page to show the conversation
@@ -219,8 +281,37 @@ export class SidebarComponent implements OnInit, OnDestroy {
   // Helpers
   // ===========================
 
-  isUserOnline(userId: string): boolean {
-    return this.onlineUsers.includes(userId);
+  isUserOnline(userId?: string | null): boolean {
+    if (userId == null || userId === '') { return false; }
+    const id = String(userId);
+    return this.onlineUsers.some(u => String(u) === id);
+  }
+
+  conversationLabel(conv: IConversation): string {
+    return this.chatService.getDisplayName(conv);
+  }
+
+  /** Merge accepted contacts + pending (sent-request) contacts for display. */
+  private buildDisplayContacts(): void {
+    const pending: IContact[] = this.sentRequests.map(r => ({
+      contactId: r.requestId,
+      contactUserId: r.receiverUserId,
+      status: 'pending',
+      firstName: r.firstName || '',
+      lastName: r.lastName || '',
+      username: r.username || '',
+      avatarUrl: r.avatarUrl,
+      createdAt: r.requestedAt
+    } as IContact));
+    const acceptedIds = new Set(this.contacts.map(c => c.contactUserId));
+    this.displayContacts = [
+      ...this.contacts,
+      ...pending.filter(p => !acceptedIds.has(p.contactUserId))
+    ];
+  }
+
+  isPending(contact: IContact): boolean {
+    return contact.status === 'pending';
   }
 
   filteredConversations(): IConversation[] {

@@ -1,0 +1,19 @@
+<div class="admin-page">
+  <div class="page-head">
+    <div>
+      <h2>Data Studio</h2>
+      <p>Preview-first generators. Open a sub-menu entity, build a form preview, then commit to the database.</p>
+    </div>
+  </div>
+
+  <div class="hub-grid">
+    <button type="button" class="hub-card" *ngFor="let card of cards" (click)="open(card)">
+      <div class="hub-icon">
+        <mat-icon>{{ card.icon }}</mat-icon>
+      </div>
+      <h3>{{ card.title }}</h3>
+      <p>{{ card.description }}</p>
+      <span class="go">Open <mat-icon>arrow_forward</mat-icon></span>
+    </button>
+  </div>
+</div>

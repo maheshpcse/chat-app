@@ -1,0 +1,116 @@
+<div class="admin-page">
+  <div class="page-head">
+    <div class="page-head-text">
+      <h2>Settings</h2>
+      <p>Admin console preferences and security notes</p>
+    </div>
+    <button type="button" class="btn ghost head-action" (click)="load()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <ng-container *ngIf="loading; else settingsLoaded">
+    <div class="card shimmer-card">
+      <div class="card-head">
+        <div class="sk-line w-35 title-line"></div>
+        <div class="sk-btn short"></div>
+      </div>
+      <div class="meta-grid">
+        <div *ngFor="let _ of [1,2,3,4]">
+          <div class="sk-line w-30 thin"></div>
+          <div class="sk-line w-65"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shimmer-card">
+      <div class="sk-line w-40 title-line"></div>
+      <div class="prefs">
+        <div class="sk-check"></div>
+        <div class="sk-check"></div>
+        <div class="field">
+          <div class="sk-line w-55 thin"></div>
+          <div class="sk-select"></div>
+        </div>
+        <div class="sk-btn"></div>
+      </div>
+    </div>
+
+    <div class="card notes shimmer-card">
+      <div class="sk-line w-35 title-line"></div>
+      <div class="sk-line w-90"></div>
+      <div class="sk-line w-85"></div>
+      <div class="sk-line w-80"></div>
+      <div class="sk-line w-70"></div>
+    </div>
+  </ng-container>
+
+  <ng-template #settingsLoaded>
+    <div class="card" *ngIf="admin as a">
+      <div class="card-head">
+        <h3>Account snapshot</h3>
+        <button type="button" class="btn ghost" (click)="goProfile()">View profile</button>
+      </div>
+      <dl class="meta-grid">
+        <div>
+          <dt>Name</dt>
+          <dd>{{ a.firstName }} {{ a.lastName }}</dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd>{{ a.email }}</dd>
+        </div>
+        <div>
+          <dt>Role</dt>
+          <dd>{{ a.role }}</dd>
+        </div>
+        <div *ngIf="a.lastLoginAt">
+          <dt>Last login</dt>
+          <dd>{{ a.lastLoginAt | date:'medium' }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h3>Console preferences</h3>
+      <div class="prefs">
+        <label class="check">
+          <input type="checkbox" [(ngModel)]="denseTables">
+          <span>Dense tables on list pages</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" [(ngModel)]="confirmBeforeSave">
+          <span>Confirm before saving Data Studio previews</span>
+        </label>
+        <div class="field">
+          <label id="default-faker-count-label">Default Data Studio count</label>
+          <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+            <mat-select aria-labelledby="default-faker-count-label" [(ngModel)]="defaultFakerCount">
+              <mat-option [value]="5">5</mat-option>
+              <mat-option [value]="10">10</mat-option>
+              <mat-option [value]="20">20</mat-option>
+              <mat-option [value]="50">50</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn primary" (click)="savePrefs()">Save preferences</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card notes">
+      <h3>Security notes</h3>
+      <ul>
+        <li>Admin JWT secrets are separate from chat user tokens.</li>
+        <li>Data Studio generators run only on the backend (<code>@faker-js/faker</code>).</li>
+        <li>No admin entry is exposed in the public chat app navigation.</li>
+        <li>Default seed: <code>admin@chatapp.com</code> / <code>Admin@12345</code> (change in production).</li>
+      </ul>
+    </div>
+  </ng-template>
+</div>

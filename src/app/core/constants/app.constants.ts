@@ -13,5 +13,9 @@ export const APP_CONSTANTS = {
   ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   TOKEN_KEY: 'chat_access_token',
   REFRESH_TOKEN_KEY: 'chat_refresh_token',
-  USER_KEY: 'chat_current_user'
+  USER_KEY: 'chat_current_user',
+  // Admin panel — isolated storage keys (never mix with chat user session)
+  ADMIN_TOKEN_KEY: 'admin_access_token',
+  ADMIN_REFRESH_TOKEN_KEY: 'admin_refresh_token',
+  ADMIN_USER_KEY: 'admin_current_user'
 };

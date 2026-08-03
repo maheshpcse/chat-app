@@ -50,8 +50,8 @@ export class LoginComponent implements OnInit {
 
     // Initialize Reactive Form
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      email: ['maheshpm1599@gmail.com', [Validators.required, Validators.email]],
+      password: ['Pmahesh@1769', [Validators.required, Validators.minLength(6)]]
     });
   }
 

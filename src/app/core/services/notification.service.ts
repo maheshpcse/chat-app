@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, of } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
 import { INotification } from '../models/notification.model';
 import { IApiResponse } from '../models/api-response.model';
 import { SocketService } from './socket.service';
@@ -47,14 +47,19 @@ export class NotificationService {
    * Load notifications from server on app init.
    */
   loadNotifications(page: number = 1, limit: number = 20): Observable<INotification[]> {
-    return this.http.get<IApiResponse<INotification[]>>(
+    return this.http.get<any>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.NOTIFICATIONS.BASE}`,
-      { params: { page: page.toString(), limit: limit.toString() } }
+      { params: { page: page.toString(), limit: limit.toString(), includeRead: 'true' } }
     ).pipe(
-      map(response => response.data),
+      map(response => this.extractNotifications(response)),
       tap(notifications => {
         this.notificationsSubject.next(notifications);
         this.recalculateUnread(notifications);
+      }),
+      catchError(() => {
+        this.notificationsSubject.next([]);
+        this.recalculateUnread([]);
+        return of([]);
       })
     );
   }
@@ -63,11 +68,15 @@ export class NotificationService {
    * Fetch unread count from server.
    */
   loadUnreadCount(): Observable<number> {
-    return this.http.get<IApiResponse<{ unreadCount: number }>>(
+    return this.http.get<any>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT}`
     ).pipe(
-      map(response => response.data.unreadCount),
-      tap(count => this.unreadCountSubject.next(count))
+      map(response => this.extractUnreadCount(response)),
+      tap(count => this.unreadCountSubject.next(count)),
+      catchError(() => {
+        this.unreadCountSubject.next(0);
+        return of(0);
+      })
     );
   }
 
@@ -75,26 +84,35 @@ export class NotificationService {
    * Add a notification locally (from socket push).
    */
   addNotification(notification: INotification): void {
+    const normalized = this.normalize(notification);
     const current = this.notificationsSubject.value;
-    this.notificationsSubject.next([notification, ...current]);
+    this.notificationsSubject.next([normalized, ...current]);
     this.unreadCountSubject.next(this.unreadCountSubject.value + 1);
-    this.newNotificationSubject.next(notification);
+    this.newNotificationSubject.next(normalized);
   }
 
   /**
    * Mark single notification as read (HTTP + local update).
    */
   markAsRead(notificationId: string): void {
+    if (!notificationId) { return; }
+    const id = String(notificationId);
+
+    // Optimistic local clear so badge drops immediately
+    const current = this.notificationsSubject.value;
+    const updated = current.map(n =>
+      String(n.id || n.notificationId || '') === id ? { ...n, isRead: true } : n
+    );
+    this.notificationsSubject.next(updated);
+    this.recalculateUnread(updated);
+
     this.http.put(
-      `${environment.apiBaseUrl}${API_ENDPOINTS.NOTIFICATIONS.READ}/${notificationId}/read`,
+      `${environment.apiBaseUrl}${API_ENDPOINTS.NOTIFICATIONS.READ}/${id}/read`,
       {}
-    ).subscribe(() => {
-      const current = this.notificationsSubject.value;
-      const updated = current.map(n =>
-        n.id === notificationId ? { ...n, isRead: true } : n
-      );
-      this.notificationsSubject.next(updated);
-      this.recalculateUnread(updated);
+    ).subscribe({
+      error: () => {
+        // keep optimistic read state; badge already cleared
+      }
     });
   }
 
@@ -132,6 +150,35 @@ export class NotificationService {
   private recalculateUnread(notifications: INotification[]): void {
     const unread = notifications.filter(n => !n.isRead).length;
     this.unreadCountSubject.next(unread);
+  }
+
+  private extractNotifications(response: any): INotification[] {
+    const payload = response?.data ?? response?.notifications ?? response ?? [];
+    const list = Array.isArray(payload) ? payload : (payload?.items ?? payload?.results ?? []);
+    return (list || []).map(n => this.normalize(n));
+  }
+
+  private extractUnreadCount(response: any): number {
+    const payload = response?.data ?? response;
+    const count = payload?.unreadCount ?? payload?.count ?? payload?.unread ?? 0;
+    return typeof count === 'number' ? count : Number(count || 0);
+  }
+
+  /**
+   * Normalizes a server/socket notification to the shape the UI expects:
+   * maps notificationId->id and body->message, coerces isRead to boolean.
+   */
+  private normalize(n: any): INotification {
+    const title = n.title || n.message || n.body || 'Notification';
+    const body = n.body || n.message || n.title || '';
+    return {
+      ...n,
+      id: n.id || n.notificationId || n._id,
+      title,
+      message: body,
+      isRead: n.isRead === true || n.isRead === 1 || n.read === true,
+      createdAt: n.createdAt ? new Date(n.createdAt) : new Date()
+    } as INotification;
   }
 
   private listenToSocketNotifications(): void {

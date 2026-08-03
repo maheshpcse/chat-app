@@ -24,6 +24,20 @@ export enum MessageType {
   VIDEO = 'video'
 }
 
+/**
+ * Delivery/read lifecycle for a sent message.
+ * Mirrors the backend messageStatus states.
+ */
+export enum MessageStatus {
+  SCHEDULED = 'scheduled',
+  SENDING = 'sending',
+  SENT = 'sent',
+  DELIVERED = 'delivered',
+  SEEN = 'seen',
+  READ = 'read',
+  FAILED = 'failed'
+}
+
 export interface ISendMessage {
   conversationId: string;
   content: string;
@@ -35,5 +49,7 @@ export interface ITypingEvent {
   conversationId: string;
   userId: string;
   username: string;
+  /** First + Last when provided by socket */
+  displayName?: string;
   isTyping: boolean;
 }

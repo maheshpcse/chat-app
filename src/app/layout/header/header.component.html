@@ -1,30 +1,12 @@
 <mat-toolbar color="primary" class="app-header">
   <span class="app-title clickable" routerLink="/dashboard">Chat App</span>
 
-  <!-- Main Navigation Links -->
-  <nav class="main-nav">
-    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-      <mat-icon>dashboard</mat-icon>
-      <span>Dashboard</span>
-    </a>
-    <a routerLink="/chat" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-      <mat-icon>chat</mat-icon>
-      <span>Chat</span>
-    </a>
-    <a routerLink="/contacts" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-      <mat-icon>people</mat-icon>
-      <span>Contacts</span>
-    </a>
-    <a routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-      <mat-icon>settings</mat-icon>
-      <span>Settings</span>
-    </a>
-  </nav>
+  <!-- Primary navigation lives in the left app side-menu (not the header). -->
 
   <span class="spacer"></span>
 
   <!-- Notification Bell -->
-  <button mat-icon-button (click)="toggleNotifications()"
+  <button #notificationButton mat-icon-button (click)="toggleNotifications(); $event.stopPropagation()"
           [matBadge]="unreadNotifications > 0 ? unreadNotifications : null"
           matBadgeColor="warn"
           matBadgeSize="small"
@@ -32,38 +14,57 @@
     <mat-icon>notifications</mat-icon>
   </button>
 
-  <!-- User Avatar / Menu -->
-  <button mat-icon-button [matMenuTriggerFor]="userMenu" *ngIf="currentUser" class="user-avatar-btn">
-    <div class="header-avatar" *ngIf="!currentUser.avatarUrl">
-      {{ getUserInitials() }}
-    </div>
-    <img *ngIf="currentUser.avatarUrl" [src]="currentUser.avatarUrl"
-         class="header-avatar-img" alt="Profile">
+  <!-- User Avatar / Profile panel trigger -->
+  <button #profileButton mat-icon-button *ngIf="currentUser" class="user-avatar-btn"
+          (click)="toggleProfileMenu(); $event.stopPropagation()"
+          matTooltip="Profile">
+    <span class="header-avatar-wrap">
+      <div class="header-avatar" *ngIf="!currentUser.avatarUrl">
+        {{ getUserInitials() }}
+      </div>
+      <img *ngIf="currentUser.avatarUrl" [src]="currentUser.avatarUrl"
+           class="header-avatar-img" alt="Profile">
+      <span class="header-online-dot" [class.is-online]="isSelfOnline"
+            [attr.title]="isSelfOnline ? 'Online' : 'Offline'"></span>
+    </span>
   </button>
-
-  <mat-menu #userMenu="matMenu">
-    <div class="user-info-panel">
-      <strong>{{ currentUser?.firstName }} {{ currentUser?.lastName }}</strong>
-      <small>{{ currentUser?.email }}</small>
-    </div>
-    <mat-divider></mat-divider>
-    <button mat-menu-item (click)="goToProfile()">
-      <mat-icon>person</mat-icon>
-      <span>Profile</span>
-    </button>
-    <button mat-menu-item (click)="onLogout()">
-      <mat-icon>logout</mat-icon>
-      <span>Logout</span>
-    </button>
-  </mat-menu>
 </mat-toolbar>
 
-<!-- Notification Panel (dropdown) -->
-<div class="notification-panel" *ngIf="showNotifications" (appClickOutside)="showNotifications = false">
-  <div class="notif-panel-header">
-    <h5>Notifications</h5>
-    <button mat-button color="primary" (click)="viewAllNotifications()">View All</button>
+<!-- Notification Panel (dropdown with caret) — fade in/out like profile panel -->
+<div #notificationPanel class="notification-panel"
+     *ngIf="showNotifications"
+     [class.closing]="panelClosing"
+     (mouseenter)="onPanelMouseEnter()"
+     (mouseleave)="onPanelMouseLeave()">
+  <div class="notification-caret"></div>
+  <app-notification-list
+    (viewAll)="viewAllNotifications()"
+    (itemOpen)="onNotificationItemOpen()">
+  </app-notification-list>
+</div>
+
+<!-- Profile Panel — same fade open/close motion as notification bell -->
+<div #profilePanel class="profile-panel"
+     *ngIf="showProfileMenu"
+     [class.closing]="profileMenuClosing"
+     (mouseenter)="onProfilePanelMouseEnter()"
+     (mouseleave)="onProfilePanelMouseLeave()">
+  <div class="profile-caret"></div>
+  <div class="user-info-panel">
+    <strong>{{ currentUser?.firstName }} {{ currentUser?.lastName }}</strong>
+    <small>{{ currentUser?.email }}</small>
+    <span class="self-presence" [class.is-online]="isSelfOnline">
+      <span class="self-presence-dot"></span>
+      {{ isSelfOnline ? 'Online' : 'Offline' }}
+    </span>
   </div>
   <mat-divider></mat-divider>
-  <app-notification-list></app-notification-list>
+  <button type="button" class="profile-menu-item" (click)="goToProfile()">
+    <mat-icon>person</mat-icon>
+    <span>Profile</span>
+  </button>
+  <button type="button" class="profile-menu-item" (click)="onLogout()">
+    <mat-icon>logout</mat-icon>
+    <span>Logout</span>
+  </button>
 </div>
