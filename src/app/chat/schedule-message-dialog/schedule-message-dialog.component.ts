@@ -20,8 +20,8 @@ import { ICreateScheduledMessage } from '../../core/models/scheduled-message.mod
 export class ScheduleMessageDialogComponent implements OnInit {
 
   scheduleForm: FormGroup;
-  isSubmitting: boolean = false;
-  errorMessage: string = '';
+  isSubmitting = false;
+  errorMessage = '';
   minDate: string;
   minTime: string;
 

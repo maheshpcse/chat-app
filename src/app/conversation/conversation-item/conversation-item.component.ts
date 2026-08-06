@@ -18,7 +18,7 @@ import { IConversation, ConversationType } from '../../core/models/conversation.
 export class ConversationItemComponent {
 
   @Input() conversation: IConversation;
-  @Input() isOnline: boolean = false;
+  @Input() isOnline = false;
   @Input() currentUserId: string;
 
   getDisplayName(): string {

@@ -26,8 +26,8 @@ export class NewConversationComponent implements OnInit {
 
   searchControl = new FormControl('');
   searchResults: IUser[] = [];
-  isSearching: boolean = false;
-  isCreating: boolean = false;
+  isSearching = false;
+  isCreating = false;
   private searchSubject = new Subject<string>();
 
   constructor(

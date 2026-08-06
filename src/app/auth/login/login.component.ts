@@ -24,9 +24,9 @@ import { SocketService } from '../../core/services/socket.service';
 export class LoginComponent implements OnInit {
 
   loginForm: FormGroup;
-  errorMessage: string = '';
-  isLoading: boolean = false;
-  hidePassword: boolean = true;
+  errorMessage = '';
+  isLoading = false;
+  hidePassword = true;
   private returnUrl: string;
 
   constructor(

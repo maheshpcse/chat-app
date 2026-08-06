@@ -23,8 +23,8 @@ import { IMessage, MessageType } from '../../core/models/message.model';
 export class MessageBubbleComponent {
 
   @Input() message: IMessage;
-  @Input() isOwn: boolean = false;
-  @Input() isGroupChat: boolean = false;
+  @Input() isOwn = false;
+  @Input() isGroupChat = false;
 
   MessageType = MessageType; // Expose enum to template
 

@@ -31,13 +31,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   @ViewChild('profilePanel', { static: false }) profilePanel: ElementRef<HTMLElement>;
 
   currentUser: IUser | null = null;
-  unreadNotifications: number = 0;
-  showNotifications: boolean = false;
-  showProfileMenu: boolean = false;
-  panelClosing: boolean = false;
-  profileMenuClosing: boolean = false;
+  unreadNotifications = 0;
+  showNotifications = false;
+  showProfileMenu = false;
+  panelClosing = false;
+  profileMenuClosing = false;
   /** Logged-in user is connected via socket → show Online in profile popup + avatar dot. */
-  isSelfOnline: boolean = false;
+  isSelfOnline = false;
   private hideTimer: any = null;
   private profileHideTimer: any = null;
   /** Keep in sync with header-panel fade CSS duration. */

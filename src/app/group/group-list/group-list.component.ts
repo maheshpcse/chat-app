@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
 export class GroupListComponent implements OnInit {
 
   groups: IGroup[] = [];
-  isLoading: boolean = true;
+  isLoading = true;
 
   constructor(
     private groupService: GroupService,

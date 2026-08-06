@@ -88,11 +88,11 @@ import { getInitials, getAvatarColor } from '../../utilities/avatar-initials.uti
   `]
 })
 export class AvatarComponent {
-  @Input() imageUrl: string = '';
-  @Input() name: string = '';
+  @Input() imageUrl = '';
+  @Input() name = '';
   @Input() size: 'xs' | 'sm' | 'md' | 'lg' = 'md';
-  @Input() isOnline: boolean = false;
-  @Input() showStatus: boolean = true;
+  @Input() isOnline = false;
+  @Input() showStatus = true;
 
   get hasImage(): boolean {
     return !!this.imageUrl;

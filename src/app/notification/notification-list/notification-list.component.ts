@@ -19,7 +19,7 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   @Output() itemOpen = new EventEmitter<void>();
 
   notifications: INotification[] = [];
-  unreadCount: number = 0;
+  unreadCount = 0;
   isLoading = true;
   private subscriptions: Subscription[] = [];
 
