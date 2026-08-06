@@ -255,9 +255,12 @@ export class SocketService {
     });
 
     // Delivery receipts
-    this.socket.on(SOCKET_EVENTS.MESSAGE_DELIVERED, (data: { messageId: string; conversationId: string; status: string; deliveredTo: string }) => {
-      this.deliveredReceiptSubject.next(data);
-    });
+    this.socket.on(
+      SOCKET_EVENTS.MESSAGE_DELIVERED,
+      (data: { messageId: string; conversationId: string; status: string; deliveredTo: string }) => {
+        this.deliveredReceiptSubject.next(data);
+      }
+    );
 
     // Notifications
     this.socket.on(SOCKET_EVENTS.NOTIFICATION, (notification: any) => {

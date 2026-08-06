@@ -99,7 +99,11 @@ export class AdminApiService {
   }
 
   // Contacts
-  generateContacts(body: { count: number; mode?: string }): Observable<{ previewId: string; contacts: IFakerPreviewContact[]; expiresInMinutes: number }> {
+  generateContacts(body: { count: number; mode?: string }): Observable<{
+    previewId: string;
+    contacts: IFakerPreviewContact[];
+    expiresInMinutes: number;
+  }> {
     return this.http.post<IApiResponse<any>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.ADMIN.FAKER.CONTACTS_GENERATE}`, body
     ).pipe(map(r => r.data));
@@ -124,7 +128,11 @@ export class AdminApiService {
   }
 
   // Groups
-  generateGroups(body: { count: number; membersPerGroup?: number }): Observable<{ previewId: string; groups: IFakerPreviewGroup[]; expiresInMinutes: number }> {
+  generateGroups(body: { count: number; membersPerGroup?: number }): Observable<{
+    previewId: string;
+    groups: IFakerPreviewGroup[];
+    expiresInMinutes: number;
+  }> {
     return this.http.post<IApiResponse<any>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.ADMIN.FAKER.GROUPS_GENERATE}`, body
     ).pipe(map(r => r.data));
@@ -155,7 +163,11 @@ export class AdminApiService {
   }
 
   // Messages
-  generateMessages(body: { count: number; messageType?: string }): Observable<{ previewId: string; messages: IFakerPreviewMessage[]; expiresInMinutes: number }> {
+  generateMessages(body: { count: number; messageType?: string }): Observable<{
+    previewId: string;
+    messages: IFakerPreviewMessage[];
+    expiresInMinutes: number;
+  }> {
     return this.http.post<IApiResponse<any>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.ADMIN.FAKER.MESSAGES_GENERATE}`, body
     ).pipe(map(r => r.data));

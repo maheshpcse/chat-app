@@ -300,9 +300,9 @@ export class ContactsComponent implements OnInit, OnDestroy {
     // Sort by letter
     this.groupedContacts = Array.from(map.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([letter, contacts]) => ({
+      .map(([letter, letterContacts]) => ({
         letter,
-        contacts: contacts.sort((a, b) => a.firstName.localeCompare(b.firstName))
+        contacts: letterContacts.sort((a, b) => a.firstName.localeCompare(b.firstName))
       }));
   }
 
