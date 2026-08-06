@@ -26,7 +26,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   activeConversation: IConversation | null = null;
   typingUsers: ITypingEvent[] = [];
   currentUserId: string | null = null;
-  showProfileSidebar: boolean = false;
+  showProfileSidebar = false;
   sidebarUser: IUser | null = null;
   groupMembers: any[] = [];
 

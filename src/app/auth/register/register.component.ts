@@ -24,10 +24,10 @@ import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.val
 export class RegisterComponent implements OnInit {
 
   registerForm: FormGroup;
-  errorMessage: string = '';
-  isLoading: boolean = false;
-  hidePassword: boolean = true;
-  hideConfirmPassword: boolean = true;
+  errorMessage = '';
+  isLoading = false;
+  hidePassword = true;
+  hideConfirmPassword = true;
 
   constructor(
     private fb: FormBuilder,

@@ -26,7 +26,7 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
   conversations: IConversation[] = [];
   onlineUsers: string[] = [];
-  isLoading: boolean = true;
+  isLoading = true;
   currentUserId: string;
   private subscriptions: Subscription[] = [];
 

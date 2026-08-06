@@ -14,8 +14,8 @@ export class EmojiPickerComponent {
   @Output() emojiSelected = new EventEmitter<string>();
   @Output() closePicker = new EventEmitter<void>();
 
-  activeCategory: string = 'smileys';
-  searchTerm: string = '';
+  activeCategory = 'smileys';
+  searchTerm = '';
   recentEmojis: string[] = [];
 
   categories = [

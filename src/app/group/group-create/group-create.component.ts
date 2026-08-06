@@ -28,8 +28,8 @@ export class GroupCreateComponent implements OnInit {
   searchResults: IUser[] = [];
   selectedMembers: IUser[] = [];
   searchSubject = new Subject<string>();
-  isLoading: boolean = false;
-  errorMessage: string = '';
+  isLoading = false;
+  errorMessage = '';
 
   constructor(
     private fb: FormBuilder,

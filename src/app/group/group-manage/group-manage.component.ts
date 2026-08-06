@@ -23,8 +23,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 export class GroupManageComponent implements OnInit {
 
   group: IGroup;
-  isOwner: boolean = false;
-  isLoading: boolean = true;
+  isOwner = false;
+  isLoading = true;
   currentUserId: string;
 
   constructor(
