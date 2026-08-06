@@ -31,9 +31,13 @@ All paths relative to **Chat App** repo root (`chat-app`):
 
 | File | Purpose |
 |------|---------|
-| [`.github/workflows/angular.yml`](.github/workflows/angular.yml) | CI: cache → install → lint → test → prod build → GitHub Pages deploy |
+| [`.github/workflows/angular.yml`](.github/workflows/angular.yml) | CI: cache → install → lint → test → prod build → **maintenance deploy** → app deploy |
+| [`maintenance/index.html`](maintenance/index.html) | Premium light-theme maintenance page (app palette; zero framework weight) |
+| [`scripts/deploy-with-maintenance.ps1`](scripts/deploy-with-maintenance.ps1) | Local/VPS: maintenance → copy dist → live (PowerShell) |
+| [`scripts/deploy-with-maintenance.sh`](scripts/deploy-with-maintenance.sh) | Local/VPS: same flow (bash) |
+| [`scripts/docker-entrypoint.sh`](scripts/docker-entrypoint.sh) | Nginx image: `MAINTENANCE_MODE=1` serves maintenance page |
 | [`Dockerfile`](Dockerfile) | Multi-stage Node build + Nginx runtime (VPS/Docker alternative to Pages) |
-| [`nginx.conf`](nginx.conf) | SPA routing, cache headers, `/health` for containers |
+| [`nginx.conf`](nginx.conf) | SPA routing, cache headers, `/health`, no-store on `index.html` |
 | [`.dockerignore`](.dockerignore) | Keeps image small / secrets out of build context |
 | [`.env.example`](.env.example) | Documents public URLs / base-href (Angular uses `environment.*.ts`, not dotenv) |
 | [`DEPLOYMENT.md`](DEPLOYMENT.md) | This guide |
@@ -63,9 +67,24 @@ Workflow file: `.github/workflows/angular.yml`
 8. **Copy `index.html` → `404.html`** — SPA deep-link fallback on GitHub Pages.  
 9. **Upload artifact** `angular-dist` — hand-off to deploy job.
 
+### Job `deploy-maintenance` (push to `main` only)
+1. Checkout repo (needs `maintenance/index.html`).  
+2. Stage a **tiny static site**: copy maintenance HTML → `index.html` + `404.html`, add `.nojekyll` + `.maintenance` marker.  
+3. **configure-pages / upload-pages-artifact / deploy-pages** — visitors now see the premium hold screen.  
+4. **Sleep ~20s** so Pages/CDN can pick up maintenance before the app bundle overwrites it.
+
 ### Job `deploy` (push to `main` only)
-1. Download artifact.  
-2. **configure-pages / upload-pages-artifact / deploy-pages** — official GitHub Pages Actions (OIDC, no PA token).  
+1. Download Angular `angular-dist` artifact.  
+2. **configure-pages / upload-pages-artifact / deploy-pages** — production SPA replaces maintenance.  
+3. Maintenance page auto-reload script detects `app-root` and refreshes users into the new app.
+
+### Why maintenance during deploy?
+| Question | Answer |
+|----------|--------|
+| Possible on GitHub Pages? | **Yes** — two sequential `deploy-pages` jobs (maintenance first, app second). |
+| What users see mid-deploy? | Light premium page: arctic/mint/nocturnal/forsytha tokens, “We’ll be right back”. |
+| After cutover? | Page probes `index.html`; when Angular shell is live, full reload. |
+| Docker/VPS? | `MAINTENANCE_MODE=1` or `scripts/deploy-with-maintenance.*` |
 
 ### Caching strategy (frontend)
 - npm download cache via `actions/cache` on `~/.npm`.  
@@ -190,6 +209,35 @@ Re-run failed job: Actions → run → **Re-run failed jobs**.
 docker build --build-arg BASE_HREF=/ -t chat-app-fe .
 docker run --rm -p 8080:80 chat-app-fe
 # http://localhost:8080  health: http://localhost:8080/health
+
+# Temporary maintenance without rebuild:
+docker run --rm -p 8080:80 -e MAINTENANCE_MODE=1 chat-app-fe
+```
+
+### Local / VPS file deploy with maintenance window
+
+```powershell
+# Dry-run
+.\scripts\deploy-with-maintenance.ps1
+
+# Apply to a web root (after you already have dist/chat-app)
+.\scripts\deploy-with-maintenance.ps1 -TargetPath 'C:\inetpub\wwwroot\chat-app'
+
+# Optional: script may run build if you pass -Build (agent does not run ng build by default)
+```
+
+```bash
+chmod +x scripts/deploy-with-maintenance.sh scripts/docker-entrypoint.sh
+./scripts/deploy-with-maintenance.sh --target /var/www/chat-app
+```
+
+### Preview maintenance page locally (no build)
+
+Open `maintenance/index.html` in a browser, or:
+
+```bash
+npx --yes serve maintenance -p 4173
+# http://localhost:4173
 ```
 
 ---
@@ -214,13 +262,16 @@ GitHub Actions (angular.yml)
   ├─ unit tests (ChromeHeadless)
   ├─ ng build --prod --base-href=/chat-app/
   ├─ 404.html + .nojekyll
-  └─ deploy-pages
+  ├─ deploy-pages #1 → maintenance/index.html  (browsers see hold screen)
+  ├─ short hold (~20s)
+  └─ deploy-pages #2 → dist/chat-app           (live SPA)
         │
         ▼
 GitHub Pages
   └─ https://maheshpcse.github.io/chat-app/
         │
-        ├─ browser loads SPA
+        ├─ mid-deploy: premium maintenance page
+        ├─ after cutover: SPA (auto-refresh from maintenance)
         └─ API/WebSocket → Render backend (chat-system)
 ```
 

@@ -27,11 +27,21 @@ RUN rm -f /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=build /app/dist/chat-app /usr/share/nginx/html
+# Premium maintenance page (swapped in when MAINTENANCE_MODE=1)
+COPY maintenance/index.html /usr/share/nginx/maintenance/index.html
+COPY scripts/docker-entrypoint.sh /docker-entrypoint-chat.sh
+RUN chmod +x /docker-entrypoint-chat.sh \
+  && cp /usr/share/nginx/html/index.html /usr/share/nginx/html/index.html.app
 
 # Non-root-friendly: nginx master still root, workers drop privileges
 EXPOSE 80
 
+# Toggle at runtime without rebuild:
+#   docker run -e MAINTENANCE_MODE=1 ...
+# or touch a bind-mounted .maintenance file in the html root
+ENV MAINTENANCE_MODE=0
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -qO- http://127.0.0.1/health || exit 1
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint-chat.sh"]
