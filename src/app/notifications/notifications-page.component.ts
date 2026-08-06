@@ -20,8 +20,8 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   filteredNotifications: INotification[] = [];
   isLoading = true;
   viewMode: 'timeline' | 'list' | 'grid' | 'table' = 'timeline';
-  filterType: string = 'all';
-  unreadCount: number = 0;
+  filterType = 'all';
+  unreadCount = 0;
 
   filterTypes = [
     { value: 'all', label: 'All', icon: 'notifications' },

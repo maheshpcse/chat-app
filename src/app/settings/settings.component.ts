@@ -17,7 +17,7 @@ import { IUser } from '../core/models/user.model';
 export class SettingsComponent implements OnInit {
 
   currentUser: IUser | null = null;
-  activeSection: string = 'profile';
+  activeSection = 'profile';
 
   // Forms
   profileForm: FormGroup;
@@ -45,14 +45,14 @@ export class SettingsComponent implements OnInit {
   };
 
   // Theme
-  themePreference: string = 'light';
+  themePreference = 'light';
 
   // State
-  isProfileSaving: boolean = false;
-  isPasswordSaving: boolean = false;
-  hideCurrentPassword: boolean = true;
-  hideNewPassword: boolean = true;
-  hideConfirmPassword: boolean = true;
+  isProfileSaving = false;
+  isPasswordSaving = false;
+  hideCurrentPassword = true;
+  hideNewPassword = true;
+  hideConfirmPassword = true;
 
   sections = [
     { id: 'profile', label: 'Profile', icon: 'person' },

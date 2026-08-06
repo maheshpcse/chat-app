@@ -21,12 +21,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   @Output() minimizedChange = new EventEmitter<boolean>();
 
   // State
-  isMinimized: boolean = false;
+  isMinimized = false;
   activeTab: 'chats' | 'contacts' | 'requests' | 'search' = 'chats';
 
   // Conversations
   conversations: IConversation[] = [];
-  conversationFilter: string = '';
+  conversationFilter = '';
   isLoadingConversations = true;
   activeConversationId: string | null = null;
 
@@ -40,9 +40,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   sentRequests: IContactRequest[] = [];
 
   // User search
-  searchQuery: string = '';
+  searchQuery = '';
   searchResults: IUser[] = [];
-  isSearching: boolean = false;
+  isSearching = false;
 
   private searchSubject = new Subject<string>();
   private subscriptions: Subscription[] = [];

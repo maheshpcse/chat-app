@@ -23,8 +23,8 @@ import { IMessage, MessageType } from '../../core/models/message.model';
 export class MessageBubbleComponent {
 
   @Input() message: IMessage;
-  @Input() isOwn: boolean = false;
-  @Input() isGroupChat: boolean = false;
+  @Input() isOwn = false;
+  @Input() isGroupChat = false;
 
   MessageType = MessageType; // Expose enum to template
 
@@ -85,7 +85,7 @@ export class MessageBubbleComponent {
     const colors = ['#114C5A', '#FF9932', '#FFC801', '#2E7D32', '#5E35B1', '#C62828', '#00838F', '#AD1457'];
     let hash = 0;
     for (let i = 0; i < this.message.senderId.length; i++) {
-      hash = this.message.senderId.charCodeAt(i) + ((hash << 5) - hash);
+      hash = this.message.senderId.charCodeAt(i) + Math.imul(hash, 31);
     }
     return colors[Math.abs(hash) % colors.length];
   }

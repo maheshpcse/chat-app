@@ -31,16 +31,16 @@ export class ContactsComponent implements OnInit, OnDestroy {
   contacts: IContact[] = [];
   filteredContacts: IContact[] = [];
   groupedContacts: IContactGroup[] = [];
-  searchTerm: string = '';
-  showSearchDropdown: boolean = false;
+  searchTerm = '';
+  showSearchDropdown = false;
   viewMode: 'list' | 'grid' | 'table' = 'list';
-  isLoading: boolean = true;
+  isLoading = true;
 
   // Add-people / friend-request state
-  showAddPanel: boolean = false;
-  userSearchQuery: string = '';
+  showAddPanel = false;
+  userSearchQuery = '';
   searchResults: IUser[] = [];
-  searching: boolean = false;
+  searching = false;
   receivedRequests: IContactRequest[] = [];
   sentRequests: IContactRequest[] = [];
   private currentUserId: string;
@@ -300,9 +300,9 @@ export class ContactsComponent implements OnInit, OnDestroy {
     // Sort by letter
     this.groupedContacts = Array.from(map.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([letter, contacts]) => ({
+      .map(([letter, letterContacts]) => ({
         letter,
-        contacts: contacts.sort((a, b) => a.firstName.localeCompare(b.firstName))
+        contacts: letterContacts.sort((a, b) => a.firstName.localeCompare(b.firstName))
       }));
   }
 

@@ -24,14 +24,14 @@ import { MIN_LOADING_DASHBOARD_MS } from '../shared/utilities/min-loading.util';
 export class DashboardComponent implements OnInit, OnDestroy {
 
   currentUser: IUser | null = null;
-  greeting: string = '';
+  greeting = '';
   today: Date = new Date();
   recentConversations: IConversation[] = [];
   notifications: INotification[] = [];
-  unreadCount: number = 0;
-  onlineContactCount: number = 0;
-  pendingRequestCount: number = 0;
-  totalContactCount: number = 0;
+  unreadCount = 0;
+  onlineContactCount = 0;
+  pendingRequestCount = 0;
+  totalContactCount = 0;
 
   /** Full dashboard context shimmer — min 1s */
   isPageLoading = true;

@@ -37,7 +37,7 @@ export function getAvatarColor(key: string): string {
   const source = key || '';
   let hash = 0;
   for (let i = 0; i < source.length; i++) {
-    hash = source.charCodeAt(i) + ((hash << 5) - hash);
+    hash = source.charCodeAt(i) + Math.imul(hash, 31);
   }
   return palette[Math.abs(hash) % palette.length];
 }
