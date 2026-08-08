@@ -13,9 +13,9 @@ on:
   # Manual re-run from Actions tab
   workflow_dispatch:
 
-# Cancel in-progress runs on the same branch (saves minutes on rapid pushes)
+# Cancel older queued/in-progress runs for this workflow across all refs
 concurrency:
-  group: angular-${{ github.workflow }}-${{ github.ref }}
+  group: angular-${{ github.workflow }}
   cancel-in-progress: true
 
 permissions:
