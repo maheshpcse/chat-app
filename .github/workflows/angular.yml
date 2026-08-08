@@ -111,8 +111,9 @@ jobs:
   deploy-maintenance:
     name: Deploy maintenance page
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: github-pages
     steps:
@@ -157,9 +158,10 @@ jobs:
   deploy:
     name: Deploy application
     needs: [build, deploy-maintenance]
-    # Never deploy from PRs — only after merge/push to main
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Never deploy from PRs — only after merge/push to main or manual dispatch
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
