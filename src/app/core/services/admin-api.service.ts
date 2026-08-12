@@ -14,7 +14,8 @@ import {
   IFakerPreviewGroup,
   IFakerPreviewMessage,
   IFakerSaveResult,
-  IFakerEntitySaveResult
+  IFakerEntitySaveResult,
+  IFakerLinkUser
 } from '../models/admin.model';
 
 @Injectable({ providedIn: 'root' })
@@ -99,6 +100,23 @@ export class AdminApiService {
   }
 
   // Contacts
+  listContactLinkUsers(query: { search?: string; limit?: number } = {}): Observable<{
+    users: IFakerLinkUser[];
+    total: number;
+  }> {
+    let params = new HttpParams();
+    Object.keys(query).forEach(key => {
+      const val = (query as any)[key];
+      if (val !== undefined && val !== null && val !== '') {
+        params = params.set(key, String(val));
+      }
+    });
+    return this.http.get<IApiResponse<{ users: IFakerLinkUser[]; total: number }>>(
+      `${environment.apiBaseUrl}${API_ENDPOINTS.ADMIN.FAKER.CONTACTS_USERS}`,
+      { params }
+    ).pipe(map(r => r.data || { users: [], total: 0 }));
+  }
+
   generateContacts(body: { count: number; mode?: string }): Observable<{
     previewId: string;
     contacts: IFakerPreviewContact[];
@@ -106,6 +124,36 @@ export class AdminApiService {
   }> {
     return this.http.post<IApiResponse<any>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.ADMIN.FAKER.CONTACTS_GENERATE}`, body
+    ).pipe(map(r => r.data));
+  }
+
+  /**
+   * Cartesian link of selected owners × peers into contacts preview (1:1 / 1:N / N:1 / N:M).
+   */
+  linkContacts(body: {
+    userIds: string[];
+    contactUserIds: string[];
+    mode?: string;
+    previewId?: string;
+  }): Observable<{
+    previewId: string;
+    contacts: IFakerPreviewContact[];
+    added: number;
+    expiresInMinutes: number;
+  }> {
+    return this.http.post<IApiResponse<any>>(
+      `${environment.apiBaseUrl}${API_ENDPOINTS.ADMIN.FAKER.CONTACTS_LINK}`, body
+    ).pipe(map(r => r.data));
+  }
+
+  updateFakerContact(
+    previewId: string,
+    tempId: string,
+    patch: Partial<Pick<IFakerPreviewContact, 'userId' | 'contactUserId' | 'mode'>>
+  ): Observable<IFakerPreviewContact> {
+    return this.http.patch<IApiResponse<IFakerPreviewContact>>(
+      `${environment.apiBaseUrl}${API_ENDPOINTS.ADMIN.FAKER.CONTACTS_PREVIEW}/${previewId}/${tempId}`,
+      patch
     ).pipe(map(r => r.data));
   }
 

@@ -102,6 +102,19 @@ export interface IFakerPreviewContact {
   contactLabel: string;
   mode: 'accepted' | 'pending' | string;
   status: string;
+  /** random generate vs manual user link */
+  source?: 'generate' | 'link' | string;
+}
+
+/** Active chat user row for Data Studio contact linking */
+export interface IFakerLinkUser {
+  userId: string;
+  username: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  label: string;
+  status?: string;
 }
 
 export interface IFakerPreviewGroupMember {

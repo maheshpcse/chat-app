@@ -3,11 +3,109 @@
   <div class="page-head">
     <div>
       <h2>Data Studio · Contacts</h2>
-      <p>Needs at least two active users. Creates accepted friendships or pending requests.</p>
+      <p>
+        Link existing users as contacts (1:1, 1:N, N:1, N:M) or random-generate pairs.
+        Preview first, then save to database.
+      </p>
     </div>
   </div>
 
+  <div class="card controls link-card">
+    <div class="section-title">
+      <mat-icon>link</mat-icon>
+      <div>
+        <strong>Link users as contacts</strong>
+        <span class="muted">Cartesian product of selected owners × contacts (self-pairs skipped)</span>
+      </div>
+    </div>
+    <div class="link-stack">
+      <div class="row">
+        <div class="field grow">
+          <label for="faker-contact-user-search">Filter users</label>
+          <div class="search-inline">
+            <input
+              id="faker-contact-user-search"
+              type="search"
+              [(ngModel)]="userSearch"
+              (keyup.enter)="loadLinkUsers()"
+              placeholder="Name, username, email"
+            >
+            <button type="button" class="btn ghost" (click)="loadLinkUsers()" [disabled]="usersLoading">
+              {{ usersLoading ? '…' : 'Refresh' }}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field grow">
+          <label id="link-owners-label">Users (owners)</label>
+          <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+            <mat-select
+              aria-labelledby="link-owners-label"
+              multiple
+              [(ngModel)]="linkUserIds"
+              [compareWith]="compareById"
+              placeholder="Pick users…"
+            >
+              <mat-option *ngFor="let u of linkUsers; trackBy: trackByUserId" [value]="u.userId">
+                {{ u.label || u.username }}{{ u.email ? ' · ' + u.email : '' }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="field grow">
+          <label id="link-peers-label">Contacts (peers)</label>
+          <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+            <mat-select
+              aria-labelledby="link-peers-label"
+              multiple
+              [(ngModel)]="linkContactUserIds"
+              [compareWith]="compareById"
+              placeholder="Pick contacts…"
+            >
+              <mat-option *ngFor="let u of linkUsers; trackBy: trackByUserId" [value]="u.userId">
+                {{ u.label || u.username }}{{ u.email ? ' · ' + u.email : '' }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="field">
+          <label id="link-mode-label">Mode</label>
+          <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+            <mat-select aria-labelledby="link-mode-label" [(ngModel)]="linkMode">
+              <mat-option *ngFor="let o of modeOptions" [value]="o.value">{{ o.label }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="actions">
+          <button
+            type="button"
+            class="btn primary"
+            (click)="addLinks()"
+            [disabled]="linking || usersLoading || !estimatedPairs"
+          >
+            {{ linking ? 'Linking…' : 'Add links to preview' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    <p class="hint" *ngIf="estimatedPairs">
+      Will add up to <strong>{{ estimatedPairs }}</strong> new pair(s)
+      (duplicates already in preview are skipped).
+    </p>
+    <p class="hint muted" *ngIf="!linkUsers.length && !usersLoading">
+      No active users found. Create users in Data Studio · Users first.
+    </p>
+  </div>
+
   <div class="card controls">
+    <div class="section-title">
+      <mat-icon>auto_awesome</mat-icon>
+      <div>
+        <strong>Random generate</strong>
+        <span class="muted">Needs at least two active users</span>
+      </div>
+    </div>
     <div class="row">
       <div class="field">
         <label for="faker-contact-count">Count (1–200)</label>
@@ -16,8 +114,12 @@
       <div class="field">
         <label id="faker-contact-mode-label">Mode</label>
         <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
-          <mat-select aria-labelledby="faker-contact-mode-label" [(ngModel)]="mode" placeholder="Mixed">
-            <mat-option *ngFor="let o of modeOptions" [value]="o.value">{{ o.label }}</mat-option>
+          <mat-select
+            aria-labelledby="faker-contact-mode-label"
+            [(ngModel)]="mode"
+            placeholder="Mixed"
+          >
+            <mat-option *ngFor="let o of generateModeOptions" [value]="o.value">{{ o.label }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -29,8 +131,8 @@
     </div>
   </div>
 
-  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
-  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <app-admin-alert type="success" [message]="successMessage" (dismissed)="successMessage = ''"></app-admin-alert>
+  <app-admin-alert type="error" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-admin-alert>
 
   <app-shimmer *ngIf="loading" variant="list" [rows]="6"></app-shimmer>
 
@@ -56,24 +158,76 @@
             <th>User</th>
             <th>Contact</th>
             <th>Mode</th>
+            <th>Source</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of contacts; trackBy: trackByTempId">
-            <td>{{ item.userLabel || item.userId }}</td>
-            <td>{{ item.contactLabel || item.contactUserId }}</td>
-            <td>{{ item.mode | titlecase }}</td>
-            <td>{{ item.status | titlecase }}</td>
-            <td class="row-actions">
-              <button type="button" class="icon-action" matTooltip="Regenerate" (click)="regenerate(item)">
-                <mat-icon>autorenew</mat-icon>
-              </button>
-              <button type="button" class="icon-action danger" matTooltip="Remove" (click)="remove(item)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
+            <ng-container *ngIf="editingTempId !== item.tempId; else editRow">
+              <td>{{ item.userLabel || item.userId }}</td>
+              <td>{{ item.contactLabel || item.contactUserId }}</td>
+              <td>{{ item.mode | titlecase }}</td>
+              <td>{{ (item.source || 'generate') | titlecase }}</td>
+              <td>{{ item.status | titlecase }}</td>
+              <td class="row-actions">
+                <button type="button" class="icon-action" matTooltip="Edit pair" (click)="startEdit(item)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button type="button" class="icon-action" matTooltip="Regenerate" (click)="regenerate(item)">
+                  <mat-icon>autorenew</mat-icon>
+                </button>
+                <button type="button" class="icon-action danger" matTooltip="Remove" (click)="remove(item)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <ng-template #editRow>
+              <td>
+                <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+                  <mat-select
+                    [(ngModel)]="editUserId"
+                    [compareWith]="compareById"
+                    placeholder="User"
+                  >
+                    <mat-option *ngFor="let u of linkUsers; trackBy: trackByUserId" [value]="u.userId">
+                      {{ u.label || u.username }}{{ u.email ? ' · ' + u.email : '' }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </td>
+              <td>
+                <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+                  <mat-select
+                    [(ngModel)]="editContactUserId"
+                    [compareWith]="compareById"
+                    placeholder="Contact"
+                  >
+                    <mat-option *ngFor="let u of linkUsers; trackBy: trackByUserId" [value]="u.userId">
+                      {{ u.label || u.username }}{{ u.email ? ' · ' + u.email : '' }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </td>
+              <td>
+                <mat-form-field appearance="outline" class="admin-mat-field" floatLabel="never">
+                  <mat-select [(ngModel)]="editMode">
+                    <mat-option *ngFor="let o of modeOptions" [value]="o.value">{{ o.label }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </td>
+              <td>{{ (item.source || 'generate') | titlecase }}</td>
+              <td>{{ item.status | titlecase }}</td>
+              <td class="row-actions">
+                <button type="button" class="icon-action" matTooltip="Save" (click)="saveEdit(item)">
+                  <mat-icon>check</mat-icon>
+                </button>
+                <button type="button" class="icon-action" matTooltip="Cancel" (click)="cancelEdit()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </td>
+            </ng-template>
           </tr>
         </tbody>
       </table>
@@ -83,6 +237,6 @@
   <div class="empty-state card" *ngIf="!contacts.length && !loading">
     <mat-icon>contacts</mat-icon>
     <h3>No preview yet</h3>
-    <p>Generate contact pairs from active users, review, then save.</p>
+    <p>Link users above or generate random pairs, review, then save.</p>
   </div>
 </div>

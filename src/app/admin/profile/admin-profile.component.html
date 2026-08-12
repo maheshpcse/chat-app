@@ -10,7 +10,7 @@
     </button>
   </div>
 
-  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <app-admin-alert type="error" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-admin-alert>
 
   <ng-container *ngIf="loading; else profileLoaded">
     <div class="profile-hero card shimmer-card">

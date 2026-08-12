@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { AdminApiService } from '../../core/services/admin-api.service';
-import { IFakerPreviewContact } from '../../core/models/admin.model';
+import { IFakerLinkUser, IFakerPreviewContact } from '../../core/models/admin.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { withMinLoading } from '../utils/admin-rx.util';
 
@@ -11,9 +11,19 @@ import { withMinLoading } from '../utils/admin-rx.util';
   templateUrl: './admin-faker-contacts.component.html',
   styleUrls: ['./admin-faker-contacts.component.scss']
 })
-export class AdminFakerContactsComponent {
+export class AdminFakerContactsComponent implements OnInit {
+  /** Random generate */
   count = 20;
-  mode = '';
+  mode = 'accepted';
+
+  /** Explicit link: owners × peers */
+  linkUserIds: string[] = [];
+  linkContactUserIds: string[] = [];
+  linkMode = 'accepted';
+  linkUsers: IFakerLinkUser[] = [];
+  usersLoading = false;
+  userSearch = '';
+  linking = false;
 
   previewId: string | null = null;
   contacts: IFakerPreviewContact[] = [];
@@ -22,7 +32,18 @@ export class AdminFakerContactsComponent {
   errorMessage = '';
   successMessage = '';
 
+  /** Inline edit row */
+  editingTempId: string | null = null;
+  editUserId = '';
+  editContactUserId = '';
+  editMode = 'accepted';
+
   modeOptions = [
+    { value: 'accepted', label: 'Accepted' },
+    { value: 'pending', label: 'Pending' }
+  ];
+
+  generateModeOptions = [
     { value: '', label: 'Mixed' },
     { value: 'accepted', label: 'Accepted' },
     { value: 'pending', label: 'Pending' }
@@ -33,10 +54,56 @@ export class AdminFakerContactsComponent {
     private dialog: MatDialog
   ) {}
 
-  generate(): void {
-    this.loading = true;
+  ngOnInit(): void {
+    this.loadLinkUsers();
+  }
+
+  loadLinkUsers(): void {
+    this.usersLoading = true;
+    this.adminApi.listContactLinkUsers({
+      search: this.userSearch || undefined,
+      limit: 300
+    })
+      .pipe(finalize(() => { this.usersLoading = false; }))
+      .subscribe(
+        (res) => {
+          this.linkUsers = res.users || [];
+        },
+        (err) => {
+          this.errorMessage = err.message || 'Failed to load users for linking';
+        }
+      );
+  }
+
+  get estimatedPairs(): number {
+    const owners = this.linkUserIds || [];
+    const peers = this.linkContactUserIds || [];
+    if (!owners.length || !peers.length) {
+      return 0;
+    }
+    let n = 0;
+    owners.forEach(a => {
+      peers.forEach(b => {
+        if (a !== b) {
+          n += 1;
+        }
+      });
+    });
+    return n;
+  }
+
+  compareById(a: string, b: string): boolean {
+    return a === b;
+  }
+
+  clearMessages(): void {
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  generate(): void {
+    this.loading = true;
+    this.clearMessages();
     withMinLoading(this.adminApi.generateContacts({
       count: this.count,
       mode: this.mode || undefined
@@ -46,6 +113,7 @@ export class AdminFakerContactsComponent {
         (res) => {
           this.previewId = res.previewId;
           this.contacts = res.contacts || [];
+          this.editingTempId = null;
           this.successMessage = `Generated ${this.contacts.length} preview contacts (not saved yet)`;
         },
         (err) => {
@@ -54,8 +122,79 @@ export class AdminFakerContactsComponent {
       );
   }
 
+  addLinks(): void {
+    if (!this.linkUserIds.length || !this.linkContactUserIds.length) {
+      this.errorMessage = 'Select at least one user and one contact';
+      return;
+    }
+    if (!this.estimatedPairs) {
+      this.errorMessage = 'No valid pairs (user cannot link to self)';
+      return;
+    }
+    this.linking = true;
+    this.clearMessages();
+    withMinLoading(this.adminApi.linkContacts({
+      userIds: this.linkUserIds.slice(),
+      contactUserIds: this.linkContactUserIds.slice(),
+      mode: this.linkMode || 'accepted',
+      previewId: this.previewId || undefined
+    }), 400)
+      .pipe(finalize(() => { this.linking = false; }))
+      .subscribe(
+        (res) => {
+          this.previewId = res.previewId;
+          this.contacts = res.contacts || [];
+          this.successMessage = `Added ${res.added} link(s) to preview · ${this.contacts.length} total`;
+        },
+        (err) => {
+          this.errorMessage = err.message || 'Link failed';
+        }
+      );
+  }
+
+  startEdit(item: IFakerPreviewContact): void {
+    this.editingTempId = item.tempId;
+    this.editUserId = item.userId;
+    this.editContactUserId = item.contactUserId;
+    this.editMode = item.mode === 'pending' ? 'pending' : 'accepted';
+  }
+
+  cancelEdit(): void {
+    this.editingTempId = null;
+  }
+
+  saveEdit(item: IFakerPreviewContact): void {
+    if (!this.previewId || !this.editingTempId) {
+      return;
+    }
+    if (!this.editUserId || !this.editContactUserId) {
+      this.errorMessage = 'Both sides required';
+      return;
+    }
+    if (this.editUserId === this.editContactUserId) {
+      this.errorMessage = 'User and contact must differ';
+      return;
+    }
+    this.clearMessages();
+    this.adminApi.updateFakerContact(this.previewId, item.tempId, {
+      userId: this.editUserId,
+      contactUserId: this.editContactUserId,
+      mode: this.editMode
+    }).subscribe(
+      (fresh) => {
+        this.contacts = this.contacts.map(c => c.tempId === fresh.tempId ? fresh : c);
+        this.editingTempId = null;
+        this.successMessage = 'Preview contact updated';
+      },
+      (err) => {
+        this.errorMessage = err.message || 'Update failed';
+      }
+    );
+  }
+
   remove(item: IFakerPreviewContact): void {
-    if (!this.previewId) {
+    const previewId = this.previewId;
+    if (!previewId) {
       return;
     }
     const ref = this.dialog.open(ConfirmDialogComponent, {
@@ -68,8 +207,13 @@ export class AdminFakerContactsComponent {
     });
     ref.afterClosed().subscribe(ok => {
       if (!ok) { return; }
-      this.adminApi.deleteFakerContact(this.previewId, item.tempId).subscribe(
-        () => { this.contacts = this.contacts.filter(c => c.tempId !== item.tempId); },
+      this.adminApi.deleteFakerContact(previewId, item.tempId).subscribe(
+        () => {
+          this.contacts = this.contacts.filter(c => c.tempId !== item.tempId);
+          if (this.editingTempId === item.tempId) {
+            this.editingTempId = null;
+          }
+        },
         (err) => { this.errorMessage = err.message || 'Delete failed'; }
       );
     });
@@ -82,6 +226,9 @@ export class AdminFakerContactsComponent {
     this.adminApi.regenerateFakerContact(this.previewId, item.tempId).subscribe(
       (fresh) => {
         this.contacts = this.contacts.map(c => c.tempId === fresh.tempId ? fresh : c);
+        if (this.editingTempId === fresh.tempId) {
+          this.startEdit(fresh);
+        }
       },
       (err) => {
         this.errorMessage = err.message || 'Regenerate failed';
@@ -90,7 +237,8 @@ export class AdminFakerContactsComponent {
   }
 
   discard(): void {
-    if (!this.previewId) {
+    const previewId = this.previewId;
+    if (!previewId) {
       this.contacts = [];
       return;
     }
@@ -104,22 +252,25 @@ export class AdminFakerContactsComponent {
     });
     ref.afterClosed().subscribe(ok => {
       if (!ok) { return; }
-      this.adminApi.discardFakerPreview(this.previewId, 'contacts').subscribe(
+      this.adminApi.discardFakerPreview(previewId, 'contacts').subscribe(
         () => {
           this.previewId = null;
           this.contacts = [];
+          this.editingTempId = null;
           this.successMessage = 'Preview discarded';
         },
         () => {
           this.previewId = null;
           this.contacts = [];
+          this.editingTempId = null;
         }
       );
     });
   }
 
   saveToDb(): void {
-    if (!this.previewId || !this.contacts.length) {
+    const previewId = this.previewId;
+    if (!previewId || !this.contacts.length) {
       return;
     }
     const ref = this.dialog.open(ConfirmDialogComponent, {
@@ -133,9 +284,8 @@ export class AdminFakerContactsComponent {
     ref.afterClosed().subscribe(ok => {
       if (!ok) { return; }
       this.saving = true;
-      this.errorMessage = '';
-      this.successMessage = '';
-      withMinLoading(this.adminApi.saveFakerContacts(this.previewId), 500)
+      this.clearMessages();
+      withMinLoading(this.adminApi.saveFakerContacts(previewId), 500)
         .pipe(finalize(() => { this.saving = false; }))
         .subscribe(
           (res) => {
@@ -143,6 +293,7 @@ export class AdminFakerContactsComponent {
             if (res.saved > 0) {
               this.previewId = null;
               this.contacts = [];
+              this.editingTempId = null;
             }
           },
           (err) => {
@@ -154,5 +305,9 @@ export class AdminFakerContactsComponent {
 
   trackByTempId(_: number, item: IFakerPreviewContact): string {
     return item.tempId;
+  }
+
+  trackByUserId(_: number, u: IFakerLinkUser): string {
+    return u.userId;
   }
 }

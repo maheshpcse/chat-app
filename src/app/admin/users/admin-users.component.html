@@ -1,4 +1,4 @@
-﻿<div class="admin-page">
+<div class="admin-page">
   <div class="page-head">
     <div>
       <h2>Users</h2>
@@ -35,9 +35,9 @@
     </div>
   </div>
 
-  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
-  <div class="alert warning" *ngIf="warningMessage">{{ warningMessage }}</div>
-  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <app-admin-alert type="success" [message]="successMessage" (dismissed)="successMessage = ''"></app-admin-alert>
+  <app-admin-alert type="warning" [message]="warningMessage" (dismissed)="warningMessage = ''"></app-admin-alert>
+  <app-admin-alert type="error" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-admin-alert>
 
   <div class="card table-card">
     <ng-container *ngIf="loading; else usersTable">
@@ -117,7 +117,7 @@
 
       <div class="pager" *ngIf="total > 0">
         <div class="pager-meta">
-          <span>Showing {{ rangeFrom }}–{{ rangeTo }} of {{ total }}</span>
+          <span>Showing {{ rangeFrom }} - {{ rangeTo }} of {{ total }}</span>
           <div class="page-size">
             <label id="users-page-size-label">Rows</label>
             <mat-form-field appearance="outline" class="admin-mat-field page-size-field" floatLabel="never">

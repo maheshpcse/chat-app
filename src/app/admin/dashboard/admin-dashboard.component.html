@@ -1,4 +1,4 @@
-﻿<div class="admin-page">
+<div class="admin-page">
   <div class="page-head">
     <div>
       <h2>Dashboard</h2>
@@ -10,10 +10,7 @@
     </button>
   </div>
 
-  <div class="alert-error" *ngIf="errorMessage">
-    <mat-icon>error_outline</mat-icon>
-    <span>{{ errorMessage }}</span>
-  </div>
+  <app-admin-alert type="error" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-admin-alert>
 
   <ng-container *ngIf="loading; else loadedTpl">
     <div class="stat-grid shimmer-block">

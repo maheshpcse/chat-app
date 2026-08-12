@@ -12,6 +12,7 @@ import { AdminFakerGroupsComponent } from './faker/admin-faker-groups.component'
 import { AdminFakerMessagesComponent } from './faker/admin-faker-messages.component';
 import { AdminSettingsComponent } from './settings/admin-settings.component';
 import { AdminProfileComponent } from './profile/admin-profile.component';
+import { AdminAlertComponent } from './shared/admin-alert.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { AdminProfileComponent } from './profile/admin-profile.component';
     AdminFakerGroupsComponent,
     AdminFakerMessagesComponent,
     AdminSettingsComponent,
-    AdminProfileComponent
+    AdminProfileComponent,
+    AdminAlertComponent
   ],
   imports: [
     SharedModule,

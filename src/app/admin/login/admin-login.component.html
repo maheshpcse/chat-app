@@ -8,10 +8,7 @@
       <p>Secure access for platform operators only</p>
     </div>
 
-    <div class="alert-error" *ngIf="errorMessage">
-      <mat-icon>error_outline</mat-icon>
-      <span>{{ errorMessage }}</span>
-    </div>
+    <app-admin-alert type="error" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-admin-alert>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="admin-auth-form">
       <div class="form-group">

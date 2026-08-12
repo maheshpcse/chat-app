@@ -90,6 +90,8 @@ export const API_ENDPOINTS = {
       USERS_PREVIEW: '/admin/faker/users/preview',
       USERS_SAVE: '/admin/faker/users/save',
       CONTACTS_GENERATE: '/admin/faker/contacts/generate',
+      CONTACTS_LINK: '/admin/faker/contacts/link',
+      CONTACTS_USERS: '/admin/faker/contacts/users',
       CONTACTS_PREVIEW: '/admin/faker/contacts/preview',
       CONTACTS_SAVE: '/admin/faker/contacts/save',
       GROUPS_GENERATE: '/admin/faker/groups/generate',

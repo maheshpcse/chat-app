@@ -1,1 +1,57 @@
 @import './faker-shared';
+
+.link-card {
+  margin-bottom: 1rem;
+}
+
+// Vertical rhythm between filter row and owners/peers row.
+.link-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+
+  > .row {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.section-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+
+  mat-icon {
+    margin-top: 2px;
+    opacity: 0.85;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.95rem;
+  }
+
+  .muted {
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+}
+
+.search-inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  input {
+    flex: 1 1 auto;
+  }
+}
+
+.hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+}

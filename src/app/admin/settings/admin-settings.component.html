@@ -10,8 +10,8 @@
     </button>
   </div>
 
-  <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
-  <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <app-admin-alert type="success" [message]="successMessage" (dismissed)="successMessage = ''"></app-admin-alert>
+  <app-admin-alert type="error" [message]="errorMessage" (dismissed)="errorMessage = ''"></app-admin-alert>
 
   <ng-container *ngIf="loading; else settingsLoaded">
     <div class="card shimmer-card">

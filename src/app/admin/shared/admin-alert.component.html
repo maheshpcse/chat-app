@@ -1,0 +1,24 @@
+<div
+  class="admin-alert"
+  *ngIf="visible"
+  [class.success]="type === 'success'"
+  [class.error]="type === 'error'"
+  [class.warning]="type === 'warning'"
+  role="status"
+  [attr.aria-live]="type === 'error' ? 'assertive' : 'polite'"
+>
+  <mat-icon class="lead-icon" aria-hidden="true">
+    {{ type === 'success' ? 'check_circle' : (type === 'warning' ? 'warning' : 'error') }}
+  </mat-icon>
+  <span class="admin-alert-text">{{ message }}</span>
+  <button
+    type="button"
+    class="admin-alert-close"
+    mat-icon-button
+    matTooltip="Dismiss"
+    aria-label="Dismiss message"
+    (click)="dismiss()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
