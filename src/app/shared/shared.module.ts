@@ -32,6 +32,7 @@ import { AvatarComponent } from './components/avatar/avatar.component';
 import { EmojiPickerComponent } from './components/emoji-picker/emoji-picker.component';
 import { PageHeaderComponent } from './components/page-header/page-header.component';
 import { ShimmerComponent } from './components/shimmer/shimmer.component';
+import { AuthNetworkBgComponent } from './components/auth-network-bg/auth-network-bg.component';
 
 // Shared Pipes
 import { TimeAgoPipe } from './pipes/time-ago.pipe';
@@ -87,6 +88,7 @@ const MATERIAL_MODULES = [
     EmojiPickerComponent,
     PageHeaderComponent,
     ShimmerComponent,
+    AuthNetworkBgComponent,
     // Pipes
     TimeAgoPipe,
     TruncatePipe,
@@ -119,6 +121,7 @@ const MATERIAL_MODULES = [
     EmojiPickerComponent,
     PageHeaderComponent,
     ShimmerComponent,
+    AuthNetworkBgComponent,
     // Pipes
     TimeAgoPipe,
     TruncatePipe,
