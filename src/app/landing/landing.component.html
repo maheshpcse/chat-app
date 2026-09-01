@@ -33,18 +33,21 @@
         </div>
       </div>
 
-      <!-- Simple illustrative chat mock -->
+      <!-- Live auto-messaging demo (L/R random-ish stream) -->
       <div class="hero-visual" aria-hidden="true">
-        <div class="mock-bubble left">
-          <span class="mock-avatar">JB</span>
-          <span class="mock-text">Hey! Are you on Chat App yet? 👋</span>
-        </div>
-        <div class="mock-bubble right">
-          <span class="mock-text">Just joined — this is fast! ⚡</span>
-        </div>
-        <div class="mock-bubble left small">
-          <span class="mock-avatar">SK</span>
-          <span class="mock-text">Group call later?</span>
+        <div class="hero-feed" #heroFeed>
+          <div
+            class="mock-bubble"
+            *ngFor="let b of heroBubbles; trackBy: trackHeroBubble"
+            [class.left]="b.side === 'left'"
+            [class.right]="b.side === 'right'"
+            [class.typing]="b.typing">
+            <span class="mock-avatar" *ngIf="b.side === 'left'">{{ b.avatar }}</span>
+            <span class="mock-text" *ngIf="!b.typing">{{ b.text }}</span>
+            <span class="mock-typing" *ngIf="b.typing">
+              <i></i><i></i><i></i>
+            </span>
+          </div>
         </div>
       </div>
     </div>

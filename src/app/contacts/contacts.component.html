@@ -67,7 +67,7 @@
 
       <div class="add-results" *ngIf="userSearchQuery.length >= 2">
         <div class="add-results-inner">
-          <div class="add-hint" *ngIf="searching">Searchingâ€¦</div>
+          <div class="add-hint" *ngIf="searching">Searching...</div>
           <div class="add-hint" *ngIf="!searching && searchResults.length === 0">No users found.</div>
           <div class="user-row" *ngFor="let u of searchResults">
             <div class="user-main">

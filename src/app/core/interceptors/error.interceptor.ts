@@ -33,10 +33,9 @@ export class ErrorInterceptor implements HttpInterceptor {
               errorMessage = error.error?.message || 'Unauthorized';
               break;
             case 403:
+              // Keep user in chat/settings flow — toast/caller handles message.
+              // Hard navigate to /errors/403 only for true page-level access denials.
               errorMessage = error.error?.message || 'You do not have permission to perform this action';
-              if (!isAdminApi && !this.router.url.startsWith('/admin') && !this.router.url.startsWith('/auth')) {
-                this.router.navigate(['/errors/403']);
-              }
               break;
             case 404:
               errorMessage = error.error?.message || 'Resource not found';
@@ -48,14 +47,22 @@ export class ErrorInterceptor implements HttpInterceptor {
               errorMessage = error.error?.message || 'Validation error';
               break;
             case 500:
-              errorMessage = 'Internal server error. Please try again later.';
-              if (!isAdminApi && !this.router.url.startsWith('/admin')) {
-                this.router.navigate(['/errors/500']);
-              }
+              // Do not yank user off chat mid-send; surface message via throwError.
+              errorMessage = error.error?.message || 'Internal server error. Please try again later.';
               break;
             case 0:
               errorMessage = 'Unable to connect to server. Check your network connection.';
-              if (!isAdminApi && !this.router.url.startsWith('/admin')) {
+              // Only offline page if not already in authenticated app shell
+              if (
+                !isAdminApi &&
+                !this.router.url.startsWith('/admin') &&
+                !this.router.url.startsWith('/chat') &&
+                !this.router.url.startsWith('/dashboard') &&
+                !this.router.url.startsWith('/contacts') &&
+                !this.router.url.startsWith('/settings') &&
+                !this.router.url.startsWith('/conversations') &&
+                !this.router.url.startsWith('/notifications')
+              ) {
                 this.router.navigate(['/errors/offline']);
               }
               break;

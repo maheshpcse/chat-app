@@ -63,6 +63,12 @@ export const API_ENDPOINTS = {
     BASE: '/settings' // GET all, PUT bulk, PUT /:key, DELETE /:key
   },
 
+  // Presence
+  PRESENCE: {
+    CONTACTS: '/presence/contacts',
+    BY_USER: '/presence' // + /:userId
+  },
+
   // Scheduled Messages
   SCHEDULED_MESSAGES: {
     BASE: '/scheduled-messages',

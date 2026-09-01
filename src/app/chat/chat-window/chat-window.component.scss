@@ -188,18 +188,28 @@
 .message-wrapper {
   display: flex;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   margin-bottom: $spacing-sm;
   animation: fadeInUp 280ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 
-  // Bubbles sit on edge and extend toward center (max 50% via bubble CSS)
+  // Bubbles grow from edge toward center; host bubble owns max-width
   &.own-message {
     justify-content: flex-end;
-    padding-left: 0;
+    padding-left: 8%;
   }
 
   &.other-message {
     justify-content: flex-start;
-    padding-right: 0;
+    padding-right: 8%;
+  }
+
+  app-message-bubble {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 }
 

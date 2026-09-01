@@ -63,11 +63,28 @@ export class ConversationListComponent implements OnInit, OnDestroy {
   }
 
   isUserOnline(userId: string): boolean {
-    return this.onlineUsers.includes(userId);
+    if (userId == null || userId === '') { return false; }
+    const id = String(userId);
+    return (this.onlineUsers || []).map(u => String(u)).includes(id);
   }
 
-  getOtherParticipant(conversation: IConversation): any {
-    return { displayName: conversation.displayName, avatarUrl: conversation.avatarUrl };
+  /** Peer id must be participantId — list template binds isOnline(userId). */
+  getOtherParticipant(conversation: IConversation): {
+    userId?: string;
+    displayName?: string;
+    avatarUrl?: string;
+  } {
+    if (!conversation) {
+      return {};
+    }
+    const userId = conversation.participantId != null && conversation.participantId !== ''
+      ? String(conversation.participantId)
+      : undefined;
+    return {
+      userId,
+      displayName: conversation.displayName,
+      avatarUrl: conversation.avatarUrl
+    };
   }
 
   trackByConversationId(index: number, conversation: IConversation): string {

@@ -162,7 +162,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   isOwnMessage(message: IMessage): boolean {
-    return message.senderId === this.currentUserId;
+    if (!message || this.currentUserId == null) { return false; }
+    return String(message.senderId) === String(this.currentUserId);
   }
 
   trackByMessageId(index: number, message: IMessage): string {
@@ -227,14 +228,43 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
           (members) => { this.groupMembers = members; },
           () => { this.groupMembers = []; }
         );
-      } else if (this.activeConversation.participantId) {
-        // Load user profile for private chat
-        this.userService.getUserById(this.activeConversation.participantId).subscribe(
+      } else {
+        // Resolve peer id from conversation / contacts; never rely on missing participantId alone
+        const peerId = this.getOtherUserId() || (
+          this.activeConversation.participantId != null
+            ? String(this.activeConversation.participantId)
+            : null
+        );
+        if (!peerId) {
+          // Still open sidebar with conversation fallback fields (no hard error page)
+          this.sidebarUser = this.buildFallbackSidebarUser();
+          return;
+        }
+        this.userService.getUserById(peerId).subscribe(
           (user) => { this.sidebarUser = user; },
-          () => { this.sidebarUser = null; }
+          () => {
+            // Soft fail: keep sidebar open with local conversation data
+            this.sidebarUser = this.buildFallbackSidebarUser(peerId);
+          }
         );
       }
     }
+  }
+
+  /** Sidebar content when GET /users/:id fails or peer id unknown. */
+  private buildFallbackSidebarUser(peerId?: string): IUser {
+    const conv = this.activeConversation;
+    const name = this.getOtherParticipantName();
+    const parts = (name || '').trim().split(/\s+/);
+    return {
+      id: peerId || (conv?.participantId != null ? String(conv.participantId) : ''),
+      firstName: conv?.firstName || parts[0] || name || '',
+      lastName: conv?.lastName || (parts.length > 1 ? parts.slice(1).join(' ') : ''),
+      username: conv?.username || '',
+      avatarUrl: conv?.avatarUrl || '',
+      email: '',
+      fullName: name
+    } as IUser;
   }
 
   isGroupConversation(): boolean {

@@ -249,7 +249,10 @@ export class ChatService {
           this.messagesLoadingSubject.next(false);
         }
         return this.messageService.getMessages(req.conversationId, req.page).pipe(
-          map(messages => ({ req, messages })),
+          map(messages => ({
+            req,
+            messages: (messages || []).map(m => this.enrichOwnSender(m))
+          })),
           catchError(() => of({ req, messages: [] as IMessage[] })),
           finalize(() => {
             if (this.activeRequestKey === requestKey) {
@@ -275,6 +278,27 @@ export class ChatService {
     this.subscriptions.push(loadSub);
   }
 
+  /** Fill senderName/avatar for current user's messages when BE omits them. */
+  private enrichOwnSender(message: IMessage): IMessage {
+    if (!message) { return message; }
+    const normalized = this.messageService.normalizeMessage(message);
+    const me = this.authService.getCurrentUser();
+    if (!me || String(normalized.senderId) !== String(me.id)) {
+      return normalized;
+    }
+    const myName = (
+      me.fullName ||
+      [me.firstName, me.lastName].filter(Boolean).join(' ').trim() ||
+      me.username ||
+      ''
+    ).trim();
+    return {
+      ...normalized,
+      senderName: normalized.senderName || myName || undefined,
+      senderAvatar: normalized.senderAvatar || me.avatarUrl || undefined
+    };
+  }
+
   sendMessage(content: string, messageType: MessageType = MessageType.TEXT, attachmentUrl?: string): void {
     const conversation = this.activeConversationSubject.value;
     if (!conversation) { return; }
@@ -291,15 +315,23 @@ export class ChatService {
     this.messageService.sendMessage(messageData).subscribe(
       message => {
         // Add own message locally; the echoed socket copy is de-duplicated by id.
+        const enriched = this.enrichOwnSender(message);
         const current = this.messagesSubject.value;
-        this.messagesSubject.next([...current, message]);
+        this.messagesSubject.next([...current, enriched]);
       },
       () => {
         // Surface a failed send so the bubble can show the error/retry state.
+        // Stay in chat — ErrorInterceptor no longer navigates away on 4xx/5xx.
+        const me = this.authService.getCurrentUser();
+        const myName = me
+          ? (me.fullName || [me.firstName, me.lastName].filter(Boolean).join(' ').trim() || me.username || '')
+          : '';
         const failed: IMessage = {
           messageId: 'failed-' + Date.now(),
           conversationId: conversation.conversationId,
-          senderId: this.authService.getCurrentUser()?.id,
+          senderId: me?.id,
+          senderName: myName || undefined,
+          senderAvatar: me?.avatarUrl,
           content,
           messageType,
           status: 'failed',
@@ -367,18 +399,19 @@ export class ChatService {
 
   private setupSocketListeners(): void {
     // Listen for incoming messages (with deduplication)
-    const msgSub = this.socketService.messageReceived$.subscribe(message => {
+    const msgSub = this.socketService.messageReceived$.subscribe(rawMessage => {
+      const message = this.enrichOwnSender(rawMessage);
       const currentUserId = this.authService.getCurrentUser()?.id;
       const activeConv = this.activeConversationSubject.value;
-      if (activeConv && message.conversationId === activeConv.conversationId) {
+      if (activeConv && String(message.conversationId) === String(activeConv.conversationId)) {
         const current = this.messagesSubject.value;
         // Deduplicate: don't add if messageId already exists (e.g. sender's own message added via HTTP response)
-        const exists = current.some(m => m.messageId === message.messageId);
+        const exists = current.some(m => String(m.messageId) === String(message.messageId));
         if (!exists) {
           this.messagesSubject.next([...current, message]);
         }
         // Acknowledge delivery for messages from other users.
-        if (message.senderId !== currentUserId) {
+        if (String(message.senderId) !== String(currentUserId || '')) {
           this.socketService.markDelivered(message.messageId, message.conversationId);
         }
       }

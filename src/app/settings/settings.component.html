@@ -276,7 +276,7 @@
 
       <div class="theme-options">
         <div class="theme-card" [class.active]="themePreference === 'light'"
-             (click)="themePreference = 'light'">
+             (click)="setTheme('light')">
           <div class="theme-preview light-preview">
             <div class="preview-header"></div>
             <div class="preview-body">
@@ -288,7 +288,7 @@
           <mat-icon *ngIf="themePreference === 'light'">check_circle</mat-icon>
         </div>
 
-        <div class="theme-card" [class.active]="themePreference === 'dark'" (click)="themePreference = 'dark'">
+        <div class="theme-card" [class.active]="themePreference === 'dark'" (click)="setTheme('dark')">
           <div class="theme-preview dark-preview">
             <div class="preview-header"></div>
             <div class="preview-body">

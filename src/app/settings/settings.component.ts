@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../core/services/auth.service';
 import { UserService } from '../core/services/user.service';
+import { SettingsService } from '../core/services/settings.service';
 import { IUser } from '../core/models/user.model';
 
 /**
@@ -50,6 +51,7 @@ export class SettingsComponent implements OnInit {
   // State
   isProfileSaving = false;
   isPasswordSaving = false;
+  isSettingsLoading = false;
   hideCurrentPassword = true;
   hideNewPassword = true;
   hideConfirmPassword = true;
@@ -67,6 +69,7 @@ export class SettingsComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private userService: UserService,
+    private settingsService: SettingsService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -74,6 +77,35 @@ export class SettingsComponent implements OnInit {
     this.currentUser = this.authService.getCurrentUser();
     this.initProfileForm();
     this.initPasswordForm();
+    this.loadRemoteSettings();
+  }
+
+  private loadRemoteSettings(): void {
+    this.isSettingsLoading = true;
+    this.settingsService.getSettings().subscribe(
+      () => {
+        this.applySettingsFromService();
+        this.isSettingsLoading = false;
+      },
+      () => {
+        this.isSettingsLoading = false;
+        // Keep local defaults; soft fail (no error-page nav)
+      }
+    );
+  }
+
+  private applySettingsFromService(): void {
+    this.privacySettings = this.settingsService.toPrivacySettings();
+    this.notificationSettings = this.settingsService.toNotificationSettings();
+    this.chatPreferences = this.settingsService.toChatPreferences();
+    this.themePreference = this.settingsService.toThemePreference();
+  }
+
+  private persistKeys( partial: { [key: string]: any }, okMsg: string ): void {
+    this.settingsService.updateSettings(partial).subscribe(
+      () => this.showMessage(okMsg),
+      () => this.showMessage('Failed to save setting', true)
+    );
   }
 
   private initProfileForm(): void {
@@ -135,27 +167,47 @@ export class SettingsComponent implements OnInit {
     );
   }
 
-  // Notification toggles
+  // Notification toggles → API
   toggleNotification(key: string): void {
     this.notificationSettings[key] = !this.notificationSettings[key];
-    this.showMessage('Notification preference updated');
+    this.persistKeys(
+      { ['notifications.' + key]: this.notificationSettings[key] },
+      'Notification preference updated'
+    );
   }
 
-  // Privacy
+  // Privacy → API (privacy.onlineStatus | lastSeen | profilePhoto)
   setPrivacy(key: string, value: string): void {
     this.privacySettings[key] = value;
-    this.showMessage('Privacy setting updated');
+    this.persistKeys(
+      { ['privacy.' + key]: value },
+      'Privacy setting updated'
+    );
   }
 
-  // Chat preferences
+  // Chat preferences → API
   toggleEnterSends(): void {
     this.chatPreferences.enterSends = !this.chatPreferences.enterSends;
-    this.showMessage('Chat preference updated');
+    this.persistKeys(
+      { 'chat.enterSends': this.chatPreferences.enterSends },
+      'Chat preference updated'
+    );
   }
 
   setFontSize(size: string): void {
     this.chatPreferences.fontSize = size;
-    this.showMessage('Font size updated');
+    this.persistKeys(
+      { 'chat.fontSize': size },
+      'Font size updated'
+    );
+  }
+
+  setTheme(theme: string): void {
+    this.themePreference = theme;
+    this.persistKeys(
+      { 'theme.preference': theme },
+      'Appearance updated'
+    );
   }
 
   getUserInitials(): string {
