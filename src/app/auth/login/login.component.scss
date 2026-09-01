@@ -156,14 +156,19 @@
 .auth-form-wrapper {
   flex: 1 1 48%;
   max-width: 460px;
+  min-width: 0;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .auth-form-container {
   width: 100%;
   max-width: 420px;
+  min-width: 0;
+  box-sizing: border-box;
   padding: clamp(1.5rem, 3vw, 2.25rem);
   border-radius: 20px;
   background: rgba(241, 246, 244, 0.96);
@@ -173,6 +178,7 @@
     0 22px 48px rgba(23, 43, 54, 0.18);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
 .form-header {
@@ -257,15 +263,27 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-lg;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  // minmax(0, 1fr) lets columns shrink so Confirm Password stays in card
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: $spacing-md;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
-  @media (max-width: 520px) {
+  @media (max-width: 560px) {
     grid-template-columns: 1fr;
+  }
+
+  > .form-group {
+    min-width: 0;
+    max-width: 100%;
   }
 }
 
@@ -273,6 +291,9 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 
   label {
     font-family: $font-primary;
@@ -285,13 +306,18 @@
 .input-wrapper {
   display: flex;
   align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   height: 48px;
   border: 1.5px solid rgba(17, 76, 90, 0.18);
   border-radius: $radius-md;
   background: $white;
-  padding: 0 $spacing-md;
-  gap: $spacing-sm;
+  padding: 0 0.65rem;
+  gap: 0.35rem;
   transition: border-color $transition-fast, box-shadow $transition-fast;
+  overflow: hidden;
 
   &:focus-within {
     border-color: $nocturnal;
@@ -304,16 +330,16 @@
   }
 
   .input-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
     color: $nocturnal;
     opacity: 0.65;
-    flex-shrink: 0;
+    flex: 0 0 auto;
   }
 
   input {
-    flex: 1;
+    flex: 1 1 auto;
     border: none;
     outline: none;
     font-family: $font-primary;
@@ -322,6 +348,8 @@
     background: transparent;
     height: 100%;
     min-width: 0;
+    width: 100%;
+    max-width: 100%;
 
     &::placeholder {
       color: $gray-400;
@@ -332,14 +360,16 @@
     border: none;
     background: none;
     padding: 0;
+    margin: 0;
     cursor: pointer;
     display: flex;
     align-items: center;
+    flex: 0 0 auto;
 
     mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
       color: $text-muted;
       transition: color $transition-fast;
     }
@@ -347,6 +377,23 @@
     &:hover mat-icon {
       color: $nocturnal;
     }
+  }
+}
+
+// Side-by-side password row: keep toggle + text readable without blowing card
+.form-row .input-wrapper {
+  padding: 0 0.45rem;
+  gap: 0.25rem;
+
+  .input-icon,
+  .toggle-password mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  input {
+    font-size: 0.8125rem;
   }
 }
 
