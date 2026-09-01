@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { tap, map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../constants/api.constants';
 import { APP_CONSTANTS } from '../constants/app.constants';
@@ -74,6 +74,13 @@ export class AuthService {
 
   refreshToken(): Observable<IAuthResponse> {
     const refreshToken = this.getRefreshToken();
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      // Avoid 422 "refreshToken must be a string" when storage empty
+      return throwError({
+        message: 'No refresh token available',
+        status: 401
+      }) as Observable<IAuthResponse>;
+    }
     const body: IRefreshTokenRequest = { refreshToken };
     return this.http.post<IApiResponse<IAuthResponse>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH_TOKEN}`,
@@ -85,11 +92,18 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+    const refreshToken = this.getRefreshToken();
+    const body = refreshToken ? { refreshToken } : {};
     return this.http.post(
       `${environment.apiBaseUrl}${API_ENDPOINTS.AUTH.LOGOUT}`,
-      {}
+      body
     ).pipe(
-      tap(() => this.handleLogout())
+      tap(() => this.handleLogout()),
+      // Always clear local session even if API fails
+      catchError(() => {
+        this.handleLogout();
+        return of(null);
+      })
     );
   }
 

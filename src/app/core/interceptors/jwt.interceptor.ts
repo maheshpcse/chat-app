@@ -51,11 +51,25 @@ export class JwtInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
+        if (error.status === 401 && !this.isAuthPublic(request.url)) {
           return this.handle401Error(request, next);
         }
         return throwError(error);
       })
+    );
+  }
+
+  /** Login/register/refresh/forgot must not trigger nested refresh on 401. */
+  private isAuthPublic(url: string): boolean {
+    if (!url) {
+      return false;
+    }
+    return (
+      url.indexOf('/auth/login') !== -1 ||
+      url.indexOf('/auth/register') !== -1 ||
+      url.indexOf('/auth/refresh-token') !== -1 ||
+      url.indexOf('/auth/forgot-password') !== -1 ||
+      url.indexOf('/auth/reset-password') !== -1
     );
   }
 
@@ -68,6 +82,14 @@ export class JwtInterceptor implements HttpInterceptor {
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const refresh = this.authService.getRefreshToken();
+    if (!refresh) {
+      this.isRefreshing = false;
+      this.authService.handleLogout();
+      this.router.navigate(['/auth/login']);
+      return throwError({ message: 'Session expired', status: 401 });
+    }
+
     if (!this.isRefreshing) {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
