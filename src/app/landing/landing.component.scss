@@ -143,7 +143,7 @@
   }
 }
 
-/* Live auto-messaging hero demo */
+/* Live auto-messaging hero demo — no card chrome; bubbles float on hero bg */
 .hero-visual {
   flex: 1 1 380px;
   min-width: 300px;
@@ -151,10 +151,10 @@
   height: 340px;
   display: flex;
   flex-direction: column;
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba($mystic-mint, 0.12) 0%, rgba($arctic-powder, 0.08) 100%);
-  border: 1px solid rgba($white, 0.12);
-  box-shadow: 0 12px 32px rgba($oceanic-noir, 0.35);
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   overflow: hidden;
   position: relative;
 
@@ -162,7 +162,7 @@
     flex: 1 1 auto;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 18px 16px;
+    padding: 8px 4px;
     display: flex;
     flex-direction: column;
     gap: 12px;

@@ -48,7 +48,9 @@ export class ErrorInterceptor implements HttpInterceptor {
               break;
             case 500:
               // Do not yank user off chat mid-send; surface message via throwError.
-              errorMessage = error.error?.message || 'Internal server error. Please try again later.';
+              errorMessage =
+                (error.error && (error.error.message || error.error.error)) ||
+                'Internal server error. Please try again later.';
               break;
             case 0:
               errorMessage = 'Unable to connect to server. Check your network connection.';

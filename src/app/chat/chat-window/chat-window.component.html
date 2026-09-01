@@ -2,14 +2,19 @@
   <div class="chat-window">
     <!-- Chat Header -->
     <div class="chat-header">
-      <app-avatar
-        [imageUrl]="activeConversation?.avatarUrl || ''"
-        [name]="getOtherParticipantName()"
-        [isOnline]="isOtherParticipantOnline()"
-        [showStatus]="!isGroupConversation()"
-        size="sm">
-      </app-avatar>
-      <div class="chat-header-info">
+      <button type="button"
+              class="chat-header-avatar-btn"
+              matTooltip="View Profile"
+              (click)="openProfileSidebar()">
+        <app-avatar
+          [imageUrl]="activeConversation?.avatarUrl || ''"
+          [name]="getOtherParticipantName()"
+          [isOnline]="isOtherParticipantOnline()"
+          [showStatus]="!isGroupConversation()"
+          size="sm">
+        </app-avatar>
+      </button>
+      <div class="chat-header-info" (click)="openProfileSidebar()" role="button" tabindex="0">
         <h4>{{ getOtherParticipantName() }}</h4>
         <small *ngIf="typingUsers.length > 0" class="typing-status">typing...</small>
         <small *ngIf="typingUsers.length === 0 && isOtherParticipantOnline()" class="text-success">Online</small>

@@ -219,36 +219,50 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     return this.presenceService.isOnline(peerId);
   }
 
+  /** Open profile sidebar (header avatar / name). Does not toggle closed. */
+  openProfileSidebar(): void {
+    if (!this.showProfileSidebar) {
+      this.toggleProfileSidebar();
+      return;
+    }
+    // Already open — refresh peer data if private chat
+    if (this.activeConversation && !this.isGroupConversation()) {
+      this.loadPrivateSidebarProfile();
+    }
+  }
+
   toggleProfileSidebar(): void {
     this.showProfileSidebar = !this.showProfileSidebar;
     if (this.showProfileSidebar && this.activeConversation) {
       if (this.isGroupConversation()) {
-        // Load group members
         this.groupService.getGroupMembers(this.activeConversation.conversationId).subscribe(
           (members) => { this.groupMembers = members; },
           () => { this.groupMembers = []; }
         );
       } else {
-        // Resolve peer id from conversation / contacts; never rely on missing participantId alone
-        const peerId = this.getOtherUserId() || (
-          this.activeConversation.participantId != null
-            ? String(this.activeConversation.participantId)
-            : null
-        );
-        if (!peerId) {
-          // Still open sidebar with conversation fallback fields (no hard error page)
-          this.sidebarUser = this.buildFallbackSidebarUser();
-          return;
-        }
-        this.userService.getUserById(peerId).subscribe(
-          (user) => { this.sidebarUser = user; },
-          () => {
-            // Soft fail: keep sidebar open with local conversation data
-            this.sidebarUser = this.buildFallbackSidebarUser(peerId);
-          }
-        );
+        this.loadPrivateSidebarProfile();
       }
     }
+  }
+
+  /** Load peer profile for private-chat sidebar (soft-fail friendly). */
+  private loadPrivateSidebarProfile(): void {
+    if (!this.activeConversation || this.isGroupConversation()) {
+      return;
+    }
+    const peerId = this.getOtherUserId() || (
+      this.activeConversation.participantId != null
+        ? String(this.activeConversation.participantId)
+        : null
+    );
+    if (!peerId) {
+      this.sidebarUser = this.buildFallbackSidebarUser();
+      return;
+    }
+    this.userService.getUserById(peerId).subscribe(
+      (user) => { this.sidebarUser = user; },
+      () => { this.sidebarUser = this.buildFallbackSidebarUser(peerId); }
+    );
   }
 
   /** Sidebar content when GET /users/:id fails or peer id unknown. */

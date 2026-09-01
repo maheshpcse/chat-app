@@ -101,10 +101,26 @@ export class SettingsComponent implements OnInit {
     this.themePreference = this.settingsService.toThemePreference();
   }
 
-  private persistKeys( partial: { [key: string]: any }, okMsg: string ): void {
+  private persistKeys(partial: { [key: string]: any }, okMsg: string): void {
+    const keys = Object.keys(partial || {});
+    // Prefer single-key PUT when only one field changes (clearer BE path)
+    if (keys.length === 1) {
+      const key = keys[0];
+      this.settingsService.updateSetting(key, partial[key]).subscribe(
+        () => this.showMessage(okMsg),
+        (err) => this.showMessage(
+          (err && err.message) || 'Failed to save setting',
+          true
+        )
+      );
+      return;
+    }
     this.settingsService.updateSettings(partial).subscribe(
       () => this.showMessage(okMsg),
-      () => this.showMessage('Failed to save setting', true)
+      (err) => this.showMessage(
+        (err && err.message) || 'Failed to save setting',
+        true
+      )
     );
   }
 
