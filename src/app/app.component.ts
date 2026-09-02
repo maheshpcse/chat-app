@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from './core/services/auth.service';
 import { SocketService } from './core/services/socket.service';
+import { SettingsService } from './core/services/settings.service';
+import { PresenceService } from './core/services/presence.service';
 import { routeSlideAnimation } from './shared/animations/route.animations';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { ChatLayoutComponent } from './layout/chat-layout/chat-layout.component';
@@ -33,18 +36,59 @@ import { ChatLayoutComponent } from './layout/chat-layout/chat-layout.component'
   animations: [routeSlideAnimation],
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+
+  private authSub: Subscription;
 
   constructor(
     private authService: AuthService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private settingsService: SettingsService,
+    private presenceService: PresenceService
   ) {}
 
   ngOnInit(): void {
-    // If user is already authenticated (page refresh), reconnect socket
+    // If user is already authenticated (page refresh), reconnect socket + settings
     if (this.authService.isAuthenticated()) {
       this.socketService.connect();
+      this.bootstrapUserPrefs();
     }
+
+    this.authSub = this.authService.isLoggedIn$.subscribe(loggedIn => {
+      if (loggedIn) {
+        this.bootstrapUserPrefs();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.authSub) {
+      this.authSub.unsubscribe();
+    }
+  }
+
+  /** Tab focus / visibility: refresh presence without marking self offline. */
+  @HostListener('document:visibilitychange')
+  onVisibilityChange(): void {
+    if (document.visibilityState !== 'visible') {
+      return;
+    }
+    if (!this.authService.isAuthenticated()) {
+      return;
+    }
+    if (!this.socketService.isConnected()) {
+      this.socketService.connect();
+    } else {
+      this.socketService.getOnlineUsers();
+      this.presenceService.hydrateFromApi();
+    }
+  }
+
+  private bootstrapUserPrefs(): void {
+    this.settingsService.getSettings().subscribe(
+      () => { /* applyRuntimeEffects runs in service tap */ },
+      () => { /* soft-fail keep defaults */ }
+    );
   }
 
   /**

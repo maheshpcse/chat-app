@@ -99,6 +99,8 @@ export class SettingsComponent implements OnInit {
     this.notificationSettings = this.settingsService.toNotificationSettings();
     this.chatPreferences = this.settingsService.toChatPreferences();
     this.themePreference = this.settingsService.toThemePreference();
+    // Push theme/font into live document (privacy applied server-side on presence)
+    this.settingsService.applyRuntimeEffects();
   }
 
   private persistKeys(partial: { [key: string]: any }, okMsg: string): void {
@@ -145,18 +147,32 @@ export class SettingsComponent implements OnInit {
     this.activeSection = sectionId;
   }
 
-  // Profile
+  // Profile — first/last required; phone + bio optional (blank phone omitted)
   saveProfile(): void {
     if (this.profileForm.invalid) { return; }
     this.isProfileSaving = true;
-    this.userService.updateMyProfile(this.profileForm.value).subscribe(
+    const raw = this.profileForm.value || {};
+    const phone = (raw.phoneNumber || '').toString().trim();
+    const bio = (raw.bio || '').toString();
+    const payload: any = {
+      firstName: (raw.firstName || '').toString().trim(),
+      lastName: (raw.lastName || '').toString().trim()
+    };
+    if (phone) {
+      payload.phoneNumber = phone;
+    } else {
+      payload.phoneNumber = null;
+    }
+    payload.bio = bio;
+    this.userService.updateMyProfile(payload).subscribe(
       () => {
         this.isProfileSaving = false;
         this.showMessage('Profile updated successfully');
       },
       error => {
         this.isProfileSaving = false;
-        this.showMessage('Failed to update profile', true);
+        const msg = (error && error.message) || 'Failed to update profile';
+        this.showMessage(msg, true);
       }
     );
   }
@@ -212,6 +228,7 @@ export class SettingsComponent implements OnInit {
 
   setFontSize(size: string): void {
     this.chatPreferences.fontSize = size;
+    this.settingsService.applyFontSize(size);
     this.persistKeys(
       { 'chat.fontSize': size },
       'Font size updated'
@@ -220,6 +237,7 @@ export class SettingsComponent implements OnInit {
 
   setTheme(theme: string): void {
     this.themePreference = theme;
+    this.settingsService.applyTheme(theme);
     this.persistKeys(
       { 'theme.preference': theme },
       'Appearance updated'

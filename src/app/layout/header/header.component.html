@@ -6,10 +6,15 @@
   <span class="spacer"></span>
 
   <!-- Notification Bell -->
-  <button #notificationButton mat-icon-button (click)="toggleNotifications(); $event.stopPropagation()"
+  <button #notificationButton
+          mat-icon-button
+          class="notification-bell-btn"
+          (click)="toggleNotifications(); $event.stopPropagation()"
           [matBadge]="unreadNotifications > 0 ? unreadNotifications : null"
           matBadgeColor="warn"
           matBadgeSize="small"
+          matBadgePosition="above after"
+          matBadgeOverlap="true"
           matTooltip="Notifications">
     <mat-icon>notifications</mat-icon>
   </button>

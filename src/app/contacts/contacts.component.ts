@@ -258,17 +258,27 @@ export class ContactsComponent implements OnInit, OnDestroy {
     const acceptedIds = new Set(this.contacts.map(c => c.contactUserId));
     const merged = [...this.contacts, ...pending.filter(p => !acceptedIds.has(p.contactUserId))];
 
-    this.filteredContacts = merged;
-    this.groupContacts(this.searchTerm ? this.applyTextFilter(merged, this.searchTerm) : merged);
+    // filteredContacts drives list/grid/table + autocomplete — must apply search
+    const filtered = this.searchTerm
+      ? this.applyTextFilter(merged, this.searchTerm)
+      : merged;
+    this.filteredContacts = filtered;
+    this.groupContacts(filtered);
   }
 
   private applyTextFilter(list: IContact[], term: string): IContact[] {
-    const lower = term.toLowerCase();
-    return list.filter(c =>
-      (c.firstName || '').toLowerCase().includes(lower) ||
-      (c.lastName || '').toLowerCase().includes(lower) ||
-      (c.username || '').toLowerCase().includes(lower)
-    );
+    const lower = (term || '').toLowerCase().trim();
+    if (!lower) { return list; }
+    return list.filter(c => {
+      const first = (c.firstName || '').toLowerCase();
+      const last = (c.lastName || '').toLowerCase();
+      const user = (c.username || '').toLowerCase();
+      const full = `${first} ${last}`.trim();
+      return first.includes(lower)
+        || last.includes(lower)
+        || user.includes(lower)
+        || full.includes(lower);
+    });
   }
 
   isPending(contact: IContact): boolean {

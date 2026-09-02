@@ -59,6 +59,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUser()?.id || null;
 
+    // Returning to chat-window: recompute Online / last seen from API + sockets
+    this.presenceService.hydrateFromApi();
+    this.socketService.getOnlineUsers();
+
     const convSub = this.chatService.activeConversation$.subscribe(conv => {
       this.activeConversation = conv ? this.enrichConversationPeer(conv) : null;
       // Reset pagination whenever the open conversation changes
@@ -69,6 +73,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
       this.shouldScroll = true;
       this.isNearBottom = true;
       this.lastLoadTimestamp = 0;
+      // Peer may change — refresh presence display
+      this.presenceService.hydrateFromApi();
+      this.cdr.detectChanges();
     });
     this.subscriptions.push(convSub);
 

@@ -534,6 +534,39 @@
 
 .actions-cell {
   text-align: center;
+  vertical-align: middle;
+  width: 112px;
+  min-width: 112px;
+  white-space: nowrap;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+
+  // Inner flex so Chat icon / Withdraw share same center box
+  > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    margin: 0 auto;
+  }
+
+  .mat-icon-button {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+  }
+
+  .mat-icon-button .mat-icon {
+    margin: 0;
+    line-height: 24px;
+  }
+
+  .withdraw-btn {
+    min-width: 0;
+    height: 36px;
+    line-height: 34px;
+    padding: 0 10px;
+  }
 }
 
 // ==========================================
@@ -831,5 +864,12 @@ tr.is-pending {
 .actions-cell {
   .withdraw-btn {
     white-space: nowrap;
+  }
+
+  // Align Chat icon with other action controls in dense table rows
+  button[mat-icon-button] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }

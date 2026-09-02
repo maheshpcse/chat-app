@@ -310,18 +310,14 @@ export class ChatService {
       attachmentUrl
     };
 
-    // Send via HTTP (persists to DB). The backend now broadcasts the saved
-    // message over the socket, so we do NOT re-emit it here (avoids duplicates).
+    // HTTP persists + BE emits NEW_MESSAGE to room (including sender).
+    // Prefer socket delivery for own bubble; HTTP path only fills if socket missed.
     this.messageService.sendMessage(messageData).subscribe(
       message => {
-        // Add own message locally; the echoed socket copy is de-duplicated by id.
         const enriched = this.enrichOwnSender(message);
-        const current = this.messagesSubject.value;
-        this.messagesSubject.next([...current, enriched]);
+        this.upsertMessage(enriched);
       },
       () => {
-        // Surface a failed send so the bubble can show the error/retry state.
-        // Stay in chat — ErrorInterceptor no longer navigates away on 4xx/5xx.
         const me = this.authService.getCurrentUser();
         const myName = me
           ? (me.fullName || [me.firstName, me.lastName].filter(Boolean).join(' ').trim() || me.username || '')
@@ -338,10 +334,45 @@ export class ChatService {
           createdAt: new Date(),
           updatedAt: new Date()
         } as IMessage;
-        const current = this.messagesSubject.value;
-        this.messagesSubject.next([...current, failed]);
+        this.upsertMessage(failed);
       }
     );
+  }
+
+  /**
+   * Insert or replace message by id. Also collapses near-duplicate own bubbles
+   * when HTTP and socket race with different temporary ids / missing ids.
+   */
+  private upsertMessage(message: IMessage): void {
+    if (!message) { return; }
+    const current = this.messagesSubject.value;
+    const mid = message.messageId != null ? String(message.messageId) : '';
+    if (mid && current.some(m => String(m.messageId) === mid)) {
+      return;
+    }
+
+    // Collapse optimistic/failed twin: same sender + conversation + content within 8s
+    const me = this.authService.getCurrentUser()?.id;
+    const contentKey = (message.content || '').toString().trim();
+    const createdMs = new Date(message.createdAt || Date.now()).getTime();
+    const twinIdx = current.findIndex(m => {
+      if (!m) { return false; }
+      if (mid && String(m.messageId) === mid) { return true; }
+      if (String(m.conversationId) !== String(message.conversationId)) { return false; }
+      if (String(m.senderId) !== String(message.senderId || me || '')) { return false; }
+      if ((m.content || '').toString().trim() !== contentKey) { return false; }
+      const otherMs = new Date(m.createdAt || 0).getTime();
+      return Math.abs(createdMs - otherMs) < 8000;
+    });
+
+    if (twinIdx >= 0) {
+      const next = current.slice();
+      next[twinIdx] = { ...current[twinIdx], ...message, messageId: mid || current[twinIdx].messageId };
+      this.messagesSubject.next(next);
+      return;
+    }
+
+    this.messagesSubject.next([...current, message]);
   }
 
   /**
@@ -404,12 +435,7 @@ export class ChatService {
       const currentUserId = this.authService.getCurrentUser()?.id;
       const activeConv = this.activeConversationSubject.value;
       if (activeConv && String(message.conversationId) === String(activeConv.conversationId)) {
-        const current = this.messagesSubject.value;
-        // Deduplicate: don't add if messageId already exists (e.g. sender's own message added via HTTP response)
-        const exists = current.some(m => String(m.messageId) === String(message.messageId));
-        if (!exists) {
-          this.messagesSubject.next([...current, message]);
-        }
+        this.upsertMessage(message);
         // Acknowledge delivery for messages from other users.
         if (String(message.senderId) !== String(currentUserId || '')) {
           this.socketService.markDelivered(message.messageId, message.conversationId);

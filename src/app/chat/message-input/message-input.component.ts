@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ChatService } from '../../core/services/chat.service';
 import { UploadService } from '../../core/services/upload.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { MessageType } from '../../core/models/message.model';
 import { APP_CONSTANTS } from '../../core/constants/app.constants';
 import { ScheduleMessageDialogComponent } from '../schedule-message-dialog/schedule-message-dialog.component';
@@ -37,6 +38,7 @@ export class MessageInputComponent implements OnInit, OnDestroy {
   constructor(
     private chatService: ChatService,
     private uploadService: UploadService,
+    private settingsService: SettingsService,
     private dialog: MatDialog
   ) {}
 
@@ -90,7 +92,17 @@ export class MessageInputComponent implements OnInit, OnDestroy {
   }
 
   onKeyDown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key !== 'Enter') {
+      return;
+    }
+    const enterSends = this.settingsService.toChatPreferences().enterSends !== false;
+    if (enterSends && !event.shiftKey) {
+      event.preventDefault();
+      this.sendMessage();
+      return;
+    }
+    // enterSends off: Enter = newline; Ctrl/Cmd+Enter still sends
+    if (!enterSends && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       this.sendMessage();
     }

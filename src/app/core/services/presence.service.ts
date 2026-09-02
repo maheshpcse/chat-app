@@ -34,19 +34,19 @@ export class PresenceService {
     private socketService: SocketService,
     private http: HttpClient
   ) {
-    // Sync online users list (normalize ids to string)
+    // Full online_users_list from server is authoritative for peer set.
+    // Do not wipe known-online peers when list arrives empty (Redis miss / race).
     this.socketService.onlineUsers$.subscribe(users => {
-      const normalized = (users || []).map(u => String(u));
-      // Merge with existing set so HTTP seed is not wiped by empty socket list
-      const merged = new Set(this.onlineUsersSubject.value);
-      normalized.forEach(id => merged.add(id));
-      // If socket sent a full list, prefer it as source of truth for online set
-      if (normalized.length > 0 || this.hydrated) {
-        this.onlineUsersSubject.next(new Set(normalized.length ? normalized : Array.from(merged)));
+      const normalized = (users || []).map(u => String(u)).filter(Boolean);
+      if (normalized.length === 0) {
+        // Keep current set; empty list is not proof everyone went offline.
+        return;
       }
+      this.onlineUsersSubject.next(new Set(normalized));
+      normalized.forEach(id => this.lastSeenMap.delete(id));
     });
 
-    // Track when a user goes offline — store their lastSeen timestamp
+    // Explicit USER_OFFLINE only (all tabs closed / logout)
     this.socketService.userOffline$.subscribe(data => {
       if (!data?.userId) { return; }
       const id = String(data.userId);
@@ -56,7 +56,7 @@ export class PresenceService {
       this.lastSeenMap.set(id, data.timestamp || Date.now());
     });
 
-    // When user comes online, remove their lastSeen entry
+    // Explicit USER_ONLINE
     this.socketService.userOnline$.subscribe(data => {
       if (!data?.userId) { return; }
       const id = String(data.userId);
@@ -66,11 +66,18 @@ export class PresenceService {
       this.lastSeenMap.delete(id);
     });
 
-    // One-shot HTTP seed (privacy-filtered contacts presence)
+    // Re-seed when socket reconnects (tab switch / refresh recovery)
+    this.socketService.connected$.subscribe(connected => {
+      if (connected) {
+        this.hydrateFromApi();
+        this.socketService.getOnlineUsers();
+      }
+    });
+
     this.hydrateFromApi();
   }
 
-  /** Pull contacts presence from REST; safe to call multiple times. */
+  /** Pull contacts presence from REST; merges online rows, never clears socket-online peers on soft fail. */
   hydrateFromApi(): void {
     this.http.get<IApiResponse<IPresenceRow[]>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.PRESENCE.CONTACTS}`
@@ -84,8 +91,8 @@ export class PresenceService {
           if (row.isOnline) {
             online.add(id);
             this.lastSeenMap.delete(id);
-          } else {
-            online.delete(id);
+          } else if (!online.has(id)) {
+            // Only set lastSeen when not already known online via socket
             const ls = row.lastSeen;
             if (ls != null) {
               const ms = typeof ls === 'number' ? ls : Date.parse(String(ls));
@@ -95,11 +102,11 @@ export class PresenceService {
             }
           }
         });
+        // Do not remove socket-online peers just because REST said offline (stale Redis)
         this.onlineUsersSubject.next(online);
         this.hydrated = true;
       },
       () => {
-        // Soft-fail — sockets still drive presence
         this.hydrated = true;
       }
     );

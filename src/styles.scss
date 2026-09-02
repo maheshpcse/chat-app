@@ -182,6 +182,40 @@ a {
   overflow: hidden;
 }
 
+/* No sticky page footers on chat-user shells (composer stays in-flow). */
+.app-container footer,
+.page-shell footer,
+.settings-shell footer,
+.contacts-page footer:not(.chat-composer-footer) {
+  position: static !important;
+}
+
+/* Chat font-size preference (Settings → Chat) */
+:root {
+  --chat-font-scale: 1;
+}
+.chat-font-sm .message-bubble,
+.chat-font-sm .messages-area {
+  font-size: calc(0.9rem * var(--chat-font-scale, 0.9));
+}
+.chat-font-lg .message-bubble,
+.chat-font-lg .messages-area {
+  font-size: calc(1.05rem * var(--chat-font-scale, 1.12));
+}
+
+/* Appearance theme hooks */
+body.theme-dark {
+  background-color: #12141a;
+  color: #e8eceb;
+}
+body.theme-dark .page-shell,
+body.theme-dark .app-main-content,
+body.theme-dark .settings-content,
+body.theme-dark .contacts-page {
+  background-color: #12141a;
+  color: #e8eceb;
+}
+
 @media (max-width: 768px) {
   .page-shell {
     padding: 16px;

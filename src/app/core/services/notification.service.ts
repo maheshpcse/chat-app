@@ -5,6 +5,7 @@ import { map, tap, catchError } from 'rxjs/operators';
 import { INotification } from '../models/notification.model';
 import { IApiResponse } from '../models/api-response.model';
 import { SocketService } from './socket.service';
+import { SettingsService } from './settings.service';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../constants/api.constants';
 
@@ -34,7 +35,8 @@ export class NotificationService {
 
   constructor(
     private http: HttpClient,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private settingsService: SettingsService
   ) {
     this.listenToSocketNotifications();
   }
@@ -89,6 +91,43 @@ export class NotificationService {
     this.notificationsSubject.next([normalized, ...current]);
     this.unreadCountSubject.next(this.unreadCountSubject.value + 1);
     this.newNotificationSubject.next(normalized);
+    this.maybePlaySound(normalized);
+  }
+
+  /** Respect Settings → Notifications sound toggle. */
+  private maybePlaySound(notification: INotification): void {
+    if (!this.settingsService.isSoundEnabled()) {
+      return;
+    }
+    if (!this.settingsService.isMessageNotificationsEnabled()) {
+      const t = String((notification && notification.type) || '').toLowerCase();
+      if (t.indexOf('message') >= 0 || t === 'newmessage') {
+        return;
+      }
+    }
+    try {
+      const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!Ctx) {
+        return;
+      }
+      const ctx = new Ctx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.value = 0.04;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      setTimeout(() => {
+        try {
+          osc.stop();
+          ctx.close();
+        } catch (_e) { /* ignore */ }
+      }, 120);
+    } catch (_err) {
+      // autoplay policies / missing AudioContext — ignore
+    }
   }
 
   /**

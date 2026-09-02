@@ -32,6 +32,7 @@ export interface IChatPreferences {
 /**
  * SettingsService - HTTP client for /api/v1/settings free-form KV store.
  * Keys are dotted (privacy.onlineStatus, notifications.messages, …).
+ * Applies theme + chat font size to document when values change.
  */
 @Injectable({
   providedIn: 'root'
@@ -48,7 +49,10 @@ export class SettingsService {
       `${environment.apiBaseUrl}${API_ENDPOINTS.SETTINGS.BASE}`
     ).pipe(
       map(response => response.data || {}),
-      tap(settings => this.settingsSubject.next(settings))
+      tap(settings => {
+        this.settingsSubject.next(settings);
+        this.applyRuntimeEffects(settings);
+      })
     );
   }
 
@@ -62,6 +66,7 @@ export class SettingsService {
       tap(updated => {
         const merged = { ...this.settingsSubject.value, ...updated };
         this.settingsSubject.next(merged);
+        this.applyRuntimeEffects(merged);
       })
     );
   }
@@ -75,8 +80,71 @@ export class SettingsService {
       tap(() => {
         const next = { ...this.settingsSubject.value, [key]: value };
         this.settingsSubject.next(next);
+        this.applyRuntimeEffects(next);
       })
     );
+  }
+
+  /** Apply theme / font-size / enter-sends side effects to the live app shell. */
+  applyRuntimeEffects(settingsMap?: UserSettingsMap): void {
+    const snap = settingsMap || this.settingsSubject.value || {};
+    const theme = this.pickString(snap, 'theme.preference', 'light');
+    const fontSize = this.pickString(snap, 'chat.fontSize', 'medium');
+    this.applyTheme(theme);
+    this.applyFontSize(fontSize);
+  }
+
+  applyTheme(theme: string): void {
+    const root = document.documentElement;
+    const body = document.body;
+    const t = (theme || 'light').toLowerCase();
+    root.classList.remove('theme-light', 'theme-dark', 'theme-system');
+    body.classList.remove('theme-light', 'theme-dark', 'theme-system');
+    if (t === 'dark') {
+      root.classList.add('theme-dark');
+      body.classList.add('theme-dark');
+      root.setAttribute('data-theme', 'dark');
+    } else if (t === 'system') {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.classList.add(prefersDark ? 'theme-dark' : 'theme-light', 'theme-system');
+      body.classList.add(prefersDark ? 'theme-dark' : 'theme-light', 'theme-system');
+      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    } else {
+      root.classList.add('theme-light');
+      body.classList.add('theme-light');
+      root.setAttribute('data-theme', 'light');
+    }
+  }
+
+  applyFontSize(size: string): void {
+    const root = document.documentElement;
+    const s = (size || 'medium').toLowerCase();
+    root.classList.remove('chat-font-sm', 'chat-font-md', 'chat-font-lg');
+    if (s === 'small') {
+      root.classList.add('chat-font-sm');
+      root.style.setProperty('--chat-font-scale', '0.9');
+    } else if (s === 'large') {
+      root.classList.add('chat-font-lg');
+      root.style.setProperty('--chat-font-scale', '1.12');
+    } else {
+      root.classList.add('chat-font-md');
+      root.style.setProperty('--chat-font-scale', '1');
+    }
+  }
+
+  private pickString(settingsMap: UserSettingsMap, key: string, fallback: string): string {
+    const v = settingsMap[key];
+    if (v == null) { return fallback; }
+    return typeof v === 'string' ? v : String(v);
+  }
+
+  /** Sound enabled for in-app notifications (default true). */
+  isSoundEnabled(): boolean {
+    return this.readBool('notifications.sound', true);
+  }
+
+  isMessageNotificationsEnabled(): boolean {
+    return this.readBool('notifications.messages', true);
   }
 
   getSnapshot(): UserSettingsMap {
