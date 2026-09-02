@@ -169,3 +169,19 @@
   font-size: 0.6875rem;
   color: $admin-muted;
 }
+
+.admin-back-user {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+
+  a {
+    color: $admin-muted;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      color: $admin-white;
+    }
+  }
+}

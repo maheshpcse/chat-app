@@ -8,6 +8,7 @@ import { SocketService } from './socket.service';
 import { SettingsService } from './settings.service';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../constants/api.constants';
+import { parseServerDate } from '../utilities/date-parse.utility';
 
 /**
  * NotificationService - Manages in-app notifications via HTTP + socket.
@@ -216,7 +217,7 @@ export class NotificationService {
       title,
       message: body,
       isRead: n.isRead === true || n.isRead === 1 || n.read === true,
-      createdAt: n.createdAt ? new Date(n.createdAt) : new Date()
+      createdAt: parseServerDate(n.createdAt || n.created_at) || new Date()
     } as INotification;
   }
 

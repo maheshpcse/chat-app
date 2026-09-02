@@ -1,14 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../core/services/auth.service';
 import { UserService } from '../core/services/user.service';
 import { SettingsService } from '../core/services/settings.service';
+import { UploadService } from '../core/services/upload.service';
 import { IUser } from '../core/models/user.model';
+import { APP_CONSTANTS } from '../core/constants/app.constants';
+import { environment } from '../../environments/environment';
 
 /**
  * SettingsComponent - User settings page with multiple sections:
- * Profile, Privacy, Notifications, Chat, Theme, Security
+ * Profile (incl. avatar upload + initials badge), Privacy, Notifications,
+ * Chat, Theme, Security.
  */
 @Component({
   selector: 'app-settings',
@@ -20,18 +24,15 @@ export class SettingsComponent implements OnInit {
   currentUser: IUser | null = null;
   activeSection = 'profile';
 
-  // Forms
   profileForm: FormGroup;
   passwordForm: FormGroup;
 
-  // Privacy settings
   privacySettings = {
     onlineStatus: 'everyone',
     lastSeen: 'everyone',
     profilePhoto: 'everyone'
   };
 
-  // Notification settings
   notificationSettings = {
     messages: true,
     groups: true,
@@ -39,19 +40,18 @@ export class SettingsComponent implements OnInit {
     sound: true
   };
 
-  // Chat preferences
   chatPreferences = {
     enterSends: true,
     fontSize: 'medium'
   };
 
-  // Theme
   themePreference = 'light';
 
-  // State
   isProfileSaving = false;
   isPasswordSaving = false;
   isSettingsLoading = false;
+  isAvatarUploading = false;
+  avatarPreviewUrl: string | null = null;
   hideCurrentPassword = true;
   hideNewPassword = true;
   hideConfirmPassword = true;
@@ -70,6 +70,7 @@ export class SettingsComponent implements OnInit {
     private authService: AuthService,
     private userService: UserService,
     private settingsService: SettingsService,
+    private uploadService: UploadService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -78,6 +79,10 @@ export class SettingsComponent implements OnInit {
     this.initProfileForm();
     this.initPasswordForm();
     this.loadRemoteSettings();
+    this.userService.getMyProfile().subscribe(
+      (user) => this.applyUserToLocal(user),
+      () => { /* keep cached user */ }
+    );
   }
 
   private loadRemoteSettings(): void {
@@ -89,7 +94,6 @@ export class SettingsComponent implements OnInit {
       },
       () => {
         this.isSettingsLoading = false;
-        // Keep local defaults; soft fail (no error-page nav)
       }
     );
   }
@@ -99,13 +103,11 @@ export class SettingsComponent implements OnInit {
     this.notificationSettings = this.settingsService.toNotificationSettings();
     this.chatPreferences = this.settingsService.toChatPreferences();
     this.themePreference = this.settingsService.toThemePreference();
-    // Push theme/font into live document (privacy applied server-side on presence)
     this.settingsService.applyRuntimeEffects();
   }
 
   private persistKeys(partial: { [key: string]: any }, okMsg: string): void {
     const keys = Object.keys(partial || {});
-    // Prefer single-key PUT when only one field changes (clearer BE path)
     if (keys.length === 1) {
       const key = keys[0];
       this.settingsService.updateSetting(key, partial[key]).subscribe(
@@ -147,7 +149,7 @@ export class SettingsComponent implements OnInit {
     this.activeSection = sectionId;
   }
 
-  // Profile — first/last required; phone + bio optional (blank phone omitted)
+  /** Profile — first/last required; phone + bio optional. */
   saveProfile(): void {
     if (this.profileForm.invalid) { return; }
     this.isProfileSaving = true;
@@ -156,17 +158,14 @@ export class SettingsComponent implements OnInit {
     const bio = (raw.bio || '').toString();
     const payload: any = {
       firstName: (raw.firstName || '').toString().trim(),
-      lastName: (raw.lastName || '').toString().trim()
+      lastName: (raw.lastName || '').toString().trim(),
+      bio,
+      phoneNumber: phone || null
     };
-    if (phone) {
-      payload.phoneNumber = phone;
-    } else {
-      payload.phoneNumber = null;
-    }
-    payload.bio = bio;
     this.userService.updateMyProfile(payload).subscribe(
-      () => {
+      (updated) => {
         this.isProfileSaving = false;
+        this.applyUserToLocal(updated || payload);
         this.showMessage('Profile updated successfully');
       },
       error => {
@@ -177,7 +176,108 @@ export class SettingsComponent implements OnInit {
     );
   }
 
-  // Password
+  /** Upload image → save avatarUrl. Empty avatar shows initials badge. */
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input?.files?.length) { return; }
+    const file = input.files[0];
+    input.value = '';
+    if (file.size > APP_CONSTANTS.MAX_FILE_SIZE) {
+      this.showMessage('Image must be under 10MB', true);
+      return;
+    }
+    const allowed = APP_CONSTANTS.ALLOWED_IMAGE_TYPES || [];
+    if (allowed.length && allowed.indexOf(file.type) < 0) {
+      this.showMessage('Use JPEG, PNG, GIF, or WebP', true);
+      return;
+    }
+
+    this.isAvatarUploading = true;
+    try {
+      this.avatarPreviewUrl = URL.createObjectURL(file);
+    } catch (_e) {
+      this.avatarPreviewUrl = null;
+    }
+
+    this.uploadService.uploadLocal(file).subscribe(
+      (result) => {
+        const fileUrl = result && result.fileUrl;
+        if (!fileUrl) {
+          this.isAvatarUploading = false;
+          this.showMessage('Upload failed', true);
+          return;
+        }
+        this.userService.updateMyProfile({ avatarUrl: fileUrl }).subscribe(
+          (updated) => {
+            this.isAvatarUploading = false;
+            this.avatarPreviewUrl = null;
+            this.applyUserToLocal(updated || { avatarUrl: fileUrl });
+            this.showMessage('Profile photo updated');
+          },
+          (err) => {
+            this.isAvatarUploading = false;
+            this.showMessage((err && err.message) || 'Failed to save photo', true);
+          }
+        );
+      },
+      (err) => {
+        this.isAvatarUploading = false;
+        this.avatarPreviewUrl = null;
+        this.showMessage((err && err.message) || 'Upload failed', true);
+      }
+    );
+  }
+
+  removeAvatar(): void {
+    this.isAvatarUploading = true;
+    this.userService.updateMyProfile({ avatarUrl: null as any }).subscribe(
+      (updated) => {
+        this.isAvatarUploading = false;
+        this.avatarPreviewUrl = null;
+        this.applyUserToLocal({ ...(updated || {}), avatarUrl: '' });
+        this.showMessage('Profile photo removed — initials badge in use');
+      },
+      (err) => {
+        this.isAvatarUploading = false;
+        this.showMessage((err && err.message) || 'Failed to remove photo', true);
+      }
+    );
+  }
+
+  resolveAvatarUrl(url?: string): string {
+    if (!url) { return ''; }
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) {
+      return url;
+    }
+    return `${environment.socketUrl}${url}`;
+  }
+
+  private applyUserToLocal(user: Partial<IUser> | any): void {
+    if (!user) { return; }
+    const id = user.id || user.userId || this.currentUser?.id;
+    const patch: Partial<IUser> = {
+      id,
+      userId: user.userId || id,
+      firstName: user.firstName != null ? user.firstName : this.currentUser?.firstName,
+      lastName: user.lastName != null ? user.lastName : this.currentUser?.lastName,
+      username: user.username != null ? user.username : this.currentUser?.username,
+      email: user.email != null ? user.email : this.currentUser?.email,
+      bio: user.bio != null ? user.bio : this.currentUser?.bio,
+      phoneNumber: user.phoneNumber != null ? user.phoneNumber : this.currentUser?.phoneNumber,
+      avatarUrl: user.avatarUrl != null ? user.avatarUrl : this.currentUser?.avatarUrl
+    };
+    this.authService.patchCurrentUser(patch);
+    this.currentUser = this.authService.getCurrentUser();
+    if (this.profileForm && (user.firstName != null || user.lastName != null || user.bio != null || user.phoneNumber != null)) {
+      this.profileForm.patchValue({
+        firstName: patch.firstName,
+        lastName: patch.lastName,
+        bio: patch.bio || '',
+        phoneNumber: patch.phoneNumber || ''
+      }, { emitEvent: false });
+    }
+  }
+
   changePassword(): void {
     if (this.passwordForm.invalid) { return; }
     const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
@@ -199,7 +299,6 @@ export class SettingsComponent implements OnInit {
     );
   }
 
-  // Notification toggles → API
   toggleNotification(key: string): void {
     this.notificationSettings[key] = !this.notificationSettings[key];
     this.persistKeys(
@@ -208,7 +307,6 @@ export class SettingsComponent implements OnInit {
     );
   }
 
-  // Privacy → API (privacy.onlineStatus | lastSeen | profilePhoto)
   setPrivacy(key: string, value: string): void {
     this.privacySettings[key] = value;
     this.persistKeys(
@@ -217,7 +315,6 @@ export class SettingsComponent implements OnInit {
     );
   }
 
-  // Chat preferences → API
   toggleEnterSends(): void {
     this.chatPreferences.enterSends = !this.chatPreferences.enterSends;
     this.persistKeys(
@@ -248,7 +345,7 @@ export class SettingsComponent implements OnInit {
     if (!this.currentUser) { return '?'; }
     const first = this.currentUser.firstName ? this.currentUser.firstName.charAt(0) : '';
     const last = this.currentUser.lastName ? this.currentUser.lastName.charAt(0) : '';
-    return (first + last).toUpperCase();
+    return (first + last).toUpperCase() || '?';
   }
 
   private showMessage(message: string, isError: boolean = false): void {

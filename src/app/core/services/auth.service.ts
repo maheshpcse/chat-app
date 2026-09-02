@@ -178,14 +178,19 @@ export class AuthService {
     localStorage.setItem(APP_CONSTANTS.REFRESH_TOKEN_KEY, authData.refreshToken);
 
     // Map server's userId to internal id, construct fullName from firstName + lastName
+    const u = authData.user as any;
     const user: IUser = {
-      id: authData.user.userId,
-      username: authData.user.username,
-      email: authData.user.email,
-      firstName: authData.user.firstName,
-      lastName: authData.user.lastName,
-      fullName: `${authData.user.firstName} ${authData.user.lastName}`.trim(),
-      role: authData.user.role as any,
+      id: u.userId || u.id,
+      userId: u.userId || u.id,
+      username: u.username,
+      email: u.email,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      fullName: `${u.firstName || ''} ${u.lastName || ''}`.trim(),
+      avatarUrl: u.avatarUrl || u.avatar || undefined,
+      phoneNumber: u.phoneNumber || undefined,
+      bio: u.bio || undefined,
+      role: u.role as any,
       isOnline: true,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -194,6 +199,26 @@ export class AuthService {
     localStorage.setItem(APP_CONSTANTS.USER_KEY, JSON.stringify(user));
     this.currentUserSubject.next(user);
     this.isLoggedInSubject.next(true);
+  }
+
+  /** Merge profile fields into stored current user (after Settings save / avatar upload). */
+  patchCurrentUser(partial: Partial<IUser>): void {
+    const current = this.currentUserSubject.value || ({} as IUser);
+    const next: IUser = {
+      ...current,
+      ...partial,
+      id: (partial.id || partial.userId || current.id || current.userId) as string,
+      fullName: (
+        partial.fullName ||
+        [partial.firstName || current.firstName, partial.lastName || current.lastName]
+          .filter(Boolean).join(' ').trim() ||
+        current.fullName ||
+        current.username ||
+        ''
+      )
+    };
+    localStorage.setItem(APP_CONSTANTS.USER_KEY, JSON.stringify(next));
+    this.currentUserSubject.next(next);
   }
 
   handleLogout(): void {

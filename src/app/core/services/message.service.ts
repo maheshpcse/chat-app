@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../constants/api.constants';
 import { IMessage, ISendMessage } from '../models/message.model';
 import { IApiResponse } from '../models/api-response.model';
+import { parseServerDate } from '../utilities/date-parse.utility';
 
 /**
  * MessageService - HTTP service for message API endpoints.
@@ -45,13 +46,18 @@ export class MessageService {
       ''
     ).toString();
 
+    const created = parseServerDate(raw.createdAt || raw.created_at || raw.sentAt);
+    const updated = parseServerDate(raw.updatedAt || raw.updated_at) || created;
+
     return {
       ...raw,
       messageId: raw.messageId != null ? String(raw.messageId) : raw.messageId,
       conversationId: raw.conversationId != null ? String(raw.conversationId) : raw.conversationId,
       senderId: raw.senderId != null ? String(raw.senderId) : raw.senderId,
       senderName: senderName || undefined,
-      senderAvatar: senderAvatar || undefined
+      senderAvatar: senderAvatar || undefined,
+      createdAt: created || new Date(),
+      updatedAt: updated || created || new Date()
     } as IMessage;
   }
 

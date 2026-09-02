@@ -82,27 +82,35 @@
   position: relative;
   overflow: visible !important;
 
-  // Material badge: keep fully round, clear of icon edge
+  // Red pill only when matBadge has a value (unread > 0). Park top-right corner of bell.
   ::ng-deep .mat-badge-content {
-    width: 18px !important;
-    height: 18px !important;
-    min-width: 18px !important;
-    line-height: 18px !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    line-height: 16px !important;
     border-radius: 50% !important;
-    font-size: 10px !important;
+    font-size: 9px !important;
     font-weight: 700 !important;
     padding: 0 !important;
-    top: 2px !important;
-    right: 2px !important;
+    top: -2px !important;
+    right: -2px !important;
     box-sizing: border-box;
     display: flex !important;
     align-items: center;
     justify-content: center;
+    transform: none !important;
+  }
+
+  // Hide empty / zero badge chrome if Material still mounts node
+  ::ng-deep .mat-badge-hidden .mat-badge-content,
+  ::ng-deep .mat-badge-content:empty {
+    display: none !important;
   }
 
   ::ng-deep.mat-badge-medium-after .mat-badge-content,
   ::ng-deep.mat-badge-small-after .mat-badge-content {
-    right: 2px !important;
+    right: -2px !important;
+    top: -2px !important;
   }
 }
 

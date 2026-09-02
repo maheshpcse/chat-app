@@ -7,6 +7,7 @@ import { SocketService } from '../../core/services/socket.service';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ContactService } from '../../core/services/contact.service';
+import { PresenceService } from '../../core/services/presence.service';
 import { IConversation } from '../../core/models/conversation.model';
 import { IUser } from '../../core/models/user.model';
 import { IContact, IContactRequest } from '../../core/models/contact.model';
@@ -54,6 +55,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private authService: AuthService,
     private contactService: ContactService,
+    private presenceService: PresenceService,
     private router: Router
   ) {}
 
@@ -102,12 +104,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
       })
     );
 
-    // Subscribe to online users (string ids)
+    // PresenceService is source of truth (REST hydrate + sockets); keep list for legacy helpers
     this.subscriptions.push(
-      this.socketService.onlineUsers$.subscribe(users => {
-        this.onlineUsers = (users || []).map(u => String(u));
+      this.presenceService.onlineUsers$.subscribe(set => {
+        this.onlineUsers = Array.from(set || []).map(u => String(u));
       })
     );
+    this.presenceService.hydrateFromApi();
+    this.socketService.getOnlineUsers();
 
     // Subscribe to real-time contact events
     this.subscriptions.push(
@@ -283,8 +287,32 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   isUserOnline(userId?: string | null): boolean {
     if (userId == null || userId === '') { return false; }
-    const id = String(userId);
-    return this.onlineUsers.some(u => String(u) === id);
+    return this.presenceService.isOnline(String(userId));
+  }
+
+  /**
+   * Resolve peer id for private chat list avatars.
+   * Prefer participantId; fall back to contact match by display name.
+   */
+  resolveConversationPeerId(conv: IConversation): string | null {
+    if (!conv) { return null; }
+    const direct = conv.participantId
+      || (conv as any).otherUserId
+      || (conv as any).other_user_id
+      || (conv as any).contactUserId;
+    if (direct != null && direct !== '') {
+      return String(direct);
+    }
+    const name = (conv.displayName || this.chatService.getDisplayName(conv) || '')
+      .trim()
+      .toLowerCase();
+    if (!name) { return null; }
+    const hit = (this.contacts || []).find(c => {
+      const full = `${c.firstName || ''} ${c.lastName || ''}`.trim().toLowerCase();
+      const user = (c.username || '').toLowerCase();
+      return (full && full === name) || (user && user === name);
+    });
+    return hit?.contactUserId != null ? String(hit.contactUserId) : null;
   }
 
   conversationLabel(conv: IConversation): string {

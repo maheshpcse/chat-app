@@ -10,7 +10,8 @@
           mat-icon-button
           class="notification-bell-btn"
           (click)="toggleNotifications(); $event.stopPropagation()"
-          [matBadge]="unreadNotifications > 0 ? unreadNotifications : null"
+          [matBadge]="unreadNotifications > 0 ? (unreadNotifications > 99 ? '99+' : unreadNotifications) : null"
+          [matBadgeHidden]="unreadNotifications <= 0"
           matBadgeColor="warn"
           matBadgeSize="small"
           matBadgePosition="above after"

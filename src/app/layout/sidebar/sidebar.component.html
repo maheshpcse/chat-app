@@ -70,8 +70,8 @@
             [imageUrl]="conv.avatarUrl"
             [name]="conversationLabel(conv)"
             size="md"
-            [showStatus]="!!conv.participantId"
-            [isOnline]="!!conv.participantId && isUserOnline(conv.participantId)">
+            [showStatus]="!!resolveConversationPeerId(conv)"
+            [isOnline]="isUserOnline(resolveConversationPeerId(conv))">
           </app-avatar>
           <div class="item-info">
             <div class="item-row">

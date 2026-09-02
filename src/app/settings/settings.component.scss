@@ -157,6 +157,7 @@
 }
 
 .avatar-large {
+  position: relative;
   width: 72px;
   height: 72px;
   flex-shrink: 0;
@@ -180,6 +181,42 @@
     height: 72px;
     border-radius: 50%;
     object-fit: cover;
+    display: block;
+  }
+
+  .avatar-upload-btn {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: $nocturnal;
+    color: $white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: $shadow-sm;
+    border: 2px solid $white;
+    margin: 0;
+    padding: 0;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+    }
+
+    &.busy {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    &:hover {
+      background: darken($nocturnal, 6%);
+    }
   }
 }
 
@@ -193,6 +230,20 @@
     font-size: $fs-lg;
     font-weight: $fw-semibold;
     color: $text-primary;
+  }
+
+  .avatar-hint {
+    font-family: $font-meta;
+    font-size: $fs-xs;
+    color: $text-muted;
+  }
+
+  .avatar-remove-btn {
+    align-self: flex-start;
+    margin-top: 6px;
+    line-height: 32px;
+    height: 32px;
+    padding: 0 10px;
   }
 
   .avatar-email {

@@ -28,14 +28,29 @@
 
       <div class="profile-avatar-section">
         <div class="avatar-large">
-          <div class="avatar-placeholder" *ngIf="!currentUser?.avatarUrl">
+          <div class="avatar-placeholder" *ngIf="!avatarPreviewUrl && !currentUser?.avatarUrl">
             {{ getUserInitials() }}
           </div>
-          <img *ngIf="currentUser?.avatarUrl" [src]="currentUser.avatarUrl" alt="Avatar">
+          <img *ngIf="avatarPreviewUrl || currentUser?.avatarUrl"
+               [src]="avatarPreviewUrl || resolveAvatarUrl(currentUser?.avatarUrl)"
+               alt="Avatar">
+          <label class="avatar-upload-btn" matTooltip="Change photo" [class.busy]="isAvatarUploading">
+            <mat-icon>photo_camera</mat-icon>
+            <input type="file" accept="image/jpeg,image/png,image/gif,image/webp"
+                   (change)="onAvatarSelected($event)" hidden
+                   [disabled]="isAvatarUploading">
+          </label>
         </div>
         <div class="avatar-info">
           <span class="avatar-name">{{ currentUser?.fullName || currentUser?.username }}</span>
           <span class="avatar-email">{{ currentUser?.email }}</span>
+          <span class="avatar-hint">Photo optional. Initials badge shows when no image.</span>
+          <button type="button" mat-stroked-button color="warn" class="avatar-remove-btn"
+                  *ngIf="currentUser?.avatarUrl || avatarPreviewUrl"
+                  [disabled]="isAvatarUploading"
+                  (click)="removeAvatar()">
+            Remove photo
+          </button>
         </div>
       </div>
 

@@ -460,6 +460,11 @@
     margin: 0;
   }
 
+  p.admin-entry {
+    margin-top: $spacing-sm;
+    font-size: $fs-xs;
+  }
+
   a {
     color: $nocturnal;
     font-weight: $fw-semibold;

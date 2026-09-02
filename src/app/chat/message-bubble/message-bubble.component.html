@@ -31,9 +31,9 @@
       </a>
     </div>
 
-    <!-- Message Meta (time + delivery/read status) -->
+    <!-- Message Meta (clock time + delivery/read status) -->
     <div class="message-meta">
-      <small class="message-time">{{ message.createdAt | timeAgo }}</small>
+      <small class="message-time" [attr.title]="message.createdAt | timeAgo">{{ message.createdAt | messageTime }}</small>
       <mat-icon *ngIf="isOwn" class="read-status" [ngClass]="statusClass">{{ statusIcon }}</mat-icon>
     </div>
   </div>

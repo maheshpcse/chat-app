@@ -1,13 +1,14 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { parseServerDate } from '../../core/utilities/date-parse.utility';
 
 @Pipe({
   name: 'messageTime'
 })
 export class MessageTimePipe implements PipeTransform {
-  transform(value: string | Date): string {
-    if (!value) { return ''; }
+  transform(value: string | Date | number): string {
+    const date = parseServerDate(value);
+    if (!date) { return ''; }
 
-    const date = new Date(value);
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
 

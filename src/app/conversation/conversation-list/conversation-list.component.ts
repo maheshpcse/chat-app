@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ChatService } from '../../core/services/chat.service';
 import { SocketService } from '../../core/services/socket.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PresenceService } from '../../core/services/presence.service';
 import { IConversation } from '../../core/models/conversation.model';
 
 /**
@@ -34,12 +35,15 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     private chatService: ChatService,
     private socketService: SocketService,
     private authService: AuthService,
+    private presenceService: PresenceService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getCurrentUser()?.id;
     this.chatService.loadConversations();
+    this.presenceService.hydrateFromApi();
+    this.socketService.getOnlineUsers();
 
     const convSub = this.chatService.conversations$.subscribe(conversations => {
       this.conversations = conversations;
@@ -47,8 +51,8 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     });
     this.subscriptions.push(convSub);
 
-    const onlineSub = this.socketService.onlineUsers$.subscribe(users => {
-      this.onlineUsers = users;
+    const onlineSub = this.presenceService.onlineUsers$.subscribe(set => {
+      this.onlineUsers = Array.from(set || []).map(u => String(u));
     });
     this.subscriptions.push(onlineSub);
   }
@@ -64,11 +68,10 @@ export class ConversationListComponent implements OnInit, OnDestroy {
 
   isUserOnline(userId: string): boolean {
     if (userId == null || userId === '') { return false; }
-    const id = String(userId);
-    return (this.onlineUsers || []).map(u => String(u)).includes(id);
+    return this.presenceService.isOnline(String(userId));
   }
 
-  /** Peer id must be participantId — list template binds isOnline(userId). */
+  /** Peer id for private chats — participantId or alternate API keys. */
   getOtherParticipant(conversation: IConversation): {
     userId?: string;
     displayName?: string;
@@ -77,9 +80,13 @@ export class ConversationListComponent implements OnInit, OnDestroy {
     if (!conversation) {
       return {};
     }
-    const userId = conversation.participantId != null && conversation.participantId !== ''
-      ? String(conversation.participantId)
-      : undefined;
+    const raw: any = conversation;
+    const peer = conversation.participantId
+      || raw.otherUserId
+      || raw.other_user_id
+      || raw.contactUserId
+      || '';
+    const userId = peer !== '' && peer != null ? String(peer) : undefined;
     return {
       userId,
       displayName: conversation.displayName,

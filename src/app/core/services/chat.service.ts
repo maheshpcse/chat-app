@@ -7,6 +7,7 @@ import { SocketService } from './socket.service';
 import { MessageService } from './message.service';
 import { ConversationService } from './conversation.service';
 import { AuthService } from './auth.service';
+import { parseServerDate, toServerDateMs } from '../utilities/date-parse.utility';
 
 /**
  * ChatService - Orchestrates chat state combining HTTP and Socket services.
@@ -74,22 +75,41 @@ export class ChatService {
   /** Ensure ids + displayName filled (create/find often omit displayName). */
   private normalizeConversation(conv: IConversation, seed?: Partial<IConversation>): IConversation {
     if (!conv) { return conv; }
-    const merged: IConversation = { ...conv, ...(seed || {}) };
-    if (seed?.participantId && !merged.participantId) {
-      merged.participantId = seed.participantId;
-    }
-    const participantId = merged.participantId != null && merged.participantId !== ''
-      ? String(merged.participantId)
-      : merged.participantId;
+    const merged: IConversation = { ...conv, ...(seed || {}) } as IConversation;
+    const raw: any = { ...conv, ...(seed || {}) };
 
-    const first = (merged.firstName || seed?.firstName || '').trim();
-    const last = (merged.lastName || seed?.lastName || '').trim();
+    // API / SP may use alternate peer-id keys for private chats
+    const peerRaw =
+      merged.participantId ||
+      seed?.participantId ||
+      raw.otherUserId ||
+      raw.other_user_id ||
+      raw.participant_id ||
+      raw.peerUserId ||
+      raw.userId ||
+      '';
+    const participantId = peerRaw !== '' && peerRaw != null ? String(peerRaw) : undefined;
+
+    const first = (merged.firstName || seed?.firstName || raw.first_name || '').toString().trim();
+    const last = (merged.lastName || seed?.lastName || raw.last_name || '').toString().trim();
     const fromParts = [first, last].filter(Boolean).join(' ').trim();
-    const rawName = (merged.displayName || seed?.displayName || fromParts || merged.username || seed?.username || '').trim();
+    const rawName = (
+      merged.displayName ||
+      seed?.displayName ||
+      raw.display_name ||
+      fromParts ||
+      merged.username ||
+      seed?.username ||
+      ''
+    ).toString().trim();
     // Guard against literal "undefined" from bad string concat
     const safeName = rawName && !/^undefined(\s+undefined)?$/i.test(rawName)
       ? rawName
       : (fromParts || merged.username || seed?.username || 'Unknown');
+
+    const lastAt = parseServerDate(
+      (merged as any).lastMessageAt || (merged as any).last_message_at || (merged as any).updatedAt
+    );
 
     return {
       ...merged,
@@ -99,7 +119,8 @@ export class ChatService {
       firstName: first || merged.firstName,
       lastName: last || merged.lastName,
       username: merged.username || seed?.username,
-      avatarUrl: merged.avatarUrl || seed?.avatarUrl
+      avatarUrl: merged.avatarUrl || seed?.avatarUrl || raw.avatar_url,
+      lastMessageAt: lastAt || (merged as any).lastMessageAt
     };
   }
 
@@ -354,14 +375,14 @@ export class ChatService {
     // Collapse optimistic/failed twin: same sender + conversation + content within 8s
     const me = this.authService.getCurrentUser()?.id;
     const contentKey = (message.content || '').toString().trim();
-    const createdMs = new Date(message.createdAt || Date.now()).getTime();
+    const createdMs = toServerDateMs(message.createdAt) || Date.now();
     const twinIdx = current.findIndex(m => {
       if (!m) { return false; }
       if (mid && String(m.messageId) === mid) { return true; }
       if (String(m.conversationId) !== String(message.conversationId)) { return false; }
       if (String(m.senderId) !== String(message.senderId || me || '')) { return false; }
       if ((m.content || '').toString().trim() !== contentKey) { return false; }
-      const otherMs = new Date(m.createdAt || 0).getTime();
+      const otherMs = toServerDateMs(m.createdAt);
       return Math.abs(createdMs - otherMs) < 8000;
     });
 
@@ -534,19 +555,19 @@ export class ChatService {
   private updateConversationLastMessage(message: IMessage): void {
     const conversations = this.conversationsSubject.value;
     const updated = conversations.map(conv => {
-      if (conv.conversationId === message.conversationId) {
+      if (String(conv.conversationId) === String(message.conversationId)) {
         return {
           ...conv,
           lastMessageContent: message.content,
           lastMessageSender: message.senderId,
           lastMessageType: message.messageType,
-          lastMessageAt: message.createdAt
+          lastMessageAt: parseServerDate(message.createdAt) || message.createdAt
         };
       }
       return conv;
     });
     // Sort by latest message
-    updated.sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
+    updated.sort((a, b) => toServerDateMs(b.lastMessageAt) - toServerDateMs(a.lastMessageAt));
     this.conversationsSubject.next(updated);
   }
 }
