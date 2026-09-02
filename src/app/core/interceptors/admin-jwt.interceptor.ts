@@ -71,6 +71,24 @@ export class AdminJwtInterceptor implements HttpInterceptor {
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const access = this.adminAuthService.getToken();
+    const refresh = this.adminAuthService.getRefreshToken
+      ? this.adminAuthService.getRefreshToken()
+      : null;
+
+    // No admin session → soft 401 (do not bounce public/admin-login routes)
+    if (!access && !refresh) {
+      this.isRefreshing = false;
+      return throwError({ message: 'Unauthorized', status: 401 });
+    }
+
+    if (!refresh) {
+      this.isRefreshing = false;
+      this.adminAuthService.handleLogout();
+      this.navigateToAdminLoginIfNeeded();
+      return throwError({ message: 'Admin session expired', status: 401 });
+    }
+
     if (!this.isRefreshing) {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
@@ -84,7 +102,7 @@ export class AdminJwtInterceptor implements HttpInterceptor {
         catchError((err) => {
           this.isRefreshing = false;
           this.adminAuthService.handleLogout();
-          this.router.navigate(['/admin/login']);
+          this.navigateToAdminLoginIfNeeded();
           return throwError(err);
         })
       );
@@ -95,5 +113,16 @@ export class AdminJwtInterceptor implements HttpInterceptor {
       take(1),
       switchMap(token => next.handle(this.addToken(request, token as string)))
     );
+  }
+
+  private navigateToAdminLoginIfNeeded(): void {
+    const url = (this.router.url || '').split('?')[0];
+    if (!url || url.indexOf('/admin/login') === 0 || url === '/admin/login') {
+      return;
+    }
+    // Only force admin login when already under /admin shell
+    if (url.indexOf('/admin') === 0) {
+      this.router.navigate(['/admin/login']);
+    }
   }
 }

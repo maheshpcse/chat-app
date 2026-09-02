@@ -82,11 +82,19 @@ export class JwtInterceptor implements HttpInterceptor {
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Anonymous / public pages often hit protected APIs (e.g. presence hydrate).
+    // Only treat 401 as "session expired" when this browser actually had user tokens.
+    const access = this.authService.getToken();
     const refresh = this.authService.getRefreshToken();
+    if (!access && !refresh) {
+      this.isRefreshing = false;
+      return throwError({ message: 'Unauthorized', status: 401 });
+    }
+
     if (!refresh) {
       this.isRefreshing = false;
       this.authService.handleLogout();
-      this.router.navigate(['/auth/login']);
+      this.navigateToLoginIfNeeded();
       return throwError({ message: 'Session expired', status: 401 });
     }
 
@@ -103,7 +111,7 @@ export class JwtInterceptor implements HttpInterceptor {
         catchError((err) => {
           this.isRefreshing = false;
           this.authService.handleLogout();
-          this.router.navigate(['/auth/login']);
+          this.navigateToLoginIfNeeded();
           return throwError(err);
         })
       );
@@ -117,5 +125,24 @@ export class JwtInterceptor implements HttpInterceptor {
         })
       );
     }
+  }
+
+  /**
+   * Do not yank users off public marketing / admin / auth screens.
+   * Only force chat login when they were already in the authenticated app shell.
+   */
+  private navigateToLoginIfNeeded(): void {
+    const url = (this.router.url || '').split('?')[0];
+    if (
+      !url ||
+      url === '/' ||
+      url.indexOf('/auth') === 0 ||
+      url.indexOf('/admin') === 0 ||
+      url.indexOf('/errors') === 0 ||
+      url.indexOf('/landing') === 0
+    ) {
+      return;
+    }
+    this.router.navigate(['/auth/login']);
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { SocketService } from './socket.service';
+import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 import { API_ENDPOINTS } from '../constants/api.constants';
 import { IApiResponse } from '../models/api-response.model';
@@ -32,7 +33,8 @@ export class PresenceService {
 
   constructor(
     private socketService: SocketService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {
     // Full online_users_list from server is authoritative for peer set.
     // Do not wipe known-online peers when list arrives empty (Redis miss / race).
@@ -74,11 +76,18 @@ export class PresenceService {
       }
     });
 
-    this.hydrateFromApi();
+    // Only when already logged in — never hit protected API on landing/admin/auth
+    if (this.authService.isAuthenticated()) {
+      this.hydrateFromApi();
+    }
   }
 
   /** Pull contacts presence from REST; merges online rows, never clears socket-online peers on soft fail. */
   hydrateFromApi(): void {
+    if (!this.authService.isAuthenticated()) {
+      this.hydrated = true;
+      return;
+    }
     this.http.get<IApiResponse<IPresenceRow[]>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.PRESENCE.CONTACTS}`
     ).subscribe(
