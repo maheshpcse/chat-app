@@ -1,24 +1,7 @@
+<!-- Logged-in pages only: plain L/R copy. No themed bar. Landing footer is separate. -->
 <footer class="app-site-footer">
   <div class="footer-inner">
-    <div class="footer-main">
-      <div class="footer-brand">
-        <mat-icon>forum</mat-icon>
-        <div>
-          <strong>Chat App</strong>
-          <p>Real-time messaging, groups, and presence — built for everyday conversations.</p>
-        </div>
-      </div>
-      <div class="footer-links">
-        <a routerLink="/dashboard">Dashboard</a>
-        <a routerLink="/chat">Chat</a>
-        <a routerLink="/contacts">Contacts</a>
-        <a routerLink="/groups">Groups</a>
-        <a routerLink="/settings">Settings</a>
-      </div>
-    </div>
-    <div class="footer-copy">
-      <span>© {{ currentYear }} Chat App. All rights reserved.</span>
-      <span class="footer-note">Private sessions · Secure delivery</span>
-    </div>
+    <span class="footer-left">© {{ currentYear }} Chat App. All rights reserved.</span>
+    <span class="footer-right">Private sessions · Secure delivery</span>
   </div>
 </footer>

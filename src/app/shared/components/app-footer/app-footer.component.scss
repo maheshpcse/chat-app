@@ -5,96 +5,57 @@
   flex-shrink: 0;
 }
 
+/* No themed background — text only, corners L/R */
 .app-site-footer {
   position: static !important;
   width: 100%;
-  background: $oceanic-noir;
-  color: rgba($white, 0.78);
-  border-top: 1px solid rgba($white, 0.06);
-  padding: 18px 20px 14px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 10px 20px 12px;
   box-sizing: border-box;
 }
 
 .footer-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.footer-main {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba($white, 0.08);
-}
-
-.footer-brand {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  max-width: 420px;
-
-  mat-icon {
-    color: $forsytha;
-    margin-top: 2px;
-  }
-
-  strong {
-    display: block;
-    color: $white;
-    font-family: $font-heading;
-    font-size: $fs-base;
-    margin-bottom: 4px;
-  }
-
-  p {
-    margin: 0;
-    font-size: $fs-xs;
-    line-height: 1.45;
-    color: rgba($white, 0.65);
-  }
-}
-
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  align-items: center;
-
-  a {
-    color: rgba($white, 0.72);
-    font-size: $fs-sm;
-    font-weight: $fw-medium;
-
-    &:hover {
-      color: $forsytha;
-    }
-  }
-}
-
-.footer-copy {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 12px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.footer-left,
+.footer-right {
+  font-family: $font-meta;
   font-size: $fs-xs;
-  color: rgba($white, 0.5);
+  line-height: 1.4;
+  color: $text-muted;
 }
 
-.footer-note {
-  color: rgba($white, 0.4);
+.footer-left {
+  text-align: left;
+}
+
+.footer-right {
+  text-align: right;
+  margin-left: auto;
 }
 
 @media (max-width: 640px) {
   .app-site-footer {
-    padding: 16px 14px 12px;
+    padding: 8px 14px 10px;
   }
 
-  .footer-main {
+  .footer-inner {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-right {
+    margin-left: 0;
+    text-align: left;
   }
 }

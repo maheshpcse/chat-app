@@ -1,3 +1,5 @@
+@import '../../shared/styles/theme.variables';
+
 .app-container {
   display: flex;
   flex-direction: column;
@@ -31,17 +33,24 @@
 }
 
 .chat-sidenav {
-  flex: 0 0 320px;
-  width: 320px;
+  /* Keep conversation list at design token width — do not shrink under flex */
+  flex: 0 0 $sidebar-width;
+  width: $sidebar-width;
+  min-width: $sidebar-width;
+  max-width: $sidebar-width;
   border-right: 1px solid #e8eceb;
   transition:
     flex-basis 350ms cubic-bezier(0.25, 0.1, 0.25, 1),
-    width 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
+    width 350ms cubic-bezier(0.25, 0.1, 0.25, 1),
+    min-width 350ms cubic-bezier(0.25, 0.1, 0.25, 1),
+    max-width 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
   overflow: hidden;
 
   &.minimized {
-    flex-basis: 60px;
-    width: 60px;
+    flex-basis: $sidebar-minimized-width;
+    width: $sidebar-minimized-width;
+    min-width: $sidebar-minimized-width;
+    max-width: $sidebar-minimized-width;
   }
 }
 

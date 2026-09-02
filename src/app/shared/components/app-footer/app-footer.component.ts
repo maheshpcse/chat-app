@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 
 /**
- * AppFooterComponent — non-sticky site footer for authenticated shells + public pages.
+ * AppFooterComponent — plain L/R copy for logged-in app shell only.
+ * Landing / home page uses its own footer; do not reuse themed brand bar here.
  */
 @Component({
   selector: 'app-footer',

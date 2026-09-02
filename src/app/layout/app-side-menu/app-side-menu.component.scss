@@ -1,19 +1,27 @@
 @import '../../../app/shared/styles/theme.variables';
 
-// Host owns the flex width so collapse frees main content (no empty column).
+// Host owns flex width so collapse frees main content (no empty column).
+// Expanded width restored to full nav rail (was shrinking under max-width only).
+$app-side-menu-width: 260px;
+$app-side-menu-collapsed-width: 64px;
+
 :host {
   display: block;
   height: 100%;
+  flex: 0 0 $app-side-menu-width;
   flex-shrink: 0;
-  width: 240px;
-  max-width: 240px;
+  width: $app-side-menu-width;
+  min-width: $app-side-menu-width;
+  max-width: $app-side-menu-width;
   box-sizing: border-box;
-  transition: width $transition-smooth, max-width $transition-smooth;
+  transition: width $transition-smooth, min-width $transition-smooth, max-width $transition-smooth, flex-basis $transition-smooth;
 
   &.collapsed,
   &.rail-mode {
-    width: 64px;
-    max-width: 64px;
+    flex-basis: $app-side-menu-collapsed-width;
+    width: $app-side-menu-collapsed-width;
+    min-width: $app-side-menu-collapsed-width;
+    max-width: $app-side-menu-collapsed-width;
   }
 }
 
@@ -21,6 +29,7 @@
   box-sizing: border-box;
   height: 100%;
   width: 100%;
+  min-width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -38,7 +47,7 @@
   }
 
   &.collapsed {
-    .menu-label { opacity: 0; width: 0; }
+    .menu-label { opacity: 0; width: 0; overflow: hidden; }
     .menu-link { justify-content: center; padding-left: 0; padding-right: 0; }
   }
 }
