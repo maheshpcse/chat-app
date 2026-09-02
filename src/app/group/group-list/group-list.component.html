@@ -1,37 +1,53 @@
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>My Groups</h2>
-    <button mat-raised-button color="primary" (click)="createGroup()">
-      <mat-icon>group_add</mat-icon>
-      Create Group
-    </button>
-  </div>
+﻿<div class="groups-page page-shell">
+  <app-page-header title="My Groups" icon="groups"
+                   subtitle="Create and manage group conversations"></app-page-header>
 
-  <!-- Loading -->
-  <div class="text-center py-5" *ngIf="isLoading">
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
-
-  <!-- Groups Grid -->
-  <div class="row" *ngIf="!isLoading">
-    <div class="col-md-4 col-sm-6 mb-3" *ngFor="let group of groups">
-      <mat-card class="group-card" (click)="openGroup(group)">
-        <mat-card-header>
-          <mat-icon mat-card-avatar>group</mat-icon>
-          <mat-card-title>{{ group.name }}</mat-card-title>
-          <mat-card-subtitle>{{ group.members.length }} members</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p *ngIf="group.description">{{ group.description | truncate:60 }}</p>
-        </mat-card-content>
-      </mat-card>
+  <div class="page-toolbar">
+    <div class="toolbar-actions">
+      <button mat-raised-button color="primary" (click)="createGroup()">
+        <mat-icon>group_add</mat-icon>
+        Create Group
+      </button>
     </div>
   </div>
 
-  <!-- Empty State -->
-  <div class="empty-state text-center py-5" *ngIf="!isLoading && groups.length === 0">
-    <mat-icon>group_off</mat-icon>
-    <p>You haven't joined any groups yet.</p>
-    <button mat-raised-button color="accent" (click)="createGroup()">Create Your First Group</button>
+  <div class="page-scroll">
+    <div class="groups-loading" *ngIf="isLoading">
+      <app-shimmer variant="list" [rows]="6"></app-shimmer>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+      <div class="groups-grid" *ngIf="groups.length > 0">
+        <mat-card class="group-card" *ngFor="let group of groups" (click)="openGroup(group)">
+          <mat-card-header>
+            <div mat-card-avatar class="group-avatar">
+              <mat-icon>group</mat-icon>
+            </div>
+            <mat-card-title>{{ group.name }}</mat-card-title>
+            <mat-card-subtitle>
+              {{ (group.members && group.members.length) || group.memberCount || 0 }} members
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p *ngIf="group.description">{{ group.description | truncate:80 }}</p>
+            <p class="muted" *ngIf="!group.description">No description</p>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-button color="primary" (click)="openGroupChat(group, $event)">
+              <mat-icon>chat</mat-icon>
+              Open chat
+            </button>
+            <button mat-button (click)="openGroup(group, $event)">Manage</button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+
+      <div class="empty-state" *ngIf="groups.length === 0">
+        <mat-icon>group_off</mat-icon>
+        <h3>No groups yet</h3>
+        <p>Create a group with accepted friends to start chatting together.</p>
+        <button mat-raised-button color="primary" (click)="createGroup()">Create Your First Group</button>
+      </div>
+    </ng-container>
   </div>
 </div>

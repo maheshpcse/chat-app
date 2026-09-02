@@ -48,7 +48,15 @@
     align-items: center;
     gap: 8px;
 
-    .login-link { color: $white; }
+    .login-link {
+      color: $white;
+      transition: color $transition-fast, background-color $transition-fast;
+
+      &:hover {
+        color: $forsytha;
+        background-color: rgba($white, 0.08);
+      }
+    }
 
     a.mat-raised-button,
     a.mat-button {
@@ -343,24 +351,79 @@
 
 /* ============ Footer ============ */
 .landing-footer {
+  position: static;
   background: $oceanic-noir;
   color: rgba($white, 0.75);
-  padding: 18px 0;
+  padding: 36px 0 20px;
   font-size: $fs-sm;
 
-  .footer-row {
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba($white, 0.1);
+  }
+
+  .footer-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+
+    mat-icon { color: $forsytha; }
+    strong {
+      color: $white;
+      font-family: $font-heading;
+      font-size: $fs-base;
+    }
+  }
+
+  .footer-brand p {
+    margin: 0;
+    max-width: 360px;
+    line-height: 1.55;
+    color: rgba($white, 0.7);
+  }
+
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    h4 {
+      margin: 0 0 4px;
+      color: $white;
+      font-family: $font-heading;
+      font-size: $fs-sm;
+      font-weight: $fw-semibold;
+    }
+
+    a {
+      color: rgba($white, 0.72);
+      width: fit-content;
+
+      &:hover { color: $forsytha; }
+    }
+  }
+
+  .footer-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 8px;
+    padding-top: 16px;
+    color: rgba($white, 0.55);
   }
 
-  .footer-links a {
-    color: $forsytha;
-    margin-left: 16px;
+  .footer-meta { color: rgba($white, 0.45); }
+}
 
-    &:hover { text-decoration: underline; }
+@media (max-width: 860px) {
+  .landing-footer .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 

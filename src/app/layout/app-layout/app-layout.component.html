@@ -7,8 +7,11 @@
     <app-app-side-menu class="app-nav"></app-app-side-menu>
 
     <main class="app-main-content">
-      <div class="route-animation-host" [@routeSlide]="getRouteKey(outlet)">
-        <router-outlet #outlet="outlet"></router-outlet>
+      <div class="app-main-scroll">
+        <div class="route-animation-host" [@routeSlide]="getRouteKey(outlet)">
+          <router-outlet #outlet="outlet"></router-outlet>
+        </div>
+        <app-footer></app-footer>
       </div>
     </main>
   </div>

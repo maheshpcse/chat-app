@@ -160,7 +160,13 @@
   position: relative;
   width: 72px;
   height: 72px;
+  min-width: 72px;
+  min-height: 72px;
+  max-width: 72px;
+  max-height: 72px;
   flex-shrink: 0;
+  border-radius: 50%;
+  overflow: visible;
 
   .avatar-placeholder {
     width: 72px;
@@ -174,11 +180,14 @@
     font-weight: $fw-bold;
     color: $white;
     font-family: $font-heading;
+    overflow: hidden;
   }
 
   img {
     width: 72px;
     height: 72px;
+    max-width: 72px;
+    max-height: 72px;
     border-radius: 50%;
     object-fit: cover;
     display: block;
@@ -201,6 +210,8 @@
     border: 2px solid $white;
     margin: 0;
     padding: 0;
+    z-index: 2;
+    box-sizing: border-box;
 
     mat-icon {
       font-size: 16px;
@@ -283,6 +294,23 @@
   font-size: $fs-base;
   font-weight: $fw-semibold;
   margin-top: $spacing-md;
+
+  // Theme primary (nocturnal) — beat Material indigo-pink prebuilt theme
+  &.mat-raised-button.mat-primary,
+  &.mat-flat-button.mat-primary {
+    background-color: $nocturnal !important;
+    color: $white !important;
+    box-shadow: 0 2px 6px rgba($nocturnal, 0.25);
+
+    &:hover:not([disabled]) {
+      background-color: $nocturnal-dark !important;
+    }
+
+    &[disabled] {
+      background-color: rgba($nocturnal, 0.35) !important;
+      color: rgba($white, 0.85) !important;
+    }
+  }
 }
 
 // Bio uses a textarea: align the prefix icon to the top line, not the middle.
@@ -346,12 +374,60 @@
 .select-field {
   width: 180px;
   flex-shrink: 0;
+  font-size: $fs-sm;
 
   ::ng-deep {
     .mat-form-field-wrapper {
-      margin-bottom: 0;
-      padding-bottom: 0;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
     }
+
+    .mat-form-field-flex {
+      align-items: center !important;
+      min-height: 40px;
+    }
+
+    .mat-form-field-infix {
+      display: flex !important;
+      align-items: center !important;
+      border-top: 0.5em solid transparent;
+      padding: 0.5em 0 !important;
+      width: auto;
+      min-height: 1.5em;
+    }
+
+    .mat-select {
+      display: flex;
+      align-items: center;
+    }
+
+    .mat-select-trigger {
+      display: flex;
+      align-items: center;
+      height: 1.5em;
+      line-height: 1.5em;
+    }
+
+    .mat-select-value {
+      display: flex;
+      align-items: center;
+      line-height: 1.5em;
+      max-width: 100%;
+    }
+
+    .mat-select-value-text {
+      line-height: 1.5em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mat-select-arrow-wrapper {
+      display: flex;
+      align-items: center;
+      transform: none !important;
+    }
+
     .mat-form-field-subscript-wrapper {
       display: none;
     }

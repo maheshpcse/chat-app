@@ -1,4 +1,4 @@
-@import '../../shared/styles/theme.variables';
+﻿@import '../../shared/styles/theme.variables';
 
 :host {
   display: block;
@@ -28,6 +28,35 @@
 .full-width {
   width: 100%;
   margin-bottom: $spacing-sm;
+}
+
+/* Description icon sits on first text line, not vertically centered on whole textarea */
+.desc-field {
+  ::ng-deep {
+    .mat-form-field-flex {
+      align-items: flex-start !important;
+    }
+
+    .mat-form-field-prefix {
+      align-self: flex-start !important;
+      margin-top: 12px !important;
+      padding-right: 4px;
+    }
+
+    .desc-prefix-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      color: $text-muted;
+    }
+
+    textarea.mat-input-element {
+      margin-top: 4px;
+      resize: vertical;
+      min-height: 64px;
+    }
+  }
 }
 
 .selected-members {

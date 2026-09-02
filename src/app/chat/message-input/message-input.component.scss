@@ -17,9 +17,9 @@
 .composer-bar {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
-  min-height: 48px;
-  padding: 0;
+  gap: 8px;
+  min-height: 56px;
+  padding: 2px 0;
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -107,25 +107,25 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  padding: 8px 14px;
+  padding: 10px 16px;
   align-self: center;
-  min-height: 42px;
+  min-height: 48px;
   background: $white;
-  border: 1px solid rgba($nocturnal, 0.12);
-  border-radius: 22px;
+  border: 1px solid rgba($nocturnal, 0.14);
+  border-radius: 24px;
   box-sizing: border-box;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 
   &:focus-within {
-    border-color: rgba($nocturnal, 0.28);
-    box-shadow: 0 0 0 3px rgba($nocturnal, 0.07);
+    border-color: rgba($nocturnal, 0.32);
+    box-shadow: 0 0 0 3px rgba($nocturnal, 0.08);
   }
 }
 
 .composer-textarea {
   width: 100%;
-  min-height: 22px;
-  max-height: 128px;
+  min-height: 24px;
+  max-height: 140px;
   border: 0;
   outline: none;
   resize: none;
@@ -133,8 +133,8 @@
   color: $text-primary;
   font-family: $font-chat;
   font-size: 15px;
-  line-height: 1.45;
-  overflow-y: auto;
+  line-height: 1.5;
+  overflow-y: hidden; // scroll only after autoGrow exceeds max-height
   scrollbar-width: thin;
   scrollbar-color: rgba($nocturnal, 0.25) transparent;
 

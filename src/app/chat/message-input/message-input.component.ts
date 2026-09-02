@@ -184,9 +184,11 @@ export class MessageInputComponent implements OnInit, OnDestroy {
   autoGrow(event: Event): void {
     const el = event.target as HTMLTextAreaElement;
     if (!el) { return; }
+    const maxH = 140;
     el.style.height = 'auto';
-    const next = Math.min(el.scrollHeight, 128);
+    const next = Math.min(el.scrollHeight, maxH);
     el.style.height = String(Math.max(next, 24)) + 'px';
+    el.style.overflowY = el.scrollHeight > maxH ? 'auto' : 'hidden';
   }
 
   openScheduleDialog(): void {

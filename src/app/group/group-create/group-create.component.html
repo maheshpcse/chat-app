@@ -1,4 +1,4 @@
-<div class="container py-4">
+﻿<div class="container py-4">
   <mat-card class="group-create-card">
     <mat-card-header>
       <mat-card-title>Create New Group</mat-card-title>
@@ -11,52 +11,61 @@
       </div>
 
       <form [formGroup]="groupForm" (ngSubmit)="onSubmit()">
-        <!-- Group Name -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Group Name</mat-label>
-          <input matInput formControlName="name" placeholder="Enter group name">
           <mat-icon matPrefix>group</mat-icon>
+          <input matInput formControlName="name" placeholder="Enter group name">
           <mat-error *ngIf="groupForm.get('name').hasError('required')">Name is required</mat-error>
           <mat-error *ngIf="groupForm.get('name').hasError('minlength')">Minimum 3 characters</mat-error>
         </mat-form-field>
 
-        <!-- Description -->
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width desc-field">
           <mat-label>Description (optional)</mat-label>
+          <mat-icon matPrefix class="desc-prefix-icon">notes</mat-icon>
           <textarea matInput formControlName="description" rows="3"
                     placeholder="What's this group about?"></textarea>
-          <mat-icon matPrefix>description</mat-icon>
         </mat-form-field>
 
-        <!-- Member Search -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Add Members</mat-label>
-          <input matInput placeholder="Search users..."
-                 (input)="onSearchInput($event)"
-                 [matAutocomplete]="auto">
           <mat-icon matPrefix>person_add</mat-icon>
+          <input matInput
+                 placeholder="Search accepted friends..."
+                 [value]="searchQuery"
+                 (input)="onSearchInput($event)"
+                 [matAutocomplete]="auto"
+                 [disabled]="isFriendsLoading">
           <mat-autocomplete #auto="matAutocomplete">
-            <mat-option *ngFor="let user of searchResults" (click)="addMember(user)">
-              <span>{{ user.fullName }}</span>
-              <small> (@{{ user.username }})</small>
+            <mat-option *ngFor="let friend of searchResults" (onSelectionChange)="addMember(friend)"
+                        [value]="displayName(friend)">
+              <span>{{ displayName(friend) }}</span>
+              <small *ngIf="friend.username"> (@{{ friend.username }})</small>
+            </mat-option>
+            <mat-option disabled *ngIf="isSearching && !isFriendsLoading && searchResults.length === 0">
+              No friends found
+            </mat-option>
+            <mat-option disabled *ngIf="isFriendsLoading">
+              Loading friends…
+            </mat-option>
+            <mat-option disabled *ngIf="!isFriendsLoading && friends.length === 0">
+              No accepted friends yet — add contacts first
             </mat-option>
           </mat-autocomplete>
+          <mat-hint>Only accepted friends appear here</mat-hint>
         </mat-form-field>
 
-        <!-- Selected Members Chips -->
         <div class="selected-members mb-3" *ngIf="selectedMembers.length > 0">
           <mat-chip-list>
             <mat-chip *ngFor="let member of selectedMembers"
                       [removable]="true"
                       (removed)="removeMember(member)">
-              {{ member.fullName }}
+              {{ displayName(member) }}
               <mat-icon matChipRemove>cancel</mat-icon>
             </mat-chip>
           </mat-chip-list>
           <small class="text-muted">{{ selectedMembers.length }} member(s) selected</small>
         </div>
 
-        <!-- Submit -->
         <button mat-raised-button color="primary" type="submit"
                 class="full-width"
                 [disabled]="isLoading || groupForm.invalid || selectedMembers.length === 0">

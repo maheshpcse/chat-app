@@ -1,8 +1,9 @@
 :host {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   height: 100%;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -11,18 +12,25 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
 }
 
 .empty-chat {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  align-self: stretch;
   min-height: 0;
   height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  box-sizing: border-box;
   color: #999;
   text-align: center;
 
@@ -38,11 +46,13 @@
     font-size: 22px;
     font-weight: 500;
     color: #555;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
   }
 
   p {
     font-size: 14px;
     color: #888;
+    margin: 0;
+    max-width: 320px;
   }
 }

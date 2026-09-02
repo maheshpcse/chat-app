@@ -35,12 +35,12 @@
 
 .bubble {
   display: block;
-  // Comfortable chat bubble — not a one-char column
+  // Comfortable chat bubble — short text stays one line toward page center
   flex: 0 1 auto;
-  width: auto;
-  max-width: min(72%, 520px);
-  min-width: 72px;
-  padding: 10px 14px 8px;
+  width: fit-content;
+  max-width: min(78%, 560px);
+  min-width: 88px;
+  padding: 10px 16px 8px;
   border-radius: 16px;
   position: relative;
   box-sizing: border-box;

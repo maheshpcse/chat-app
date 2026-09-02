@@ -1,17 +1,26 @@
 @import '../../../app/shared/styles/theme.variables';
 
-// Host must be a block flex-item so the width truly shrinks on collapse and the
-// main content expands into the freed space (no leftover empty column).
+// Host owns the flex width so collapse frees main content (no empty column).
 :host {
   display: block;
   height: 100%;
   flex-shrink: 0;
+  width: 240px;
+  max-width: 240px;
+  box-sizing: border-box;
+  transition: width $transition-smooth, max-width $transition-smooth;
+
+  &.collapsed,
+  &.rail-mode {
+    width: 64px;
+    max-width: 64px;
+  }
 }
 
 .app-side-menu {
   box-sizing: border-box;
   height: 100%;
-  width: 240px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -19,13 +28,18 @@
   border-right: 1px solid $border-light;
   overflow-x: hidden;
   overflow-y: auto;
-  transition: width $transition-smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
 
   &.collapsed {
-    width: 64px;
-
     .menu-label { opacity: 0; width: 0; }
-    .menu-link { justify-content: center; }
+    .menu-link { justify-content: center; padding-left: 0; padding-right: 0; }
   }
 }
 

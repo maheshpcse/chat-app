@@ -14,10 +14,12 @@
         <app-sidebar (minimizedChange)="isSidebarMinimized = $event"></app-sidebar>
       </aside>
 
-      <!-- Main Content: Chat Window -->
+      <!-- Main Content: Chat Window (no page footer — composer needs full height) -->
       <main class="main-content">
-        <div class="route-animation-host" [@routeSlide]="getRouteKey(outlet)">
-          <router-outlet #outlet="outlet"></router-outlet>
+        <div class="chat-main-scroll">
+          <div class="route-animation-host" [@routeSlide]="getRouteKey(outlet)">
+            <router-outlet #outlet="outlet"></router-outlet>
+          </div>
         </div>
       </main>
 

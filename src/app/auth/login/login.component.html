@@ -5,10 +5,10 @@
     <!-- Branding panel -->
     <aside class="auth-branding" aria-label="Product highlights">
       <div class="brand-content">
-        <div class="brand-badge">
+        <a class="brand-badge brand-home-link" routerLink="/" matTooltip="Back to home">
           <mat-icon>forum</mat-icon>
           <span>Chat System</span>
-        </div>
+        </a>
         <h1>Messages that move across your network</h1>
         <p>
           One-to-one and group links — secure, real-time conversations on a
@@ -85,7 +85,6 @@
 
         <div class="auth-footer">
           <p>Don't have an account? <a routerLink="/auth/register">Create Account</a></p>
-          <p class="admin-entry"><a routerLink="/admin/login">Admin Console</a></p>
         </div>
       </div>
     </main>

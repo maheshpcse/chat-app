@@ -19,6 +19,9 @@
     <button mat-icon-button (click)="setTab('search'); toggleMinimize()" matTooltip="Search Users">
       <mat-icon>search</mat-icon>
     </button>
+    <button mat-icon-button (click)="goToGroups()" matTooltip="Groups">
+      <mat-icon>groups</mat-icon>
+    </button>
   </div>
 
   <!-- Full sidebar view -->
@@ -41,6 +44,9 @@
         </button>
         <button mat-button [class.active]="activeTab === 'search'" (click)="setTab('search')">
           <mat-icon>search</mat-icon>
+        </button>
+        <button mat-button matTooltip="My Groups" (click)="goToGroups()">
+          <mat-icon>groups</mat-icon>
         </button>
         <button mat-button (click)="toggleMinimize()" matTooltip="Minimize sidebar" class="collapse-btn">
           <mat-icon>chevron_left</mat-icon>
@@ -65,17 +71,24 @@
              class="list-item"
              [class.is-active]="isConversationActive(conv)"
              [class.is-selected]="isConversationActive(conv)"
+             [class.is-group]="isGroupConversation(conv)"
              (click)="selectConversation(conv)">
-          <app-avatar
-            [imageUrl]="conv.avatarUrl"
-            [name]="conversationLabel(conv)"
-            size="md"
-            [showStatus]="!!resolveConversationPeerId(conv)"
-            [isOnline]="isUserOnline(resolveConversationPeerId(conv))">
-          </app-avatar>
+          <div class="avatar-wrap" [class.group-avatar-wrap]="isGroupConversation(conv)">
+            <app-avatar
+              [imageUrl]="conv.avatarUrl"
+              [name]="conversationLabel(conv)"
+              size="md"
+              [showStatus]="!isGroupConversation(conv) && !!resolveConversationPeerId(conv)"
+              [isOnline]="!isGroupConversation(conv) && isUserOnline(resolveConversationPeerId(conv))">
+            </app-avatar>
+            <mat-icon class="group-badge" *ngIf="isGroupConversation(conv)" matTooltip="Group chat">groups</mat-icon>
+          </div>
           <div class="item-info">
             <div class="item-row">
-              <span class="item-name">{{ conversationLabel(conv) }}</span>
+              <span class="item-name">
+                <mat-icon class="group-inline-icon" *ngIf="isGroupConversation(conv)">group</mat-icon>
+                {{ conversationLabel(conv) }}
+              </span>
               <small class="item-time" *ngIf="conv.lastMessageAt">{{ conv.lastMessageAt | timeAgo }}</small>
             </div>
             <div class="item-row">
@@ -89,6 +102,9 @@
           <p>No conversations yet</p>
           <button mat-stroked-button color="primary" (click)="setTab('contacts')">
             Start chatting with contacts
+          </button>
+          <button mat-stroked-button class="mt-2" (click)="goToGroups()">
+            Or create a group
           </button>
         </div>
         </ng-container>

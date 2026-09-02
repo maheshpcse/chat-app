@@ -77,6 +77,7 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewChecked {
     { side: 'right', avatar: 'You', text: 'Private, real-time, done right.' }
   ];
   private demoIndex = 0;
+  readonly currentYear = new Date().getFullYear();
 
   constructor(
     private authService: AuthService,

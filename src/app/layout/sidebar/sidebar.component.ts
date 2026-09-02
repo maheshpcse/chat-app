@@ -8,7 +8,7 @@ import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ContactService } from '../../core/services/contact.service';
 import { PresenceService } from '../../core/services/presence.service';
-import { IConversation } from '../../core/models/conversation.model';
+import { ConversationType, IConversation } from '../../core/models/conversation.model';
 import { IUser } from '../../core/models/user.model';
 import { IContact, IContactRequest } from '../../core/models/contact.model';
 
@@ -317,6 +317,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   conversationLabel(conv: IConversation): string {
     return this.chatService.getDisplayName(conv);
+  }
+
+  isGroupConversation(conv: IConversation): boolean {
+    if (!conv) { return false; }
+    const t = (conv.conversationType || (conv as any).type || '').toString().toLowerCase();
+    return t === ConversationType.GROUP || t === 'group';
+  }
+
+  goToGroups(): void {
+    this.router.navigate(['/groups']);
   }
 
   /** Merge accepted contacts + pending (sent-request) contacts for display. */

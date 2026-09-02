@@ -8,7 +8,6 @@
         <span>Chat App</span>
       </div>
       <nav class="header-actions">
-        <a mat-button routerLink="/admin/login" class="login-link">Admin</a>
         <a mat-button routerLink="/auth/login" class="login-link">Login</a>
         <a mat-raised-button color="primary" routerLink="/auth/register">Sign Up Free</a>
       </nav>
@@ -82,13 +81,28 @@
 
   <!-- ============ Footer ============ -->
   <footer class="landing-footer">
-    <div class="landing-container footer-row">
-      <span>© 2026 Chat App</span>
-      <span class="footer-links">
-        <a routerLink="/auth/login">Login</a>
-        <a routerLink="/auth/register">Sign Up</a>
-        <a routerLink="/admin/login">Admin</a>
-      </span>
+    <div class="landing-container footer-grid">
+      <div class="footer-brand">
+        <div class="footer-brand-row">
+          <mat-icon>forum</mat-icon>
+          <strong>Chat App</strong>
+        </div>
+        <p>Real-time messaging for people who stay connected — private chats, groups, and presence in one place.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a routerLink="/auth/register">Get started</a>
+        <a routerLink="/auth/login">Sign in</a>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <a routerLink="/auth/forgot-password">Forgot password</a>
+        <a routerLink="/auth/register">Create account</a>
+      </div>
+    </div>
+    <div class="landing-container footer-bottom">
+      <span>© {{ currentYear }} Chat App. All rights reserved.</span>
+      <span class="footer-meta">Built for secure, real-time conversations.</span>
     </div>
   </footer>
 </div>

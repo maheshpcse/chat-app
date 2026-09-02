@@ -111,15 +111,36 @@ export class ChatService {
       (merged as any).lastMessageAt || (merged as any).last_message_at || (merged as any).updatedAt
     );
 
+    const typeRaw = (
+      merged.conversationType ||
+      seed?.conversationType ||
+      raw.conversation_type ||
+      raw.type ||
+      ''
+    ).toString().toLowerCase();
+    const conversationType = typeRaw === ConversationType.GROUP || typeRaw === 'group'
+      ? ConversationType.GROUP
+      : (typeRaw === ConversationType.PRIVATE || typeRaw === 'private'
+        ? ConversationType.PRIVATE
+        : (merged.conversationType || ConversationType.PRIVATE));
+
+    const groupName = (
+      raw.groupName || raw.group_name || raw.name || ''
+    ).toString().trim();
+    const displayName = conversationType === ConversationType.GROUP
+      ? (safeName && safeName !== 'Unknown' ? safeName : (groupName || 'Group'))
+      : safeName;
+
     return {
       ...merged,
       conversationId: merged.conversationId != null ? String(merged.conversationId) : merged.conversationId,
-      participantId,
-      displayName: safeName,
+      conversationType,
+      participantId: conversationType === ConversationType.GROUP ? undefined : participantId,
+      displayName,
       firstName: first || merged.firstName,
       lastName: last || merged.lastName,
       username: merged.username || seed?.username,
-      avatarUrl: merged.avatarUrl || seed?.avatarUrl || raw.avatar_url,
+      avatarUrl: merged.avatarUrl || seed?.avatarUrl || raw.avatar_url || raw.groupAvatar,
       lastMessageAt: lastAt || (merged as any).lastMessageAt
     };
   }
@@ -193,6 +214,14 @@ export class ChatService {
    */
   getDisplayName(conversation: IConversation): string {
     if (!conversation) { return 'Unknown'; }
+    if (conversation.conversationType === ConversationType.GROUP) {
+      const gName = (conversation.displayName
+        || (conversation as any).groupName
+        || (conversation as any).name
+        || '').toString().trim();
+      if (gName && !/^undefined/i.test(gName)) { return gName; }
+      return 'Group';
+    }
     const name = (conversation.displayName
       || [conversation.firstName, conversation.lastName].filter(Boolean).join(' ')
       || conversation.username

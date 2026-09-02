@@ -1,40 +1,41 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { GroupService } from '../../core/services/group.service';
-import { UserService } from '../../core/services/user.service';
-import { IUser } from '../../core/models/user.model';
-import { Subject } from 'rxjs';
-import { debounceTime, switchMap } from 'rxjs/operators';
+import { ContactService } from '../../core/services/contact.service';
+import { ChatService } from '../../core/services/chat.service';
+import { IContact } from '../../core/models/contact.model';
+import { ConversationType, IConversation } from '../../core/models/conversation.model';
 
 /**
- * GroupCreateComponent - Form to create a new group.
- *
- * Angular Concepts Used:
- * - Reactive Forms with FormBuilder
- * - MatChips for selected members display
- * - MatAutocomplete for user search
- * - Subject with debounceTime + switchMap for search-as-you-type
- * - Array manipulation for member list
+ * GroupCreateComponent - Create group from accepted friends only.
  */
 @Component({
   selector: 'app-group-create',
   templateUrl: './group-create.component.html',
   styleUrls: ['./group-create.component.scss']
 })
-export class GroupCreateComponent implements OnInit {
+export class GroupCreateComponent implements OnInit, OnDestroy {
 
   groupForm: FormGroup;
-  searchResults: IUser[] = [];
-  selectedMembers: IUser[] = [];
-  searchSubject = new Subject<string>();
+  friends: IContact[] = [];
+  searchResults: IContact[] = [];
+  selectedMembers: IContact[] = [];
+  searchQuery = '';
+  isSearching = false;
   isLoading = false;
+  isFriendsLoading = true;
   errorMessage = '';
+  private searchSubject = new Subject<string>();
+  private subs: Subscription[] = [];
 
   constructor(
     private fb: FormBuilder,
     private groupService: GroupService,
-    private userService: UserService,
+    private contactService: ContactService,
+    private chatService: ChatService,
     private router: Router
   ) {}
 
@@ -44,35 +45,83 @@ export class GroupCreateComponent implements OnInit {
       description: ['', [Validators.maxLength(200)]]
     });
 
-    // Search users with debounce (RxJS Subject + switchMap)
-    this.searchSubject.pipe(
-      debounceTime(300),
-      switchMap(query => this.userService.searchUsers({ search: query }))
-    ).subscribe(users => {
-      this.searchResults = users.filter(u =>
-        !this.selectedMembers.find(m => (m.userId || m.id) === (u.userId || u.id))
-      );
-    });
+    this.subs.push(
+      this.contactService.contacts$.subscribe(list => {
+        this.friends = list || [];
+        this.isFriendsLoading = false;
+        this.applyFriendFilter(this.searchQuery);
+      })
+    );
+
+    // Ensure accepted friends loaded
+    this.contactService.getContacts().subscribe(
+      () => { this.isFriendsLoading = false; },
+      () => { this.isFriendsLoading = false; }
+    );
+
+    this.subs.push(
+      this.searchSubject.pipe(
+        debounceTime(250),
+        distinctUntilChanged()
+      ).subscribe(q => this.applyFriendFilter(q))
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   onSearchInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    if (value.trim().length >= 2) {
-      this.searchSubject.next(value);
-    } else {
+    const value = ((event.target as HTMLInputElement).value || '').trim();
+    this.searchQuery = value;
+    this.isSearching = value.length >= 1;
+    if (value.length < 1) {
       this.searchResults = [];
+      this.isSearching = false;
+      return;
     }
+    this.searchSubject.next(value.toLowerCase());
   }
 
-  addMember(user: IUser): void {
-    if (!this.selectedMembers.find(m => m.id === user.id)) {
-      this.selectedMembers.push(user);
+  private applyFriendFilter(query: string): void {
+    const q = (query || '').trim().toLowerCase();
+    if (!q) {
+      this.searchResults = [];
+      return;
     }
-    this.searchResults = [];
+    const selectedIds = new Set(
+      this.selectedMembers.map(m => String(m.contactUserId))
+    );
+    this.searchResults = (this.friends || []).filter(c => {
+      const id = String(c.contactUserId || '');
+      if (!id || selectedIds.has(id)) { return false; }
+      const full = `${c.firstName || ''} ${c.lastName || ''}`.trim().toLowerCase();
+      const user = (c.username || '').toLowerCase();
+      const nick = (c.nickname || '').toLowerCase();
+      return full.indexOf(q) >= 0 || user.indexOf(q) >= 0 || nick.indexOf(q) >= 0;
+    });
   }
 
-  removeMember(user: IUser): void {
-    this.selectedMembers = this.selectedMembers.filter(m => m.id !== user.id);
+  displayName(c: IContact): string {
+    return `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.username || 'Unknown';
+  }
+
+  addMember(contact: IContact): void {
+    if (!contact) { return; }
+    const id = String(contact.contactUserId);
+    if (this.selectedMembers.find(m => String(m.contactUserId) === id)) {
+      return;
+    }
+    this.selectedMembers = [...this.selectedMembers, contact];
+    this.searchResults = this.searchResults.filter(m => String(m.contactUserId) !== id);
+    this.searchQuery = '';
+  }
+
+  removeMember(contact: IContact): void {
+    this.selectedMembers = this.selectedMembers.filter(
+      m => String(m.contactUserId) !== String(contact.contactUserId)
+    );
+    this.applyFriendFilter(this.searchQuery);
   }
 
   onSubmit(): void {
@@ -84,19 +133,42 @@ export class GroupCreateComponent implements OnInit {
     this.errorMessage = '';
 
     const groupData = {
-      ...this.groupForm.value,
-      memberIds: this.selectedMembers.map(m => m.id)
+      name: (this.groupForm.value.name || '').toString().trim(),
+      description: (this.groupForm.value.description || '').toString().trim() || undefined,
+      memberIds: this.selectedMembers.map(m => String(m.contactUserId))
     };
 
     this.groupService.createGroup(groupData).subscribe(
       (group) => {
         this.isLoading = false;
-        this.router.navigate(['/groups', group.id]);
+        const g: any = group || {};
+        const conversationId = g.conversationId || g.conversation_id;
+        if (conversationId) {
+          const conv: IConversation = {
+            conversationId: String(conversationId),
+            conversationType: ConversationType.GROUP,
+            displayName: g.name || groupData.name,
+            avatarUrl: g.avatar || g.avatarUrl,
+            lastMessageContent: groupData.description || ''
+          };
+          this.chatService.setActiveConversation(conv);
+          this.chatService.loadConversations();
+          this.router.navigate(['/chat']);
+          return;
+        }
+        const id = g.id || g.groupId;
+        this.chatService.loadConversations();
+        this.router.navigate(id ? ['/groups', id] : ['/groups']);
       },
       (error) => {
         this.isLoading = false;
         this.errorMessage = error.message || 'Failed to create group';
       }
     );
+  }
+
+  // Keep shape helper if template needs IUser-like label
+  asUserLabel(c: IContact): string {
+    return this.displayName(c);
   }
 }
