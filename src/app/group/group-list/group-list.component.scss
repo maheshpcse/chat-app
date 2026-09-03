@@ -3,6 +3,10 @@
 :host {
   display: block;
   min-height: 100%;
+  height: auto;
+  overflow: visible;
+  opacity: 1;
+  visibility: visible;
 }
 
 .groups-page {

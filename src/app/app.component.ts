@@ -29,8 +29,15 @@ import { ChatLayoutComponent } from './layout/chat-layout/chat-layout.component'
     .route-animation-host {
       position: relative;
       min-height: 100vh;
-      /* no overflow clipping here: it would break position:sticky in pages;
-         html/body already clip horizontal overflow globally */
+      width: 100%;
+      display: block;
+      /* no overflow clip — sticky headers need visible ancestors */
+    }
+    .route-animation-host > * {
+      display: block;
+      width: 100%;
+      min-height: 100vh;
+      opacity: 1;
     }
   `],
   animations: [routeSlideAnimation],

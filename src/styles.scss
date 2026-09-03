@@ -191,7 +191,6 @@ a.mat-raised-button.mat-primary,
   flex-direction: column;
   width: 100%;
   max-width: 1120px;
-  /* Grow with content so app-main-scroll owns Y scroll + footer rides along */
   height: auto;
   min-height: 100%;
   margin: 0 auto;
@@ -199,6 +198,9 @@ a.mat-raised-button.mat-primary,
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: visible;
+  /* Never leave shell invisible after route anim glitch */
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Title sticks while scrolling app-main-scroll (footer not pinned) */
