@@ -59,6 +59,6 @@
   width: 100%;
   min-height: 100%;
   box-sizing: border-box;
-  /* Ensure animated enter cannot stick at opacity 0 after a failed player */
-  opacity: 1;
+  opacity: 1 !important;
+  visibility: visible !important;
 }

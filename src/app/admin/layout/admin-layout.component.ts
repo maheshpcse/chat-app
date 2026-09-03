@@ -1,8 +1,7 @@
 ﻿import { Component, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 import { AdminAuthService } from '../../core/services/admin-auth.service';
 import { IAdminUser } from '../../core/models/admin.model';
-import { routeSlideAnimation } from '../../shared/animations/route.animations';
 
 interface IAdminNavChild {
   label: string;
@@ -22,8 +21,7 @@ interface IAdminNavItem {
 @Component({
   selector: 'app-admin-layout',
   templateUrl: './admin-layout.component.html',
-  styleUrls: ['./admin-layout.component.scss'],
-  animations: [routeSlideAnimation]
+  styleUrls: ['./admin-layout.component.scss']
 })
 export class AdminLayoutComponent implements OnInit {
   admin: IAdminUser | null = null;
@@ -90,15 +88,6 @@ export class AdminLayoutComponent implements OnInit {
         item.expanded = true;
       }
     });
-  }
-
-  getRouteKey(outlet: RouterOutlet): string {
-    if (!outlet || !outlet.isActivated) {
-      return '';
-    }
-    return outlet.activatedRoute.snapshot.pathFromRoot
-      .map(r => (r.routeConfig && r.routeConfig.path) || '')
-      .join('/');
   }
 
   logout(): void {

@@ -106,58 +106,12 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
-  # Job 2a: Publish maintenance page first (browsers see premium hold screen)
-  # ---------------------------------------------------------------------------
-  deploy-maintenance:
-    name: Deploy maintenance page
-    needs: build
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment:
-      name: github-pages
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Stage maintenance site for Pages
-        run: |
-          mkdir -p pages-maintenance
-          # Self-contained premium page (theme colours match app)
-          cp maintenance/index.html pages-maintenance/index.html
-          cp pages-maintenance/index.html pages-maintenance/404.html
-          touch pages-maintenance/.nojekyll
-          # Flag file for ops / future probes
-          echo "maintenance=1" > pages-maintenance/.maintenance
-          echo "sha=${{ github.sha }}" >> pages-maintenance/.maintenance
-          echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> pages-maintenance/.maintenance
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload maintenance Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: pages-maintenance
-          name: github-pages-maintenance
-
-      - name: Deploy maintenance to GitHub Pages
-        id: maintenance_deployment
-        uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages-maintenance
-
-      - name: Hold so CDN / browsers pick up maintenance
-        run: |
-          echo "Maintenance page deployed — brief hold before app cutover"
-          sleep 20
-
-  # ---------------------------------------------------------------------------
-  # Job 2b: Deploy production Angular bundle (replaces maintenance)
+  # Deploy production Angular bundle only (no pre-maintenance cutover).
+  # Dual deploy-pages raced CDN and could leave visitors on blank/stale shell.
   # ---------------------------------------------------------------------------
   deploy:
     name: Deploy application
-    needs: [build, deploy-maintenance]
+    needs: [build]
     # Never deploy from PRs — only after merge/push to main or manual dispatch
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
@@ -194,7 +148,7 @@ jobs:
   # ---------------------------------------------------------------------------
   notify:
     name: Workflow summary
-    needs: [build, deploy-maintenance, deploy]
+    needs: [build, deploy]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -202,9 +156,8 @@ jobs:
         run: |
           echo "## Angular CI/CD result" >> $GITHUB_STEP_SUMMARY
           echo "- Build: \`${{ needs.build.result }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Maintenance deploy: \`${{ needs.deploy-maintenance.result }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- App deploy: \`${{ needs.deploy.result }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Branch: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "During deploy, visitors briefly see \`maintenance/index.html\` (theme-matched hold screen), then the new SPA." >> $GITHUB_STEP_SUMMARY
+          echo "SPA artifact from dist/chat-app is published to GitHub Pages." >> $GITHUB_STEP_SUMMARY
