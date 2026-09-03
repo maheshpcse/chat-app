@@ -84,7 +84,11 @@
   width: 100%;
   overflow: hidden;
 
-  > * {
+  > router-outlet {
+    display: none;
+  }
+
+  > router-outlet + * {
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;

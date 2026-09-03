@@ -54,11 +54,6 @@
   overflow: visible;
 }
 
-.route-animation-host > * {
-  display: block;
-  width: 100%;
-  min-height: 100%;
-  box-sizing: border-box;
-  opacity: 1 !important;
-  visibility: visible !important;
+.route-animation-host > router-outlet {
+  display: none;
 }

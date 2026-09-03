@@ -435,6 +435,23 @@ body.theme-dark {
   scroll-behavior: smooth;
 }
 
+/*
+ * Angular keeps <router-outlet> in the DOM before the activated component.
+ * Route hosts must size the activated sibling, not the empty outlet element.
+ */
+.route-animation-host > router-outlet {
+  display: none;
+}
+
+.route-animation-host > router-outlet + * {
+  display: block;
+  width: 100%;
+  min-height: inherit;
+  box-sizing: border-box;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* ====================================================
    GLOBAL: Page toolbar (search + actions below page header)
    ==================================================== */

@@ -33,12 +33,8 @@ import { PresenceService } from './core/services/presence.service';
       opacity: 1 !important;
       visibility: visible !important;
     }
-    .route-animation-host > * {
-      display: block;
-      width: 100%;
-      min-height: 100vh;
-      opacity: 1 !important;
-      visibility: visible !important;
+    .route-animation-host > router-outlet {
+      display: none;
     }
   `],
   styleUrls: ['./app.component.scss']

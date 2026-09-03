@@ -67,8 +67,10 @@ npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage=false
 
 # Production build → dist/chat-app
 npm run build:prod
-# GitHub Pages base path:
-npx ng build --prod --base-href=/chat-app/
+# GitHub Pages (base-href + deploy-url required — empty publicPath blanks lazy routes):
+npm run build:pages
+# or:
+npx ng build --prod --base-href=/chat-app/ --deploy-url=/chat-app/
 
 # Docker (optional; primary host is GitHub Pages)
 docker build --build-arg BASE_HREF=/ -t chat-app-fe .

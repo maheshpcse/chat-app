@@ -82,13 +82,16 @@ jobs:
         continue-on-error: false
 
       # Step: AOT production build → dist/chat-app
-      # base-href required so assets resolve under GitHub Pages subpath
+      # base-href: document-relative links + Angular Location
+      # deploy-url: webpack publicPath for lazy chunks (runtime c.p).
+      # Without deploy-url, c.p="" and chunks load from github.io/ root → 404 → blank app, often no Network "errors" if filtered.
       # Angular 10: --prod enables production configuration/fileReplacements
       - name: Build production bundle
         run: >
           npx ng build
           --prod
           --base-href=${{ env.ANGULAR_BASE_HREF }}
+          --deploy-url=${{ env.ANGULAR_BASE_HREF }}
 
       # Step: SPA fallback — GitHub Pages serves 404.html for unknown paths
       - name: Prepare GitHub Pages SPA fallback

@@ -63,7 +63,7 @@ Workflow file: `.github/workflows/angular.yml`
 4. **`npm ci`** — clean install from lockfile (reproducible).  
 5. **`npm run lint`** — TSLint via Angular CLI.  
 6. **`ng test --watch=false --browsers=ChromeHeadless`** — unit tests, single run.  
-7. **`ng build --prod --base-href=/chat-app/`** — AOT production bundle for project Pages URL.  
+7. **`ng build --prod --base-href=/chat-app/ --deploy-url=/chat-app/`** — AOT bundle. `base-href` for routing/document links; **`deploy-url` sets webpack `publicPath` (`c.p`) so lazy chunks load under `/chat-app/` (not site root).  
 8. **Copy `index.html` → `404.html`** — SPA deep-link fallback on GitHub Pages.  
 9. **Upload artifact** `angular-dist` — hand-off to deploy job.
 
@@ -179,7 +179,7 @@ Same for PRs targeting `main` (build only).
 | Lint fails | TSLint errors | Fix reported files; run `npm run lint` locally |
 | Tests fail | Spec/TestBed errors | Run `npx ng test --watch=false --browsers=ChromeHeadless` |
 | Build OpenSSL error | Missing legacy provider | Workflow already sets `NODE_OPTIONS`; ensure not overridden |
-| Blank page on Pages | Wrong `base-href` | Must be `/chat-app/` for project pages |
+| Blank page on Pages (no console errors) | Missing `--deploy-url` → runtime `c.p=""`; lazy chunks 404 at `github.io/*.js` | Build with **both** `--base-href=/chat-app/` and `--deploy-url=/chat-app/`; confirm runtime contains `c.p="/chat-app/"` |
 | 404 on refresh | Missing `404.html` | Workflow copies `index.html` → `404.html` |
 | Deploy job skipped | Event is PR or not `main` | Merge to `main` or run `workflow_dispatch` |
 | Deploy permission error | Pages not Actions-based / token perms | Enable Pages → GitHub Actions; workflow write perms |
