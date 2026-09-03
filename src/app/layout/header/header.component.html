@@ -25,11 +25,13 @@
           (click)="toggleProfileMenu(); $event.stopPropagation()"
           matTooltip="Profile">
     <span class="header-avatar-wrap">
-      <div class="header-avatar" *ngIf="!currentUser.avatarUrl">
+      <div class="header-avatar" *ngIf="!headerAvatarSrc || headerAvatarFailed">
         {{ getUserInitials() }}
       </div>
-      <img *ngIf="currentUser.avatarUrl" [src]="currentUser.avatarUrl"
-           class="header-avatar-img" alt="Profile">
+      <img *ngIf="headerAvatarSrc && !headerAvatarFailed"
+           [src]="headerAvatarSrc"
+           class="header-avatar-img" alt="Profile"
+           (error)="onHeaderAvatarError()">
       <span class="header-online-dot" [class.is-online]="isSelfOnline"
             [attr.title]="isSelfOnline ? 'Online' : 'Offline'"></span>
     </span>

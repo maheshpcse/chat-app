@@ -1,19 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { IFakerPreviewMessage } from '../../core/models/admin.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { withMinLoading } from '../utils/admin-rx.util';
+import { readAdminConsolePrefs } from '../utils/admin-console-prefs.util';
 
 @Component({
   selector: 'app-admin-faker-messages',
   templateUrl: './admin-faker-messages.component.html',
   styleUrls: ['./admin-faker-messages.component.scss']
 })
-export class AdminFakerMessagesComponent {
+export class AdminFakerMessagesComponent implements OnInit {
   count = 30;
   messageType = 'text';
+  private confirmBeforeSave = true;
 
   previewId: string | null = null;
   messages: IFakerPreviewMessage[] = [];
@@ -31,6 +33,12 @@ export class AdminFakerMessagesComponent {
     private adminApi: AdminApiService,
     private dialog: MatDialog
   ) {}
+
+  ngOnInit(): void {
+    const prefs = readAdminConsolePrefs();
+    this.count = prefs.defaultFakerCount;
+    this.confirmBeforeSave = prefs.confirmBeforeSave;
+  }
 
   generate(): void {
     this.loading = true;
@@ -121,6 +129,10 @@ export class AdminFakerMessagesComponent {
     if (!this.previewId || !this.messages.length) {
       return;
     }
+    if (!this.confirmBeforeSave) {
+      this.persistMessages();
+      return;
+    }
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -131,24 +143,28 @@ export class AdminFakerMessagesComponent {
     });
     ref.afterClosed().subscribe(ok => {
       if (!ok) { return; }
-      this.saving = true;
-      this.errorMessage = '';
-      this.successMessage = '';
-      withMinLoading(this.adminApi.saveFakerMessages(this.previewId), 500)
-        .pipe(finalize(() => { this.saving = false; }))
-        .subscribe(
-          (res) => {
-            this.successMessage = `Saved ${res.saved} messages` + (res.failed ? ` · ${res.failed} failed` : '');
-            if (res.saved > 0) {
-              this.previewId = null;
-              this.messages = [];
-            }
-          },
-          (err) => {
-            this.errorMessage = err.message || 'Save failed';
-          }
-        );
+      this.persistMessages();
     });
+  }
+
+  private persistMessages(): void {
+    this.saving = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    withMinLoading(this.adminApi.saveFakerMessages(this.previewId), 500)
+      .pipe(finalize(() => { this.saving = false; }))
+      .subscribe(
+        (res) => {
+          this.successMessage = `Saved ${res.saved} messages` + (res.failed ? ` · ${res.failed} failed` : '');
+          if (res.saved > 0) {
+            this.previewId = null;
+            this.messages = [];
+          }
+        },
+        (err) => {
+          this.errorMessage = err.message || 'Save failed';
+        }
+      );
   }
 
   trackByTempId(_: number, item: IFakerPreviewMessage): string {

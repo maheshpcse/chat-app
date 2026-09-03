@@ -5,6 +5,7 @@ import { AdminApiService } from '../../core/services/admin-api.service';
 import { IFakerLinkUser, IFakerPreviewContact } from '../../core/models/admin.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { withMinLoading } from '../utils/admin-rx.util';
+import { readAdminConsolePrefs } from '../utils/admin-console-prefs.util';
 
 @Component({
   selector: 'app-admin-faker-contacts',
@@ -15,6 +16,7 @@ export class AdminFakerContactsComponent implements OnInit {
   /** Random generate */
   count = 20;
   mode = 'accepted';
+  private confirmBeforeSave = true;
 
   /** Explicit link: owners × peers */
   linkUserIds: string[] = [];
@@ -55,6 +57,9 @@ export class AdminFakerContactsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const prefs = readAdminConsolePrefs();
+    this.count = prefs.defaultFakerCount;
+    this.confirmBeforeSave = prefs.confirmBeforeSave;
     this.loadLinkUsers();
   }
 
@@ -273,6 +278,10 @@ export class AdminFakerContactsComponent implements OnInit {
     if (!previewId || !this.contacts.length) {
       return;
     }
+    if (!this.confirmBeforeSave) {
+      this.persistContacts(previewId);
+      return;
+    }
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -283,24 +292,28 @@ export class AdminFakerContactsComponent implements OnInit {
     });
     ref.afterClosed().subscribe(ok => {
       if (!ok) { return; }
-      this.saving = true;
-      this.clearMessages();
-      withMinLoading(this.adminApi.saveFakerContacts(previewId), 500)
-        .pipe(finalize(() => { this.saving = false; }))
-        .subscribe(
-          (res) => {
-            this.successMessage = `Saved ${res.saved} contacts` + (res.failed ? ` · ${res.failed} failed` : '');
-            if (res.saved > 0) {
-              this.previewId = null;
-              this.contacts = [];
-              this.editingTempId = null;
-            }
-          },
-          (err) => {
-            this.errorMessage = err.message || 'Save failed';
-          }
-        );
+      this.persistContacts(previewId);
     });
+  }
+
+  private persistContacts(previewId: string): void {
+    this.saving = true;
+    this.clearMessages();
+    withMinLoading(this.adminApi.saveFakerContacts(previewId), 500)
+      .pipe(finalize(() => { this.saving = false; }))
+      .subscribe(
+        (res) => {
+          this.successMessage = `Saved ${res.saved} contacts` + (res.failed ? ` · ${res.failed} failed` : '');
+          if (res.saved > 0) {
+            this.previewId = null;
+            this.contacts = [];
+            this.editingTempId = null;
+          }
+        },
+        (err) => {
+          this.errorMessage = err.message || 'Save failed';
+        }
+      );
   }
 
   trackByTempId(_: number, item: IFakerPreviewContact): string {

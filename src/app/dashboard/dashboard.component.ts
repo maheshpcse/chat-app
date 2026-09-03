@@ -11,6 +11,7 @@ import { IUser } from '../core/models/user.model';
 import { IConversation } from '../core/models/conversation.model';
 import { INotification } from '../core/models/notification.model';
 import { MIN_LOADING_DASHBOARD_MS } from '../shared/utilities/min-loading.util';
+import { resolveMediaUrl } from '../shared/utilities/media-url.util';
 
 /**
  * DashboardComponent - Main landing page after login.
@@ -24,6 +25,7 @@ import { MIN_LOADING_DASHBOARD_MS } from '../shared/utilities/min-loading.util';
 export class DashboardComponent implements OnInit, OnDestroy {
 
   currentUser: IUser | null = null;
+  dashboardAvatarFailed = false;
   greeting = '';
   today: Date = new Date();
   recentConversations: IConversation[] = [];
@@ -50,8 +52,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
+    this.dashboardAvatarFailed = false;
+    this.subscriptions.push(
+      this.authService.currentUser$.subscribe(user => {
+        this.currentUser = user;
+        this.dashboardAvatarFailed = false;
+      })
+    );
     this.setGreeting();
     this.loadDashboardData();
+  }
+
+  get dashboardAvatarSrc(): string {
+    return resolveMediaUrl(this.currentUser && this.currentUser.avatarUrl);
+  }
+
+  onDashboardAvatarError(): void {
+    this.dashboardAvatarFailed = true;
   }
 
   ngOnDestroy(): void {

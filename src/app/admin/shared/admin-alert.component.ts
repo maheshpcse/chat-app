@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 
 /**
  * Dismissible admin banner (success / error / warning).
@@ -15,6 +15,7 @@ export class AdminAlertComponent {
   @Input() message = '';
   @Output() dismissed = new EventEmitter<void>();
 
+  @HostBinding('class.has-message')
   get visible(): boolean {
     return !!(this.message && String(this.message).trim());
   }

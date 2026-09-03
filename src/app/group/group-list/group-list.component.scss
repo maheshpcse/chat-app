@@ -17,6 +17,10 @@
     max-width: 320px;
   }
 
+  .toolbar-actions {
+    margin-left: auto;
+  }
+
   .view-toggle {
     display: flex;
     background: $gray-100;

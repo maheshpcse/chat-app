@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { SocketService } from '../../core/services/socket.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { IUser } from '../../core/models/user.model';
+import { resolveMediaUrl } from '../../shared/utilities/media-url.util';
 
 /**
  * HeaderComponent - Top navigation bar with user info, notifications, logout.
@@ -38,6 +39,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   profileMenuClosing = false;
   /** Logged-in user is connected via socket → show Online in profile popup + avatar dot. */
   isSelfOnline = false;
+  headerAvatarFailed = false;
   private hideTimer: any = null;
   private profileHideTimer: any = null;
   /** Keep in sync with header-panel fade CSS duration. */
@@ -55,6 +57,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Subscribe to current user
     const userSub = this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      this.headerAvatarFailed = false;
       this.refreshSelfOnline();
     });
     this.subscriptions.push(userSub);
@@ -269,6 +272,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const first = (this.currentUser.firstName || '').charAt(0).toUpperCase();
     const last = (this.currentUser.lastName || '').charAt(0).toUpperCase();
     return first + last || '?';
+  }
+
+  /** Relative /uploads paths must be prefixed with API host. */
+  get headerAvatarSrc(): string {
+    return resolveMediaUrl(this.currentUser && this.currentUser.avatarUrl);
+  }
+
+  onHeaderAvatarError(): void {
+    this.headerAvatarFailed = true;
   }
 
   /** Logged-in session with live socket → Online in profile popup + avatar badge. */

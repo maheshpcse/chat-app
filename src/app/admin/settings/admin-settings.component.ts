@@ -6,6 +6,10 @@ import { AdminAuthService } from '../../core/services/admin-auth.service';
 import { IAdminUser } from '../../core/models/admin.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { withMinLoading } from '../utils/admin-rx.util';
+import {
+  readAdminConsolePrefs,
+  writeAdminConsolePrefs
+} from '../utils/admin-console-prefs.util';
 
 @Component({
   selector: 'app-admin-settings',
@@ -18,7 +22,7 @@ export class AdminSettingsComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  // Console preferences (local only)
+  // Console preferences — browser local (no BE prefs API / column yet)
   denseTables = true;
   confirmBeforeSave = true;
   defaultFakerCount = 10;
@@ -47,14 +51,10 @@ export class AdminSettingsComponent implements OnInit {
   }
 
   restoreLocalPrefs(): void {
-    try {
-      const raw = localStorage.getItem('admin_console_prefs');
-      if (!raw) { return; }
-      const p = JSON.parse(raw);
-      if (typeof p.denseTables === 'boolean') { this.denseTables = p.denseTables; }
-      if (typeof p.confirmBeforeSave === 'boolean') { this.confirmBeforeSave = p.confirmBeforeSave; }
-      if (typeof p.defaultFakerCount === 'number') { this.defaultFakerCount = p.defaultFakerCount; }
-    } catch { /* ignore */ }
+    const p = readAdminConsolePrefs();
+    this.denseTables = p.denseTables;
+    this.confirmBeforeSave = p.confirmBeforeSave;
+    this.defaultFakerCount = p.defaultFakerCount;
   }
 
   savePrefs(): void {
@@ -62,18 +62,21 @@ export class AdminSettingsComponent implements OnInit {
       width: '420px',
       data: {
         title: 'Save console settings',
-        message: 'Store these admin console preferences in this browser?',
+        message: 'Store these admin console preferences in this browser? ' +
+          'They apply to Users dense tables and Data Studio defaults. ' +
+          '(No server preferences API is deployed yet.)',
         confirmText: 'Save'
       }
     });
     ref.afterClosed().subscribe(ok => {
       if (!ok) { return; }
-      localStorage.setItem('admin_console_prefs', JSON.stringify({
+      writeAdminConsolePrefs({
         denseTables: this.denseTables,
         confirmBeforeSave: this.confirmBeforeSave,
         defaultFakerCount: this.defaultFakerCount
-      }));
-      this.successMessage = 'Console preferences saved for this browser.';
+      });
+      this.successMessage =
+        'Console preferences saved for this browser (Users + Data Studio).';
     });
   }
 

@@ -1,19 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { IFakerPreviewGroup } from '../../core/models/admin.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { withMinLoading } from '../utils/admin-rx.util';
+import { readAdminConsolePrefs } from '../utils/admin-console-prefs.util';
 
 @Component({
   selector: 'app-admin-faker-groups',
   templateUrl: './admin-faker-groups.component.html',
   styleUrls: ['./admin-faker-groups.component.scss']
 })
-export class AdminFakerGroupsComponent {
+export class AdminFakerGroupsComponent implements OnInit {
   count = 5;
   membersPerGroup = 4;
+  private confirmBeforeSave = true;
 
   previewId: string | null = null;
   groups: IFakerPreviewGroup[] = [];
@@ -28,6 +30,12 @@ export class AdminFakerGroupsComponent {
     private adminApi: AdminApiService,
     private dialog: MatDialog
   ) {}
+
+  ngOnInit(): void {
+    const prefs = readAdminConsolePrefs();
+    this.count = prefs.defaultFakerCount;
+    this.confirmBeforeSave = prefs.confirmBeforeSave;
+  }
 
   generate(): void {
     this.loading = true;
@@ -151,6 +159,10 @@ export class AdminFakerGroupsComponent {
     if (!this.previewId || !this.groups.length) {
       return;
     }
+    if (!this.confirmBeforeSave) {
+      this.persistGroups();
+      return;
+    }
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -161,24 +173,28 @@ export class AdminFakerGroupsComponent {
     });
     ref.afterClosed().subscribe(ok => {
       if (!ok) { return; }
-      this.saving = true;
-      this.errorMessage = '';
-      this.successMessage = '';
-      withMinLoading(this.adminApi.saveFakerGroups(this.previewId), 500)
-        .pipe(finalize(() => { this.saving = false; }))
-        .subscribe(
-          (res) => {
-            this.successMessage = `Saved ${res.saved} groups` + (res.failed ? ` · ${res.failed} failed` : '');
-            if (res.saved > 0) {
-              this.previewId = null;
-              this.groups = [];
-            }
-          },
-          (err) => {
-            this.errorMessage = err.message || 'Save failed';
-          }
-        );
+      this.persistGroups();
     });
+  }
+
+  private persistGroups(): void {
+    this.saving = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    withMinLoading(this.adminApi.saveFakerGroups(this.previewId), 500)
+      .pipe(finalize(() => { this.saving = false; }))
+      .subscribe(
+        (res) => {
+          this.successMessage = `Saved ${res.saved} groups` + (res.failed ? ` · ${res.failed} failed` : '');
+          if (res.saved > 0) {
+            this.previewId = null;
+            this.groups = [];
+          }
+        },
+        (err) => {
+          this.errorMessage = err.message || 'Save failed';
+        }
+      );
   }
 
   memberSummary(group: IFakerPreviewGroup): string {

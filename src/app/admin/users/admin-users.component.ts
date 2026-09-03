@@ -5,6 +5,7 @@ import { AdminApiService } from '../../core/services/admin-api.service';
 import { IAdminManagedUser } from '../../core/models/admin.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { withMinLoading } from '../utils/admin-rx.util';
+import { readAdminConsolePrefs } from '../utils/admin-console-prefs.util';
 
 @Component({
   selector: 'app-admin-users',
@@ -17,6 +18,7 @@ export class AdminUsersComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   warningMessage = '';
+  denseTables = true;
 
   search = '';
   status = '';
@@ -58,6 +60,7 @@ export class AdminUsersComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.denseTables = readAdminConsolePrefs().denseTables;
     this.load();
   }
 

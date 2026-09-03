@@ -96,10 +96,10 @@
   flex: 1;
   min-width: 0;
   min-height: 0;
-  overflow-y: auto;    // scroll INSIDE the content pane; tabs + header stay fixed
+  /* One scroll surface only — page-shell header stays pinned */
+  overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
-  // Hidden-by-default scrollbar (matches the shared .page-scroll behavior)
   scrollbar-width: none;
   -ms-overflow-style: none;
 
@@ -107,21 +107,13 @@
 }
 
 .settings-section {
-  max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  max-height: none;
+  overflow: visible;
   background: $white;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
   padding: $spacing-xl $spacing-2xl;
   animation: fadeIn 300ms ease-out;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
 }
 
 .section-header {
@@ -422,14 +414,27 @@
       white-space: nowrap;
     }
 
-    /* Single Material arrow on the right — do not add custom chevrons */
+    /* One Material caret only — hide duplicate suffix/prefix chrome */
     .mat-select-arrow-wrapper {
-      transform: translateY(-2px);
+      display: flex !important;
+      align-items: center;
+      transform: none;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
 
-    .mat-form-field-suffix,
-    .mat-form-field-prefix .mat-select-arrow,
-    .mat-form-field-suffix .mat-icon:not(.mat-select-arrow) {
+    .mat-select-arrow {
+      display: block !important;
+      opacity: 1 !important;
+      border-top-color: $text-secondary !important;
+    }
+
+    /* Hide only extra suffix icons — keep native select arrow */
+    .mat-form-field-suffix .mat-icon {
+      display: none !important;
+    }
+
+    .mat-form-field-prefix .mat-select-arrow {
       display: none !important;
     }
 

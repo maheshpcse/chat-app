@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
-import { environment } from '../../../../environments/environment';
+﻿import { Component, Input } from '@angular/core';
 import { getInitials, getAvatarColor } from '../../utilities/avatar-initials.util';
+import { resolveMediaUrl } from '../../utilities/media-url.util';
 
 /**
  * AvatarComponent - Reusable user avatar with initials fallback + online badge.
@@ -24,8 +24,9 @@ import { getInitials, getAvatarColor } from '../../utilities/avatar-initials.uti
            'avatar-md': size === 'md',
            'avatar-lg': size === 'lg'
          }">
-      <img *ngIf="hasImage" [src]="avatarSrc" [alt]="name" class="avatar-img">
-      <span *ngIf="!hasImage" class="avatar-initials" [style.background-color]="initialsColor">
+      <img *ngIf="hasImage && !imageFailed" [src]="avatarSrc" [alt]="name" class="avatar-img"
+           (error)="onImageError()">
+      <span *ngIf="!hasImage || imageFailed" class="avatar-initials" [style.background-color]="initialsColor">
         {{ initials }}
       </span>
       <span class="online-badge" *ngIf="showStatus"
@@ -88,14 +89,25 @@ import { getInitials, getAvatarColor } from '../../utilities/avatar-initials.uti
   `]
 })
 export class AvatarComponent {
-  @Input() imageUrl = '';
+  @Input()
+  set imageUrl(value: string) {
+    this._imageUrl = value || '';
+    this.imageFailed = false;
+  }
+  get imageUrl(): string {
+    return this._imageUrl;
+  }
+
   @Input() name = '';
   @Input() size: 'xs' | 'sm' | 'md' | 'lg' = 'md';
   @Input() isOnline = false;
   @Input() showStatus = true;
 
+  imageFailed = false;
+  private _imageUrl = '';
+
   get hasImage(): boolean {
-    return !!this.imageUrl;
+    return !!this._imageUrl;
   }
 
   get initials(): string {
@@ -107,16 +119,13 @@ export class AvatarComponent {
   }
 
   /**
-   * Constructs full avatar URL from a relative path.
-   * DB stores: /uploads/xxxx.jpg  ->  http://localhost:3000/uploads/xxxx.jpg
+   * Full avatar URL from relative path, absolute URL, or blob/data preview.
    */
   get avatarSrc(): string {
-    if (!this.imageUrl) {
-      return '';
-    }
-    if (this.imageUrl.startsWith('http://') || this.imageUrl.startsWith('https://')) {
-      return this.imageUrl;
-    }
-    return `${environment.socketUrl}${this.imageUrl}`;
+    return resolveMediaUrl(this._imageUrl);
+  }
+
+  onImageError(): void {
+    this.imageFailed = true;
   }
 }

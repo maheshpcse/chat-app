@@ -4,8 +4,8 @@ import { GroupService } from '../../core/services/group.service';
 import { ChatService } from '../../core/services/chat.service';
 import { IGroup } from '../../core/models/group.model';
 import { ConversationType, IConversation } from '../../core/models/conversation.model';
-import { environment } from '../../../environments/environment';
 import { withMinLoading, MIN_LOADING_PAGE_MS } from '../../shared/utilities/min-loading.util';
+import { resolveMediaUrl } from '../../shared/utilities/media-url.util';
 
 @Component({
   selector: 'app-group-list',
@@ -65,12 +65,7 @@ export class GroupListComponent implements OnInit {
   }
 
   groupAvatarSrc(group: any): string {
-    const url = group && (group.avatarUrl || group.avatar);
-    if (!url) { return ''; }
-    if (String(url).startsWith('http://') || String(url).startsWith('https://') || String(url).startsWith('blob:')) {
-      return String(url);
-    }
-    return environment.socketUrl + url;
+    return resolveMediaUrl(group && (group.avatarUrl || group.avatar));
   }
 
   openGroup(group: IGroup, event?: Event): void {

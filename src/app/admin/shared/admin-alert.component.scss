@@ -1,5 +1,15 @@
 @import '../styles/admin-theme';
 
+/* Empty host must not consume admin-page flex gap when message is blank */
+:host:empty,
+:host:not(.has-message) {
+  display: none !important;
+}
+
+:host.has-message {
+  display: block;
+}
+
 .admin-alert {
   display: flex;
   align-items: flex-start;

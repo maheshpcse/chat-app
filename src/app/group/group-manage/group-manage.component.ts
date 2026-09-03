@@ -11,8 +11,8 @@ import { ChatService } from '../../core/services/chat.service';
 import { IGroup, IGroupMember } from '../../core/models/group.model';
 import { ConversationType, IConversation } from '../../core/models/conversation.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { environment } from '../../../environments/environment';
 import { withMinLoading, MIN_LOADING_PAGE_MS } from '../../shared/utilities/min-loading.util';
+import { resolveMediaUrl } from '../../shared/utilities/media-url.util';
 
 @Component({
   selector: 'app-group-manage',
@@ -25,6 +25,7 @@ export class GroupManageComponent implements OnInit {
   isOwner = false;
   isLoading = true;
   isSavingAvatar = false;
+  groupAvatarPreviewUrl: string | null = null;
   currentUserId: string;
   private groupId: string;
 
@@ -130,14 +131,18 @@ export class GroupManageComponent implements OnInit {
   }
 
   groupAvatarSrc(): string {
-    if (!this.group) { return ''; }
-    const url = this.group.avatarUrl || this.group.avatar;
-    if (!url) { return ''; }
-    const s = String(url);
-    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('blob:')) {
-      return s;
+    if (this.groupAvatarPreviewUrl) {
+      return this.groupAvatarPreviewUrl;
     }
-    return environment.socketUrl + s;
+    if (!this.group) { return ''; }
+    return resolveMediaUrl(this.group.avatarUrl || this.group.avatar);
+  }
+
+  private clearGroupAvatarPreview(): void {
+    if (this.groupAvatarPreviewUrl) {
+      try { URL.revokeObjectURL(this.groupAvatarPreviewUrl); } catch (_e) { /* ignore */ }
+      this.groupAvatarPreviewUrl = null;
+    }
   }
 
   isMemberOnline(member: IGroupMember): boolean {
@@ -175,6 +180,12 @@ export class GroupManageComponent implements OnInit {
     const file = input && input.files && input.files[0];
     if (!file) { return; }
     this.isSavingAvatar = true;
+    this.clearGroupAvatarPreview();
+    try {
+      this.groupAvatarPreviewUrl = URL.createObjectURL(file);
+    } catch (_e) {
+      this.groupAvatarPreviewUrl = null;
+    }
     // Prefer generic local upload for group image (avatar endpoint mutates user profile)
     this.uploadService.uploadLocal(file).pipe(
       catchError(() => this.uploadService.uploadAvatar(file))
@@ -183,6 +194,7 @@ export class GroupManageComponent implements OnInit {
         const url = (res && (res.url || res.fileUrl)) || '';
         if (!url) {
           this.isSavingAvatar = false;
+          this.clearGroupAvatarPreview();
           if (input) { input.value = ''; }
           return;
         }
@@ -194,10 +206,12 @@ export class GroupManageComponent implements OnInit {
               ...normalized,
               members: this.group.members
             };
+            this.clearGroupAvatarPreview();
             this.isSavingAvatar = false;
             if (input) { input.value = ''; }
           },
           () => {
+            // Keep blob preview so selected image still shows
             this.isSavingAvatar = false;
             if (input) { input.value = ''; }
           }
@@ -205,6 +219,7 @@ export class GroupManageComponent implements OnInit {
       },
       () => {
         this.isSavingAvatar = false;
+        this.clearGroupAvatarPreview();
         if (input) { input.value = ''; }
       }
     );
@@ -232,6 +247,7 @@ export class GroupManageComponent implements OnInit {
             avatarUrl: '',
             avatar: ''
           };
+          this.clearGroupAvatarPreview();
           this.isSavingAvatar = false;
         },
         () => { this.isSavingAvatar = false; }

@@ -11,9 +11,8 @@
   border-radius: $radius-lg;
   background: $white;
   box-shadow: $shadow-sm;
-  /* Sticky title card while page content scrolls */
-  position: sticky;
-  top: 0;
+  /* Pinned by page-shell flex; sticky only if parent scrolls */
+  position: relative;
   z-index: 20;
 }
 

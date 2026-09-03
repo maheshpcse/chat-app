@@ -25,6 +25,10 @@
   margin-bottom: $spacing-xl;
   box-shadow: $shadow-lg;
   animation: fadeInDown 400ms ease-out forwards;
+  /* Pinned above .page-scroll content inside page-shell */
+  position: relative;
+  z-index: 15;
+  flex-shrink: 0;
 }
 
 .welcome-content {

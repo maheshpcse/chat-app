@@ -10,13 +10,6 @@
       </div>
     </div>
 
-    <div class="toolbar-actions">
-      <button mat-raised-button color="primary" (click)="createGroup()">
-        <mat-icon>group_add</mat-icon>
-        Create Group
-      </button>
-    </div>
-
     <div class="view-toggle">
       <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')" matTooltip="List">
         <mat-icon>view_list</mat-icon>
@@ -28,12 +21,21 @@
         <mat-icon>table_chart</mat-icon>
       </button>
     </div>
+
+    <div class="toolbar-actions">
+      <button mat-raised-button color="primary" (click)="createGroup()">
+        <mat-icon>group_add</mat-icon>
+        Create Group
+      </button>
+    </div>
   </div>
 
   <div class="page-scroll">
     <div class="groups-loading" *ngIf="isLoading">
+      <!-- Three shared layers only: cards | list | lines -->
       <app-shimmer *ngIf="viewMode === 'grid'" variant="cards" [rows]="6"></app-shimmer>
-      <app-shimmer *ngIf="viewMode !== 'grid'" variant="list" [rows]="8"></app-shimmer>
+      <app-shimmer *ngIf="viewMode === 'list'" variant="list" [rows]="8"></app-shimmer>
+      <app-shimmer *ngIf="viewMode === 'table'" variant="lines" [rows]="10"></app-shimmer>
     </div>
 
     <ng-container *ngIf="!isLoading">

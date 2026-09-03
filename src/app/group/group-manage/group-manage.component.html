@@ -43,7 +43,7 @@
                   {{ groupAvatarSrc() ? 'Change photo' : 'Upload photo' }}
                 </button>
                 <button mat-button color="warn" type="button"
-                        *ngIf="groupAvatarSrc()"
+                        *ngIf="groupAvatarSrc() && !groupAvatarPreviewUrl"
                         [disabled]="isSavingAvatar"
                         (click)="removeGroupImage()">
                   <mat-icon>delete</mat-icon>
@@ -88,9 +88,6 @@
         </section>
       </div>
 
-      <div class="manage-footer-actions">
-        <button mat-stroked-button type="button" (click)="backToGroups()">Cancel</button>
-      </div>
     </ng-container>
 
     <div class="empty-state" *ngIf="!isLoading && !group">

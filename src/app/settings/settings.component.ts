@@ -7,7 +7,7 @@ import { SettingsService } from '../core/services/settings.service';
 import { UploadService } from '../core/services/upload.service';
 import { IUser } from '../core/models/user.model';
 import { APP_CONSTANTS } from '../core/constants/app.constants';
-import { environment } from '../../environments/environment';
+import { resolveMediaUrl } from '../shared/utilities/media-url.util';
 
 /**
  * SettingsComponent - User settings page with multiple sections:
@@ -213,14 +213,13 @@ export class SettingsComponent implements OnInit {
           (updated) => {
             this.isAvatarUploading = false;
             this.applyUserToLocal(updated || { avatarUrl: fileUrl });
-            // Keep selected image visible; clear blob after resolved server URL applied
-            this.avatarPreviewUrl = null;
+            this.clearAvatarPreview();
             this.showMessage('Profile photo updated');
           },
           () => {
             this.isAvatarUploading = false;
             this.applyUserToLocal({ avatarUrl: fileUrl });
-            this.avatarPreviewUrl = null;
+            this.clearAvatarPreview();
             this.showMessage('Profile photo updated');
           }
         );
@@ -232,7 +231,7 @@ export class SettingsComponent implements OnInit {
             const fileUrl = (result && (result.fileUrl || result.url)) || '';
             if (!fileUrl) {
               this.isAvatarUploading = false;
-              this.avatarPreviewUrl = null;
+              this.clearAvatarPreview();
               this.showMessage('Upload failed', true);
               return;
             }
@@ -240,7 +239,7 @@ export class SettingsComponent implements OnInit {
               (updated) => {
                 this.isAvatarUploading = false;
                 this.applyUserToLocal(updated || { avatarUrl: fileUrl });
-                this.avatarPreviewUrl = null;
+                this.clearAvatarPreview();
                 this.showMessage('Profile photo updated');
               },
               (err) => {
@@ -252,7 +251,7 @@ export class SettingsComponent implements OnInit {
           },
           (err) => {
             this.isAvatarUploading = false;
-            this.avatarPreviewUrl = null;
+            this.clearAvatarPreview();
             this.showMessage((err && err.message) || 'Upload failed', true);
           }
         );
@@ -265,7 +264,7 @@ export class SettingsComponent implements OnInit {
     this.userService.updateMyProfile({ avatarUrl: null as any }).subscribe(
       (updated) => {
         this.isAvatarUploading = false;
-        this.avatarPreviewUrl = null;
+        this.clearAvatarPreview();
         this.applyUserToLocal({ ...(updated || {}), avatarUrl: '' });
         this.showMessage('Profile photo removed — initials badge in use');
       },
@@ -277,11 +276,14 @@ export class SettingsComponent implements OnInit {
   }
 
   resolveAvatarUrl(url?: string): string {
-    if (!url) { return ''; }
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) {
-      return url;
+    return resolveMediaUrl(url);
+  }
+
+  private clearAvatarPreview(): void {
+    if (this.avatarPreviewUrl) {
+      try { URL.revokeObjectURL(this.avatarPreviewUrl); } catch (_e) { /* ignore */ }
+      this.avatarPreviewUrl = null;
     }
-    return `${environment.socketUrl}${url}`;
   }
 
   private applyUserToLocal(user: Partial<IUser> | any): void {

@@ -1,21 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { AdminApiService } from '../../core/services/admin-api.service';
 import { IFakerPreviewUser } from '../../core/models/admin.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { withMinLoading } from '../utils/admin-rx.util';
+import { readAdminConsolePrefs } from '../utils/admin-console-prefs.util';
 
 @Component({
   selector: 'app-admin-faker-users',
   templateUrl: './admin-faker-users.component.html',
   styleUrls: ['./admin-faker-users.component.scss']
 })
-export class AdminFakerUsersComponent {
+export class AdminFakerUsersComponent implements OnInit {
   count = 10;
   defaultPassword = 'User@12345';
   role = '';
   status = '';
+  private confirmBeforeSave = true;
 
   previewId: string | null = null;
   users: IFakerPreviewUser[] = [];
@@ -51,6 +53,12 @@ export class AdminFakerUsersComponent {
     private adminApi: AdminApiService,
     private dialog: MatDialog
   ) {}
+
+  ngOnInit(): void {
+    const prefs = readAdminConsolePrefs();
+    this.count = prefs.defaultFakerCount;
+    this.confirmBeforeSave = prefs.confirmBeforeSave;
+  }
 
   generate(): void {
     this.loading = true;
@@ -173,6 +181,10 @@ export class AdminFakerUsersComponent {
     if (!this.previewId || !this.users.length) {
       return;
     }
+    if (!this.confirmBeforeSave) {
+      this.persistUsers();
+      return;
+    }
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
@@ -183,24 +195,28 @@ export class AdminFakerUsersComponent {
     });
     ref.afterClosed().subscribe(ok => {
       if (!ok) { return; }
-      this.saving = true;
-      this.errorMessage = '';
-      this.successMessage = '';
-      withMinLoading(this.adminApi.saveFakerUsers(this.previewId), 500)
-        .pipe(finalize(() => { this.saving = false; }))
-        .subscribe(
-          (res) => {
-            this.successMessage = `Saved ${res.saved} users` + (res.failed ? ` · ${res.failed} failed` : '');
-            if (res.saved > 0) {
-              this.previewId = null;
-              this.users = [];
-            }
-          },
-          (err) => {
-            this.errorMessage = err.message || 'Save failed';
-          }
-        );
+      this.persistUsers();
     });
+  }
+
+  private persistUsers(): void {
+    this.saving = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    withMinLoading(this.adminApi.saveFakerUsers(this.previewId), 500)
+      .pipe(finalize(() => { this.saving = false; }))
+      .subscribe(
+        (res) => {
+          this.successMessage = `Saved ${res.saved} users` + (res.failed ? ` · ${res.failed} failed` : '');
+          if (res.saved > 0) {
+            this.previewId = null;
+            this.users = [];
+          }
+        },
+        (err) => {
+          this.errorMessage = err.message || 'Save failed';
+        }
+      );
   }
 
   trackByTempId(_: number, user: IFakerPreviewUser): string {

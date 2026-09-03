@@ -1,8 +1,14 @@
 @import '../styles/admin-theme';
 
-.admin-page { @include admin-page; }
+.admin-page {
+  @include admin-page;
+  /* Tighter rhythm filters → table (profile-like); alerts only take space when visible */
+  gap: 8px;
+}
 
 .page-head {
+  margin-bottom: 4px;
+
   h2 { margin: 0 0 4px; color: $admin-ink; font-size: 1.35rem; }
   p { margin: 0; color: $admin-muted; font-size: 0.875rem; }
 }
@@ -12,11 +18,22 @@
   padding: 18px;
 }
 
+.filters.card {
+  margin-bottom: 0;
+}
+
 .filter-row {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: flex-end;
+}
+
+.admin-page.dense-tables {
+  .table-wrap th,
+  .table-wrap td {
+    padding: 8px 8px;
+  }
 }
 
 .field {
@@ -74,6 +91,7 @@
   flex-direction: column;
   min-height: 0;
   flex: 1;
+  margin-top: 0;
 }
 
 .table-wrap {

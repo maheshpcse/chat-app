@@ -13,7 +13,7 @@ import { ConversationType, IConversation } from '../../core/models/conversation.
 import { IUser } from '../../core/models/user.model';
 import { IContact, IContactRequest } from '../../core/models/contact.model';
 import { IGroup } from '../../core/models/group.model';
-import { environment } from '../../../environments/environment';
+import { resolveMediaUrl } from '../../shared/utilities/media-url.util';
 
 @Component({
   selector: 'app-sidebar',
@@ -234,13 +234,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   groupAvatarSrc(group: IGroup): string {
-    const url = group && (group.avatarUrl || group.avatar);
-    if (!url) { return ''; }
-    const s = String(url);
-    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('blob:')) {
-      return s;
-    }
-    return environment.socketUrl + s;
+    return resolveMediaUrl(group && (group.avatarUrl || group.avatar));
   }
 
   openGroupChat(group: IGroup): void {

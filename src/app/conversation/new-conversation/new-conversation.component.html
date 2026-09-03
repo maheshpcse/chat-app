@@ -22,7 +22,7 @@
                        class="user-result"
                        (click)="startConversation(user)">
           <app-avatar matListAvatar
-                      [imageUrl]="user.avatar"
+                      [imageUrl]="user.avatarUrl || user.avatar || ''"
                       [name]="user.fullName"
                       [isOnline]="user.isOnline"
                       size="sm">
