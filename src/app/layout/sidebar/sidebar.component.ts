@@ -8,9 +8,12 @@ import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ContactService } from '../../core/services/contact.service';
 import { PresenceService } from '../../core/services/presence.service';
+import { GroupService } from '../../core/services/group.service';
 import { ConversationType, IConversation } from '../../core/models/conversation.model';
 import { IUser } from '../../core/models/user.model';
 import { IContact, IContactRequest } from '../../core/models/contact.model';
+import { IGroup } from '../../core/models/group.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-sidebar',
@@ -23,7 +26,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   // State
   isMinimized = false;
-  activeTab: 'chats' | 'contacts' | 'requests' | 'search' = 'chats';
+  activeTab: 'chats' | 'contacts' | 'requests' | 'search' | 'groups' = 'chats';
 
   // Conversations
   conversations: IConversation[] = [];
@@ -39,6 +42,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
   // Requests
   receivedRequests: IContactRequest[] = [];
   sentRequests: IContactRequest[] = [];
+
+  // Groups (chat sidemenu tab)
+  groups: IGroup[] = [];
+  groupsFilter = '';
+  isLoadingGroups = false;
 
   // User search
   searchQuery = '';
@@ -56,6 +64,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private contactService: ContactService,
     private presenceService: PresenceService,
+    private groupService: GroupService,
     private router: Router
   ) {}
 
@@ -177,12 +186,104 @@ export class SidebarComponent implements OnInit, OnDestroy {
   // Tab Switching
   // ===========================
 
-  setTab(tab: 'chats' | 'contacts' | 'requests' | 'search'): void {
+  setTab(tab: 'chats' | 'contacts' | 'requests' | 'search' | 'groups'): void {
     this.activeTab = tab;
     if (tab === 'search') {
       this.searchQuery = '';
       this.searchResults = [];
     }
+    if (tab === 'groups') {
+      this.loadGroups();
+    }
+  }
+
+  loadGroups(): void {
+    this.isLoadingGroups = true;
+    this.groupService.getGroups().subscribe(
+      (groups) => {
+        this.groups = (groups || []).map(g => this.normalizeSidebarGroup(g));
+        this.isLoadingGroups = false;
+      },
+      () => {
+        this.groups = [];
+        this.isLoadingGroups = false;
+      }
+    );
+  }
+
+  private normalizeSidebarGroup(group: any): IGroup {
+    if (!group) { return group; }
+    return {
+      ...group,
+      id: group.id || group.groupId,
+      conversationId: group.conversationId || group.conversation_id,
+      avatarUrl: group.avatarUrl || group.avatar || '',
+      avatar: group.avatar || group.avatarUrl || '',
+      members: Array.isArray(group.members) ? group.members : []
+    } as IGroup;
+  }
+
+  filteredGroups(): IGroup[] {
+    const q = (this.groupsFilter || '').trim().toLowerCase();
+    if (!q) { return this.groups; }
+    return this.groups.filter(g => {
+      const name = (g.name || '').toLowerCase();
+      const desc = (g.description || '').toLowerCase();
+      return name.indexOf(q) >= 0 || desc.indexOf(q) >= 0;
+    });
+  }
+
+  groupAvatarSrc(group: IGroup): string {
+    const url = group && (group.avatarUrl || group.avatar);
+    if (!url) { return ''; }
+    const s = String(url);
+    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('blob:')) {
+      return s;
+    }
+    return environment.socketUrl + s;
+  }
+
+  openGroupChat(group: IGroup): void {
+    if (!group) { return; }
+    const conversationId = group.conversationId;
+    if (conversationId) {
+      const conv: IConversation = {
+        conversationId: String(conversationId),
+        conversationType: ConversationType.GROUP,
+        displayName: group.name,
+        avatarUrl: group.avatarUrl || group.avatar,
+        groupId: group.id ? String(group.id) : undefined,
+        lastMessageContent: group.description || ''
+      };
+      this.chatService.setActiveConversation(conv);
+      this.chatService.loadConversations();
+      this.router.navigate(['/chat']);
+      return;
+    }
+    if (group.id) {
+      this.router.navigate(['/groups', group.id]);
+    }
+  }
+
+  manageGroup(group: IGroup, event?: Event): void {
+    if (event) { event.stopPropagation(); }
+    if (group && group.id) {
+      this.router.navigate(['/groups', group.id]);
+    }
+  }
+
+  createGroupFromSidebar(): void {
+    this.router.navigate(['/groups/create']);
+  }
+
+  trackByGroupId(index: number, group: IGroup): string {
+    return group && group.id ? String(group.id) : String(index);
+  }
+
+  memberCount(group: IGroup): number {
+    if (!group) { return 0; }
+    if ((group as any).memberCount != null) { return (group as any).memberCount; }
+    return (group.members && group.members.length) || 0;
   }
 
   // ===========================
@@ -326,6 +427,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   goToGroups(): void {
+    // Full groups page still available; sidemenu uses setTab('groups')
     this.router.navigate(['/groups']);
   }
 

@@ -42,9 +42,15 @@ export class GroupService {
   }
 
   updateGroup(groupId: string, data: IUpdateGroup): Observable<IGroup> {
+    // BE expects avatarUrl; accept FE `avatar` alias
+    const body: any = { ...(data as any) };
+    if (body.avatar != null && body.avatarUrl == null) {
+      body.avatarUrl = body.avatar;
+      delete body.avatar;
+    }
     return this.http.put<IApiResponse<IGroup>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.GROUPS.BY_ID}/${groupId}`,
-      data
+      body
     ).pipe(map(response => response.data));
   }
 

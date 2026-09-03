@@ -11,6 +11,10 @@
   border-radius: $radius-lg;
   background: $white;
   box-shadow: $shadow-sm;
+  /* Sticky title card while page content scrolls */
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .page-header-main {

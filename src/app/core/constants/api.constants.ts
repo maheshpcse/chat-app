@@ -45,6 +45,7 @@ export const API_ENDPOINTS = {
   // Uploads
   UPLOADS: {
     LOCAL: '/uploads/local',
+    AVATAR: '/uploads/avatar',
     S3: '/uploads/s3',
     DOWNLOAD: '/uploads/download'
   },

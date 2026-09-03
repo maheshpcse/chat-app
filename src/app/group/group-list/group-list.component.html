@@ -1,32 +1,51 @@
-﻿<div class="groups-page page-shell">
+<div class="groups-page page-shell">
   <app-page-header title="My Groups" icon="groups"
                    subtitle="Create and manage group conversations"></app-page-header>
 
-  <div class="page-toolbar">
+  <div class="page-toolbar groups-toolbar">
+    <div class="toolbar-search">
+      <div class="input-wrapper">
+        <mat-icon class="input-icon">search</mat-icon>
+        <input type="text" placeholder="Filter groups..." [(ngModel)]="filterText">
+      </div>
+    </div>
+
     <div class="toolbar-actions">
       <button mat-raised-button color="primary" (click)="createGroup()">
         <mat-icon>group_add</mat-icon>
         Create Group
       </button>
     </div>
+
+    <div class="view-toggle">
+      <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')" matTooltip="List">
+        <mat-icon>view_list</mat-icon>
+      </button>
+      <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')" matTooltip="Grid">
+        <mat-icon>view_module</mat-icon>
+      </button>
+      <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')" matTooltip="Table">
+        <mat-icon>table_chart</mat-icon>
+      </button>
+    </div>
   </div>
 
   <div class="page-scroll">
     <div class="groups-loading" *ngIf="isLoading">
-      <app-shimmer variant="list" [rows]="6"></app-shimmer>
+      <app-shimmer *ngIf="viewMode === 'grid'" variant="cards" [rows]="6"></app-shimmer>
+      <app-shimmer *ngIf="viewMode !== 'grid'" variant="list" [rows]="8"></app-shimmer>
     </div>
 
     <ng-container *ngIf="!isLoading">
-      <div class="groups-grid" *ngIf="groups.length > 0">
-        <mat-card class="group-card" *ngFor="let group of groups" (click)="openGroup(group)">
+      <div class="groups-grid" *ngIf="viewMode === 'grid' && filteredGroups.length > 0">
+        <mat-card class="group-card" *ngFor="let group of filteredGroups" (click)="openGroup(group)">
           <mat-card-header>
             <div mat-card-avatar class="group-avatar">
-              <mat-icon>group</mat-icon>
+              <img *ngIf="groupAvatarSrc(group)" [src]="groupAvatarSrc(group)" alt="">
+              <mat-icon *ngIf="!groupAvatarSrc(group)">group</mat-icon>
             </div>
             <mat-card-title>{{ group.name }}</mat-card-title>
-            <mat-card-subtitle>
-              {{ (group.members && group.members.length) || group.memberCount || 0 }} members
-            </mat-card-subtitle>
+            <mat-card-subtitle>{{ memberCount(group) }} members</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
             <p *ngIf="group.description">{{ group.description | truncate:80 }}</p>
@@ -34,19 +53,73 @@
           </mat-card-content>
           <mat-card-actions align="end">
             <button mat-button color="primary" (click)="openGroupChat(group, $event)">
-              <mat-icon>chat</mat-icon>
-              Open chat
+              <mat-icon>chat</mat-icon> Open chat
             </button>
             <button mat-button (click)="openGroup(group, $event)">Manage</button>
           </mat-card-actions>
         </mat-card>
       </div>
 
-      <div class="empty-state" *ngIf="groups.length === 0">
+      <div class="groups-list" *ngIf="viewMode === 'list' && filteredGroups.length > 0">
+        <div class="group-list-row" *ngFor="let group of filteredGroups" (click)="openGroup(group)">
+          <div class="group-avatar sm">
+            <img *ngIf="groupAvatarSrc(group)" [src]="groupAvatarSrc(group)" alt="">
+            <mat-icon *ngIf="!groupAvatarSrc(group)">group</mat-icon>
+          </div>
+          <div class="group-list-info">
+            <span class="group-list-name">{{ group.name }}</span>
+            <span class="group-list-meta">{{ memberCount(group) }} members
+              <ng-container *ngIf="group.description"> · {{ group.description | truncate:60 }}</ng-container>
+            </span>
+          </div>
+          <div class="group-list-actions" (click)="$event.stopPropagation()">
+            <button mat-stroked-button color="primary" (click)="openGroupChat(group, $event)">
+              <mat-icon>chat</mat-icon> Chat
+            </button>
+            <button mat-button (click)="openGroup(group, $event)">Manage</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="groups-table-wrap" *ngIf="viewMode === 'table' && filteredGroups.length > 0">
+        <table class="groups-table">
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Members</th>
+              <th>Description</th>
+              <th class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let group of filteredGroups">
+              <td>
+                <div class="table-group-cell">
+                  <div class="group-avatar xs">
+                    <img *ngIf="groupAvatarSrc(group)" [src]="groupAvatarSrc(group)" alt="">
+                    <mat-icon *ngIf="!groupAvatarSrc(group)">group</mat-icon>
+                  </div>
+                  <strong>{{ group.name }}</strong>
+                </div>
+              </td>
+              <td>{{ memberCount(group) }}</td>
+              <td>{{ group.description || '—' }}</td>
+              <td class="actions-col">
+                <button mat-button color="primary" (click)="openGroupChat(group, $event)">Chat</button>
+                <button mat-button (click)="openGroup(group, $event)">Manage</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" *ngIf="filteredGroups.length === 0">
         <mat-icon>group_off</mat-icon>
-        <h3>No groups yet</h3>
-        <p>Create a group with accepted friends to start chatting together.</p>
-        <button mat-raised-button color="primary" (click)="createGroup()">Create Your First Group</button>
+        <h3 *ngIf="!filterText">No groups yet</h3>
+        <h3 *ngIf="filterText">No matching groups</h3>
+        <p *ngIf="!filterText">Create a group with accepted friends to start chatting together.</p>
+        <p *ngIf="filterText">Try a different filter.</p>
+        <button mat-raised-button color="primary" *ngIf="!filterText" (click)="createGroup()">Create Your First Group</button>
       </div>
     </ng-container>
   </div>

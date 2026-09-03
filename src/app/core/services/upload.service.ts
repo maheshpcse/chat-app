@@ -22,29 +22,55 @@ export class UploadService {
   constructor(private http: HttpClient) {}
 
   /**
+   * Normalize upload API payload (BE returns `url`; older clients used `fileUrl`).
+   */
+  private mapUploadResult(data: any): { fileUrl: string; fileName: string; url: string } {
+    const raw = data || {};
+    const fileUrl = raw.fileUrl || raw.url || '';
+    return {
+      fileUrl,
+      url: fileUrl,
+      fileName: raw.fileName || raw.originalName || ''
+    };
+  }
+
+  /**
    * Upload file to local server storage.
    */
-  uploadLocal(file: File): Observable<{ fileUrl: string; fileName: string }> {
+  uploadLocal(file: File): Observable<{ fileUrl: string; fileName: string; url: string }> {
     const formData = new FormData();
     formData.append('file', file, file.name);
 
-    return this.http.post<IApiResponse<{ fileUrl: string; fileName: string }>>(
+    return this.http.post<IApiResponse<any>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.UPLOADS.LOCAL}`,
       formData
-    ).pipe(map(response => response.data));
+    ).pipe(map(response => this.mapUploadResult(response && response.data)));
+  }
+
+  /**
+   * Upload user avatar (also persists avatarUrl on BE).
+   */
+  uploadAvatar(file: File): Observable<{ fileUrl: string; fileName: string; url: string }> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post<IApiResponse<any>>(
+      `${environment.apiBaseUrl}${API_ENDPOINTS.UPLOADS.AVATAR}`,
+      formData
+    ).pipe(map(response => this.mapUploadResult(response && response.data)));
   }
 
   /**
    * Upload file to AWS S3.
    */
-  uploadS3(file: File): Observable<{ fileUrl: string; fileName: string }> {
+  uploadS3(file: File): Observable<{ fileUrl: string; fileName: string; url: string }> {
     const formData = new FormData();
     formData.append('file', file, file.name);
 
-    return this.http.post<IApiResponse<{ fileUrl: string; fileName: string }>>(
+    return this.http.post<IApiResponse<any>>(
       `${environment.apiBaseUrl}${API_ENDPOINTS.UPLOADS.S3}`,
       formData
-    ).pipe(map(response => response.data));
+    ).pipe(map(response => this.mapUploadResult(response && response.data)));
   }
 
   /**

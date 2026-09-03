@@ -422,10 +422,15 @@
       white-space: nowrap;
     }
 
+    /* Single Material arrow on the right — do not add custom chevrons */
     .mat-select-arrow-wrapper {
-      display: flex;
-      align-items: center;
-      transform: none !important;
+      transform: translateY(-2px);
+    }
+
+    .mat-form-field-suffix,
+    .mat-form-field-prefix .mat-select-arrow,
+    .mat-form-field-suffix .mat-icon:not(.mat-select-arrow) {
+      display: none !important;
     }
 
     .mat-form-field-subscript-wrapper {

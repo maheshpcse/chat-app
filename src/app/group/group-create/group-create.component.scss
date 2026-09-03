@@ -30,29 +30,47 @@
   margin-bottom: $spacing-sm;
 }
 
-/* Description icon sits on first text line, not vertically centered on whole textarea */
+/* Description icon aligns with first text line / caret (not mid-textarea) */
 .desc-field {
   ::ng-deep {
     .mat-form-field-flex {
       align-items: flex-start !important;
+      padding-top: 0.75em !important;
     }
 
     .mat-form-field-prefix {
+      top: 0 !important;
       align-self: flex-start !important;
-      margin-top: 12px !important;
-      padding-right: 4px;
+      display: inline-flex !important;
+      align-items: center !important;
+      height: 1.125em;
+      line-height: 1.125em;
+      margin: 0 4px 0 0 !important;
+      padding: 0 !important;
+      position: relative;
     }
 
+    .mat-form-field-infix {
+      padding-top: 0.5em !important;
+      padding-bottom: 0.75em !important;
+      border-top: 0.75em solid transparent;
+    }
+
+    .desc-prefix-icon.mat-icon,
     .desc-prefix-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      line-height: 20px;
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+      line-height: 20px !important;
       color: $text-muted;
+      margin: 0 !important;
+      vertical-align: middle;
     }
 
     textarea.mat-input-element {
-      margin-top: 4px;
+      margin: 0 !important;
+      padding-top: 0 !important;
+      line-height: 1.5 !important;
       resize: vertical;
       min-height: 64px;
     }

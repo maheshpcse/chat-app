@@ -131,11 +131,20 @@ export class ChatService {
       ? (safeName && safeName !== 'Unknown' ? safeName : (groupName || 'Group'))
       : safeName;
 
+    const groupIdRaw =
+      merged.groupId ||
+      seed?.groupId ||
+      raw.groupId ||
+      raw.group_id ||
+      '';
+    const groupId = groupIdRaw !== '' && groupIdRaw != null ? String(groupIdRaw) : undefined;
+
     return {
       ...merged,
       conversationId: merged.conversationId != null ? String(merged.conversationId) : merged.conversationId,
       conversationType,
       participantId: conversationType === ConversationType.GROUP ? undefined : participantId,
+      groupId: conversationType === ConversationType.GROUP ? groupId : (merged.groupId || groupId),
       displayName,
       firstName: first || merged.firstName,
       lastName: last || merged.lastName,

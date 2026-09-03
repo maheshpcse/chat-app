@@ -16,6 +16,8 @@ export interface IConversation {
   displayName?: string;
   avatarUrl?: string;
   unreadCount?: number;
+  /** Present for group chats when known (members API uses groupId, not conversationId). */
+  groupId?: string;
   // These fields come from spCreatePrivateConversation
   participantId?: string;
   firstName?: string;

@@ -199,31 +199,63 @@ export class SettingsComponent implements OnInit {
       this.avatarPreviewUrl = null;
     }
 
-    this.uploadService.uploadLocal(file).subscribe(
+    // Prefer /uploads/avatar (persists avatarUrl on BE). Fall back to local + profile PUT.
+    this.uploadService.uploadAvatar(file).subscribe(
       (result) => {
-        const fileUrl = result && result.fileUrl;
+        const fileUrl = (result && (result.fileUrl || result.url)) || '';
         if (!fileUrl) {
           this.isAvatarUploading = false;
           this.showMessage('Upload failed', true);
           return;
         }
-        this.userService.updateMyProfile({ avatarUrl: fileUrl }).subscribe(
+        // Keep preview until profile hydrate; avatar endpoint already saved URL.
+        this.userService.getMyProfile().subscribe(
           (updated) => {
             this.isAvatarUploading = false;
-            this.avatarPreviewUrl = null;
             this.applyUserToLocal(updated || { avatarUrl: fileUrl });
+            // Keep selected image visible; clear blob after resolved server URL applied
+            this.avatarPreviewUrl = null;
             this.showMessage('Profile photo updated');
           },
-          (err) => {
+          () => {
             this.isAvatarUploading = false;
-            this.showMessage((err && err.message) || 'Failed to save photo', true);
+            this.applyUserToLocal({ avatarUrl: fileUrl });
+            this.avatarPreviewUrl = null;
+            this.showMessage('Profile photo updated');
           }
         );
       },
-      (err) => {
-        this.isAvatarUploading = false;
-        this.avatarPreviewUrl = null;
-        this.showMessage((err && err.message) || 'Upload failed', true);
+      () => {
+        // Fallback: generic local upload then profile update
+        this.uploadService.uploadLocal(file).subscribe(
+          (result) => {
+            const fileUrl = (result && (result.fileUrl || result.url)) || '';
+            if (!fileUrl) {
+              this.isAvatarUploading = false;
+              this.avatarPreviewUrl = null;
+              this.showMessage('Upload failed', true);
+              return;
+            }
+            this.userService.updateMyProfile({ avatarUrl: fileUrl }).subscribe(
+              (updated) => {
+                this.isAvatarUploading = false;
+                this.applyUserToLocal(updated || { avatarUrl: fileUrl });
+                this.avatarPreviewUrl = null;
+                this.showMessage('Profile photo updated');
+              },
+              (err) => {
+                this.isAvatarUploading = false;
+                // Keep blob preview so user still sees selected image
+                this.showMessage((err && err.message) || 'Failed to save photo', true);
+              }
+            );
+          },
+          (err) => {
+            this.isAvatarUploading = false;
+            this.avatarPreviewUrl = null;
+            this.showMessage((err && err.message) || 'Upload failed', true);
+          }
+        );
       }
     );
   }

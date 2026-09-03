@@ -242,14 +242,37 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.showProfileSidebar = !this.showProfileSidebar;
     if (this.showProfileSidebar && this.activeConversation) {
       if (this.isGroupConversation()) {
-        this.groupService.getGroupMembers(this.activeConversation.conversationId).subscribe(
-          (members) => { this.groupMembers = members; },
-          () => { this.groupMembers = []; }
-        );
+        this.loadGroupMembersForSidebar();
       } else {
         this.loadPrivateSidebarProfile();
       }
     }
+  }
+
+  /**
+   * Members API uses groupId (not conversationId).
+   * Fallback: group details payload when members route not deployed yet.
+   */
+  private loadGroupMembersForSidebar(): void {
+    if (!this.activeConversation) {
+      this.groupMembers = [];
+      return;
+    }
+    const conv: any = this.activeConversation;
+    const groupId = conv.groupId || conv.group_id || null;
+    if (!groupId) {
+      this.groupMembers = [];
+      return;
+    }
+    this.groupService.getGroupMembers(String(groupId)).subscribe(
+      (members) => { this.groupMembers = members || []; },
+      () => {
+        this.groupService.getGroupById(String(groupId)).subscribe(
+          (group) => { this.groupMembers = (group && group.members) || []; },
+          () => { this.groupMembers = []; }
+        );
+      }
+    );
   }
 
   /** Load peer profile for private-chat sidebar (soft-fail friendly). */

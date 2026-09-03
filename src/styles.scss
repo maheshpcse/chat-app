@@ -199,6 +199,15 @@ a.mat-raised-button.mat-primary,
   overflow: hidden;
 }
 
+/* Keep title header card pinned while .page-scroll moves */
+.page-shell > app-page-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+  background: transparent;
+}
+
 /* No sticky page footers on chat-user shells (composer stays in-flow). */
 .app-container footer,
 .page-shell footer,

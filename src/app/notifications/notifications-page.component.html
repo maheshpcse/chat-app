@@ -4,46 +4,46 @@
                    [subtitle]="unreadCount > 0 ? (unreadCount + ' unread') : 'You are all caught up'">
   </app-page-header>
 
-  <!-- Toolbar: actions + view toggles (below the header) -->
-  <div class="page-toolbar">
-    <div class="toolbar-actions">
-      <button mat-stroked-button (click)="markAllAsRead()" *ngIf="unreadCount > 0">
-        <mat-icon>done_all</mat-icon> Mark All Read
-      </button>
-      <button mat-stroked-button color="warn" (click)="clearAll()" *ngIf="notifications.length > 0">
-        <mat-icon>delete_sweep</mat-icon> Clear All
+  <!-- Same row: left type filters + right view mode toggles -->
+  <div class="page-toolbar notif-toolbar">
+    <div class="filter-bar">
+      <button *ngFor="let f of filterTypes"
+              class="filter-chip"
+              [class.active]="filterType === f.value"
+              (click)="setFilter(f.value)">
+        <mat-icon>{{ f.icon }}</mat-icon>
+        {{ f.label }}
       </button>
     </div>
 
-    <div class="view-toggle">
-      <button mat-icon-button [class.active]="viewMode === 'timeline'" (click)="setViewMode('timeline')"
-              matTooltip="Timeline">
-        <mat-icon>timeline</mat-icon>
-      </button>
-      <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
-              matTooltip="List">
-        <mat-icon>view_list</mat-icon>
-      </button>
-      <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
-              matTooltip="Grid">
-        <mat-icon>view_module</mat-icon>
-      </button>
-      <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')"
-              matTooltip="Table">
-        <mat-icon>table_chart</mat-icon>
-      </button>
+    <div class="toolbar-right">
+      <div class="toolbar-actions">
+        <button mat-stroked-button (click)="markAllAsRead()" *ngIf="unreadCount > 0">
+          <mat-icon>done_all</mat-icon> Mark All Read
+        </button>
+        <button mat-stroked-button color="warn" (click)="clearAll()" *ngIf="notifications.length > 0">
+          <mat-icon>delete_sweep</mat-icon> Clear All
+        </button>
+      </div>
+      <div class="view-toggle">
+        <button mat-icon-button [class.active]="viewMode === 'timeline'" (click)="setViewMode('timeline')"
+                matTooltip="Timeline">
+          <mat-icon>timeline</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'list'" (click)="setViewMode('list')"
+                matTooltip="List">
+          <mat-icon>view_list</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')"
+                matTooltip="Grid">
+          <mat-icon>view_module</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')"
+                matTooltip="Table">
+          <mat-icon>table_chart</mat-icon>
+        </button>
+      </div>
     </div>
-  </div>
-
-  <!-- Filters -->
-  <div class="filter-bar">
-    <button *ngFor="let f of filterTypes"
-            class="filter-chip"
-            [class.active]="filterType === f.value"
-            (click)="setFilter(f.value)">
-      <mat-icon>{{ f.icon }}</mat-icon>
-      {{ f.label }}
-    </button>
   </div>
 
   <div class="page-scroll">

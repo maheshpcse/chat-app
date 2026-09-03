@@ -1,42 +1,102 @@
-<div class="container py-4" *ngIf="!isLoading && group">
-  <mat-card>
-    <mat-card-header>
-      <mat-icon mat-card-avatar>group</mat-icon>
-      <mat-card-title>{{ group.name }}</mat-card-title>
-      <mat-card-subtitle>{{ group.members.length }} members</mat-card-subtitle>
-    </mat-card-header>
+<div class="group-manage-page page-shell">
+  <app-page-header
+    [title]="group?.name || 'Group'"
+    icon="group"
+    [subtitle]="group ? ((group.members?.length || 0) + ' members') : 'Manage group details'">
+  </app-page-header>
 
-    <mat-card-content>
-      <p *ngIf="group.description" class="group-description">{{ group.description }}</p>
+  <div class="page-toolbar manage-toolbar" *ngIf="!isLoading">
+    <button mat-stroked-button type="button" (click)="backToGroups()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to groups
+    </button>
+    <div class="toolbar-spacer"></div>
+    <button mat-raised-button color="primary" type="button" *ngIf="group?.conversationId" (click)="openChat()">
+      <mat-icon>chat</mat-icon>
+      Open chat
+    </button>
+  </div>
 
-      <mat-divider class="my-3"></mat-divider>
+  <div class="page-scroll">
+    <div class="manage-loading" *ngIf="isLoading">
+      <app-shimmer variant="list" [rows]="8"></app-shimmer>
+    </div>
 
-      <h4>Members</h4>
-      <mat-list>
-        <mat-list-item *ngFor="let member of group.members">
-          <app-avatar matListAvatar
-                      [imageUrl]="member.avatar"
-                      [name]="member.fullName"
-                      size="sm"
-                      [showStatus]="true"
-                      [isOnline]="isMemberOnline(member)">
-          </app-avatar>
-          <h4 matLine>{{ member.fullName }}</h4>
-          <p matLine>
-            <span class="member-role">{{ member.role }}</span>
-          </p>
-          <button mat-icon-button color="warn"
-                  *ngIf="isOwner && member.userId !== currentUserId"
-                  (click)="removeMember(member)"
-                  matTooltip="Remove member">
-            <mat-icon>person_remove</mat-icon>
-          </button>
-        </mat-list-item>
-      </mat-list>
-    </mat-card-content>
-  </mat-card>
-</div>
+    <ng-container *ngIf="!isLoading && group">
+      <div class="manage-layout">
+        <section class="group-profile-card">
+          <div class="group-hero">
+            <div class="group-photo">
+              <img *ngIf="groupAvatarSrc()" [src]="groupAvatarSrc()" alt="">
+              <mat-icon *ngIf="!groupAvatarSrc()">groups</mat-icon>
+            </div>
+            <div class="group-meta">
+              <h2>{{ group.name }}</h2>
+              <p *ngIf="group.description">{{ group.description }}</p>
+              <p class="muted" *ngIf="!group.description">No description</p>
+              <div class="owner-actions" *ngIf="isOwner">
+                <input #groupFileInput type="file" accept="image/*" hidden
+                       (change)="onGroupImageSelected($event)">
+                <button mat-stroked-button type="button" [disabled]="isSavingAvatar"
+                        (click)="groupFileInput.click()">
+                  <mat-icon>photo_camera</mat-icon>
+                  {{ groupAvatarSrc() ? 'Change photo' : 'Upload photo' }}
+                </button>
+                <button mat-button color="warn" type="button"
+                        *ngIf="groupAvatarSrc()"
+                        [disabled]="isSavingAvatar"
+                        (click)="removeGroupImage()">
+                  <mat-icon>delete</mat-icon>
+                  Remove
+                </button>
+                <mat-spinner *ngIf="isSavingAvatar" diameter="22"></mat-spinner>
+              </div>
+            </div>
+          </div>
+        </section>
 
-<div class="text-center py-5" *ngIf="isLoading">
-  <mat-spinner diameter="40"></mat-spinner>
+        <section class="members-card">
+          <div class="members-header">
+            <h3>Members</h3>
+            <span class="count">{{ group.members?.length || 0 }}</span>
+          </div>
+
+          <div class="member-row" *ngFor="let member of group.members">
+            <app-avatar
+              [imageUrl]="memberAvatar(member)"
+              [name]="memberName(member)"
+              size="sm"
+              [showStatus]="true"
+              [isOnline]="isMemberOnline(member)">
+            </app-avatar>
+            <div class="member-info">
+              <span class="member-name">{{ memberName(member) }}</span>
+              <span class="member-role">{{ member.role }}</span>
+            </div>
+            <button mat-icon-button color="warn"
+                    *ngIf="isOwner && member.userId !== currentUserId"
+                    (click)="removeMember(member)"
+                    matTooltip="Remove member">
+              <mat-icon>person_remove</mat-icon>
+            </button>
+          </div>
+
+          <div class="empty-members" *ngIf="!(group.members && group.members.length)">
+            <mat-icon>person_off</mat-icon>
+            <p>No members found</p>
+          </div>
+        </section>
+      </div>
+
+      <div class="manage-footer-actions">
+        <button mat-stroked-button type="button" (click)="backToGroups()">Cancel</button>
+      </div>
+    </ng-container>
+
+    <div class="empty-state" *ngIf="!isLoading && !group">
+      <mat-icon>error_outline</mat-icon>
+      <h3>Group not found</h3>
+      <button mat-raised-button color="primary" type="button" (click)="backToGroups()">Back to groups</button>
+    </div>
+  </div>
 </div>

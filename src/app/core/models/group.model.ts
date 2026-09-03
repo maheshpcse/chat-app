@@ -6,6 +6,7 @@ export interface IGroup {
   name: string;
   description?: string;
   avatar?: string;
+  avatarUrl?: string;
   ownerId: string;
   members: IGroupMember[];
   conversationId: string;
@@ -17,7 +18,10 @@ export interface IGroupMember {
   userId: string;
   username: string;
   fullName: string;
+  firstName?: string;
+  lastName?: string;
   avatar?: string;
+  avatarUrl?: string;
   role: GroupMemberRole;
   joinedAt: Date;
 }
@@ -38,6 +42,7 @@ export interface IUpdateGroup {
   name?: string;
   description?: string;
   avatar?: string;
+  avatarUrl?: string;
 }
 
 export interface IAddGroupMember {

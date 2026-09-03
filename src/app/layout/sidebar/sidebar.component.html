@@ -19,7 +19,7 @@
     <button mat-icon-button (click)="setTab('search'); toggleMinimize()" matTooltip="Search Users">
       <mat-icon>search</mat-icon>
     </button>
-    <button mat-icon-button (click)="goToGroups()" matTooltip="Groups">
+    <button mat-icon-button (click)="setTab('groups'); toggleMinimize()" matTooltip="Groups">
       <mat-icon>groups</mat-icon>
     </button>
   </div>
@@ -45,7 +45,7 @@
         <button mat-button [class.active]="activeTab === 'search'" (click)="setTab('search')">
           <mat-icon>search</mat-icon>
         </button>
-        <button mat-button matTooltip="My Groups" (click)="goToGroups()">
+        <button mat-button [class.active]="activeTab === 'groups'" matTooltip="My Groups" (click)="setTab('groups')">
           <mat-icon>groups</mat-icon>
         </button>
         <button mat-button (click)="toggleMinimize()" matTooltip="Minimize sidebar" class="collapse-btn">
@@ -208,6 +208,62 @@
       <div class="empty-state" *ngIf="!isSearching && searchQuery.length < 2">
         <mat-icon>search</mat-icon>
         <p>Type at least 2 characters to search</p>
+      </div>
+    </div>
+
+    <!-- TAB: GROUPS -->
+    <div class="tab-content" *ngIf="activeTab === 'groups'">
+      <div class="search-box">
+        <div class="input-wrapper">
+          <mat-icon class="input-icon">search</mat-icon>
+          <input type="text" placeholder="Filter groups..." [(ngModel)]="groupsFilter">
+        </div>
+      </div>
+      <div class="list-container">
+        <app-shimmer *ngIf="isLoadingGroups" variant="list" [rows]="5"></app-shimmer>
+
+        <ng-container *ngIf="!isLoadingGroups">
+          <div *ngFor="let group of filteredGroups(); trackBy: trackByGroupId"
+               class="list-item is-group"
+               (click)="openGroupChat(group)">
+            <div class="avatar-wrap group-avatar-wrap">
+              <app-avatar
+                [imageUrl]="groupAvatarSrc(group)"
+                [name]="group.name"
+                size="md"
+                [showStatus]="false">
+              </app-avatar>
+              <mat-icon class="group-badge" matTooltip="Group">groups</mat-icon>
+            </div>
+            <div class="item-info">
+              <div class="item-row">
+                <span class="item-name">
+                  <mat-icon class="group-inline-icon">group</mat-icon>
+                  {{ group.name }}
+                </span>
+              </div>
+              <div class="item-row">
+                <span class="item-subtitle">{{ memberCount(group) }} members</span>
+              </div>
+            </div>
+            <button mat-icon-button matTooltip="Manage"
+                    (click)="manageGroup(group, $event)">
+              <mat-icon>settings</mat-icon>
+            </button>
+          </div>
+
+          <div class="empty-state" *ngIf="filteredGroups().length === 0">
+            <mat-icon>group_off</mat-icon>
+            <p *ngIf="!groupsFilter">No groups yet</p>
+            <p *ngIf="groupsFilter">No matching groups</p>
+            <button mat-stroked-button color="primary" *ngIf="!groupsFilter" (click)="createGroupFromSidebar()">
+              Create group
+            </button>
+            <button mat-stroked-button class="mt-2" (click)="goToGroups()">
+              Open groups page
+            </button>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
