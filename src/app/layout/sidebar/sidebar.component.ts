@@ -246,7 +246,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
         conversationType: ConversationType.GROUP,
         displayName: group.name,
         avatarUrl: group.avatarUrl || group.avatar,
-        groupId: group.id ? String(group.id) : undefined,
+        groupId: (group.id || (group as any).groupId)
+          ? String(group.id || (group as any).groupId)
+          : undefined,
         lastMessageContent: group.description || ''
       };
       this.chatService.setActiveConversation(conv);

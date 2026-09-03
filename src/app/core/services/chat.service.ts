@@ -136,6 +136,7 @@ export class ChatService {
       seed?.groupId ||
       raw.groupId ||
       raw.group_id ||
+      raw.groupID ||
       '';
     const groupId = groupIdRaw !== '' && groupIdRaw != null ? String(groupIdRaw) : undefined;
 
@@ -152,6 +153,11 @@ export class ChatService {
       avatarUrl: merged.avatarUrl || seed?.avatarUrl || raw.avatar_url || raw.groupAvatar,
       lastMessageAt: lastAt || (merged as any).lastMessageAt
     };
+  }
+
+  /** Snapshot of loaded conversations (sidemenu / members resolve). */
+  getConversationsSnapshot(): IConversation[] {
+    return this.conversationsSubject.value || [];
   }
 
   /**

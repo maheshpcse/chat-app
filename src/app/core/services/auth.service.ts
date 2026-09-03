@@ -217,6 +217,11 @@ export class AuthService {
         ''
       )
     };
+    // Allow explicit clear of avatar ('' / null) — spread alone can leave stale URL semantics in UI
+    if (Object.prototype.hasOwnProperty.call(partial, 'avatarUrl')) {
+      const a = (partial as any).avatarUrl;
+      next.avatarUrl = (a == null || a === '') ? '' : String(a);
+    }
     localStorage.setItem(APP_CONSTANTS.USER_KEY, JSON.stringify(next));
     this.currentUserSubject.next(next);
   }

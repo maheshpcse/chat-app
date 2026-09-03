@@ -261,7 +261,8 @@ export class SettingsComponent implements OnInit {
 
   removeAvatar(): void {
     this.isAvatarUploading = true;
-    this.userService.updateMyProfile({ avatarUrl: null as any }).subscribe(
+    // Empty string clears DB (BE Joi allow ''/null; SP uses avatarUrl || null)
+    this.userService.updateMyProfile({ avatarUrl: '' as any }).subscribe(
       (updated) => {
         this.isAvatarUploading = false;
         this.clearAvatarPreview();
@@ -289,6 +290,14 @@ export class SettingsComponent implements OnInit {
   private applyUserToLocal(user: Partial<IUser> | any): void {
     if (!user) { return; }
     const id = user.id || user.userId || this.currentUser?.id;
+    // Explicit avatar clear: null / '' must wipe stored URL (Object.assign would keep old).
+    const hasAvatarKey = Object.prototype.hasOwnProperty.call(user, 'avatarUrl')
+      || Object.prototype.hasOwnProperty.call(user, 'avatar');
+    let nextAvatar = this.currentUser?.avatarUrl;
+    if (hasAvatarKey) {
+      const raw = user.avatarUrl !== undefined ? user.avatarUrl : user.avatar;
+      nextAvatar = (raw == null || raw === '') ? '' : String(raw);
+    }
     const patch: Partial<IUser> = {
       id,
       userId: user.userId || id,
@@ -298,7 +307,7 @@ export class SettingsComponent implements OnInit {
       email: user.email != null ? user.email : this.currentUser?.email,
       bio: user.bio != null ? user.bio : this.currentUser?.bio,
       phoneNumber: user.phoneNumber != null ? user.phoneNumber : this.currentUser?.phoneNumber,
-      avatarUrl: user.avatarUrl != null ? user.avatarUrl : this.currentUser?.avatarUrl
+      avatarUrl: nextAvatar
     };
     this.authService.patchCurrentUser(patch);
     this.currentUser = this.authService.getCurrentUser();

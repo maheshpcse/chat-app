@@ -2,8 +2,9 @@
 
 :host {
   display: block;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  height: auto;
+  overflow: visible;
   background: $bg-primary;
 }
 
@@ -16,7 +17,7 @@
   gap: $spacing-xl;
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 // ==========================================
@@ -96,14 +97,8 @@
   flex: 1;
   min-width: 0;
   min-height: 0;
-  /* One scroll surface only — page-shell header stays pinned */
-  overflow-y: auto;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar { display: none; }
+  /* Outer app-main-scroll owns Y scroll so site footer is not pinned */
+  overflow: visible;
 }
 
 .settings-section {
@@ -380,56 +375,13 @@
     }
 
     .mat-form-field-infix {
-      display: flex !important;
-      align-items: center !important;
       border-top: 0.5em solid transparent;
       padding: 0.5em 0 !important;
       width: auto;
       min-height: 1.5em;
     }
 
-    .mat-select {
-      display: flex;
-      align-items: center;
-    }
-
-    .mat-select-trigger {
-      display: flex;
-      align-items: center;
-      height: 1.5em;
-      line-height: 1.5em;
-    }
-
-    .mat-select-value {
-      display: flex;
-      align-items: center;
-      line-height: 1.5em;
-      max-width: 100%;
-    }
-
-    .mat-select-value-text {
-      line-height: 1.5em;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    /* One Material caret only — hide duplicate suffix/prefix chrome */
-    .mat-select-arrow-wrapper {
-      display: flex !important;
-      align-items: center;
-      transform: none;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-
-    .mat-select-arrow {
-      display: block !important;
-      opacity: 1 !important;
-      border-top-color: $text-secondary !important;
-    }
-
-    /* Hide only extra suffix icons — keep native select arrow */
+    /* Hide only extra suffix icons — native mat-select arrow stays (global styles) */
     .mat-form-field-suffix .mat-icon {
       display: none !important;
     }

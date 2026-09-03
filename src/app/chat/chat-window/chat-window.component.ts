@@ -252,6 +252,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
   /**
    * Members API uses groupId (not conversationId).
    * Fallback: group details payload when members route not deployed yet.
+   * If groupId missing, resolve via conversation list / group lookup by conversationId.
    */
   private loadGroupMembersForSidebar(): void {
     if (!this.activeConversation) {
@@ -261,18 +262,82 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewChecked 
     const conv: any = this.activeConversation;
     const groupId = conv.groupId || conv.group_id || null;
     if (!groupId) {
-      this.groupMembers = [];
+      this.resolveGroupIdThenLoadMembers(conv);
       return;
     }
-    this.groupService.getGroupMembers(String(groupId)).subscribe(
-      (members) => { this.groupMembers = members || []; },
+    this.fetchGroupMembers(String(groupId));
+  }
+
+  private resolveGroupIdThenLoadMembers(conv: any): void {
+    const conversationId = conv.conversationId != null ? String(conv.conversationId) : '';
+    const fromList = (this.chatService.getConversationsSnapshot
+      ? this.chatService.getConversationsSnapshot()
+      : []) as any[];
+    const hit = (fromList || []).find(c =>
+      c && String(c.conversationId) === conversationId && (c.groupId || c.group_id)
+    );
+    if (hit) {
+      const gid = String(hit.groupId || hit.group_id);
+      this.activeConversation = { ...this.activeConversation, groupId: gid } as any;
+      this.fetchGroupMembers(gid);
+      return;
+    }
+    // Last resort: match open conversation among user groups
+    this.groupService.getGroups().subscribe(
+      (groups) => {
+        const g = (groups || []).find((x: any) =>
+          x && String(x.conversationId || x.conversation_id) === conversationId
+        );
+        if (g) {
+          const gid = String((g as any).id || (g as any).groupId);
+          this.activeConversation = { ...this.activeConversation, groupId: gid } as any;
+          this.fetchGroupMembers(gid);
+        } else {
+          this.groupMembers = [];
+        }
+      },
+      () => { this.groupMembers = []; }
+    );
+  }
+
+  private fetchGroupMembers(groupId: string): void {
+    this.groupService.getGroupMembers(groupId).subscribe(
+      (members) => { this.groupMembers = this.normalizeGroupMembers(members || []); },
       () => {
-        this.groupService.getGroupById(String(groupId)).subscribe(
-          (group) => { this.groupMembers = (group && group.members) || []; },
+        this.groupService.getGroupById(groupId).subscribe(
+          (group) => {
+            this.groupMembers = this.normalizeGroupMembers((group && group.members) || []);
+          },
           () => { this.groupMembers = []; }
         );
       }
     );
+  }
+
+  private normalizeGroupMembers(members: any[]): any[] {
+    return (members || []).map(m => {
+      if (!m) { return m; }
+      const first = m.firstName || m.first_name || '';
+      const last = m.lastName || m.last_name || '';
+      const username = m.username || '';
+      const display = `${first} ${last}`.trim() || username || m.displayName || 'Member';
+      const parts = display.split(/\s+/);
+      return {
+        ...m,
+        userId: m.userId || m.user_id || m.id,
+        id: m.id || m.userId || m.user_id,
+        firstName: first || parts[0] || display,
+        lastName: last || (parts.length > 1 ? parts.slice(1).join(' ') : ''),
+        avatarUrl: m.avatarUrl || m.avatar_url || m.avatar || '',
+        role: m.role || m.memberRole || 'member'
+      };
+    });
+  }
+
+  memberDisplayName(member: any): string {
+    if (!member) { return 'Member'; }
+    const n = `${member.firstName || ''} ${member.lastName || ''}`.trim();
+    return n || member.username || member.displayName || 'Member';
   }
 
   /** Load peer profile for private-chat sidebar (soft-fail friendly). */

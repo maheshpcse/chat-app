@@ -1,10 +1,15 @@
 <div class="groups-page page-shell">
   <app-page-header title="My Groups" icon="groups"
-                   subtitle="Create and manage group conversations"></app-page-header>
+                   subtitle="Create and manage group conversations">
+    <button mat-raised-button color="primary" class="create-group-btn" (click)="createGroup()">
+      <mat-icon>group_add</mat-icon>
+      Create Group
+    </button>
+  </app-page-header>
 
   <div class="page-toolbar groups-toolbar">
-    <div class="toolbar-search">
-      <div class="input-wrapper">
+    <div class="toolbar-search-wrap">
+      <div class="input-wrapper toolbar-search">
         <mat-icon class="input-icon">search</mat-icon>
         <input type="text" placeholder="Filter groups..." [(ngModel)]="filterText">
       </div>
@@ -21,18 +26,10 @@
         <mat-icon>table_chart</mat-icon>
       </button>
     </div>
-
-    <div class="toolbar-actions">
-      <button mat-raised-button color="primary" (click)="createGroup()">
-        <mat-icon>group_add</mat-icon>
-        Create Group
-      </button>
-    </div>
   </div>
 
   <div class="page-scroll">
-    <div class="groups-loading" *ngIf="isLoading">
-      <!-- Three shared layers only: cards | list | lines -->
+    <div class="groups-loading" *ngIf="isLoading" [attr.data-view]="viewMode">
       <app-shimmer *ngIf="viewMode === 'grid'" variant="cards" [rows]="6"></app-shimmer>
       <app-shimmer *ngIf="viewMode === 'list'" variant="list" [rows]="8"></app-shimmer>
       <app-shimmer *ngIf="viewMode === 'table'" variant="lines" [rows]="10"></app-shimmer>

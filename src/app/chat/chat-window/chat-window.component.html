@@ -167,13 +167,15 @@
         <div class="group-member-item" *ngFor="let member of groupMembers">
           <app-avatar
             [imageUrl]="member.avatarUrl"
-            [name]="member.firstName + ' ' + member.lastName"
+            [name]="memberDisplayName(member)"
             [isOnline]="presenceService.isOnline(member.userId || member.id)"
             size="xs">
           </app-avatar>
           <div class="member-info">
-            <span class="member-name">{{ member.firstName }} {{ member.lastName }}</span>
-            <small class="member-role" *ngIf="member.role === 'admin'">Admin</small>
+            <span class="member-name">{{ memberDisplayName(member) }}</span>
+            <small class="member-role" *ngIf="member.role === 'admin' || member.role === 'owner'">
+              {{ member.role === 'owner' ? 'Owner' : 'Admin' }}
+            </small>
           </div>
         </div>
       </div>

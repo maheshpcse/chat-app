@@ -2,8 +2,8 @@
 
 .admin-page {
   @include admin-page;
-  /* Tighter rhythm filters → table (profile-like); alerts only take space when visible */
-  gap: 8px;
+  /* Match Profile two-card spacing */
+  gap: 16px;
 }
 
 .page-head {
@@ -238,10 +238,40 @@ table {
   ::ng-deep {
     .mat-form-field-wrapper { padding-bottom: 0; margin: 0; }
     .mat-form-field-outline { color: #d0d5d3; }
-    .mat-form-field-flex { height: 48px; align-items: center; }
-    .mat-form-field-infix { border-top: 0; padding: 0.6em 0; width: auto; }
-    .mat-select-value { color: #1f2524; }
-    .mat-select-arrow { color: #6b7572; }
+    .mat-form-field-flex {
+      height: 48px;
+      align-items: center !important;
+    }
+    .mat-form-field-infix {
+      border-top: 0;
+      padding: 0.6em 0;
+      width: auto;
+      display: flex !important;
+      align-items: center !important;
+    }
+    .mat-select-trigger {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between;
+      width: 100%;
+      height: 100%;
+    }
+    .mat-select-value {
+      color: #1f2524;
+      display: flex !important;
+      align-items: center !important;
+      line-height: 1.4;
+    }
+    .mat-select-arrow-wrapper {
+      display: flex !important;
+      align-items: center !important;
+      transform: none !important;
+      height: auto;
+    }
+    .mat-select-arrow {
+      color: #6b7572;
+      margin-top: 0 !important;
+    }
   }
 
   &.status-field {

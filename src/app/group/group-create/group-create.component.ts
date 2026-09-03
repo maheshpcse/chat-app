@@ -124,6 +124,10 @@ export class GroupCreateComponent implements OnInit, OnDestroy {
     this.applyFriendFilter(this.searchQuery);
   }
 
+  cancel(): void {
+    this.router.navigate(['/groups']);
+  }
+
   onSubmit(): void {
     if (this.groupForm.invalid || this.selectedMembers.length === 0) {
       return;
@@ -149,6 +153,7 @@ export class GroupCreateComponent implements OnInit, OnDestroy {
             conversationType: ConversationType.GROUP,
             displayName: g.name || groupData.name,
             avatarUrl: g.avatar || g.avatarUrl,
+            groupId: g.id || g.groupId ? String(g.id || g.groupId) : undefined,
             lastMessageContent: groupData.description || ''
           };
           this.chatService.setActiveConversation(conv);

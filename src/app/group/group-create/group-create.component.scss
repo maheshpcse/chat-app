@@ -30,41 +30,16 @@
   margin-bottom: $spacing-sm;
 }
 
-/* Description icon aligns with first text line / caret (not mid-textarea) */
+/* Textarea: standard outline field, no prefix icon fighting caret */
 .desc-field {
   ::ng-deep {
     .mat-form-field-flex {
       align-items: flex-start !important;
-      padding-top: 0.75em !important;
-    }
-
-    .mat-form-field-prefix {
-      top: 0 !important;
-      align-self: flex-start !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      height: 1.125em;
-      line-height: 1.125em;
-      margin: 0 4px 0 0 !important;
-      padding: 0 !important;
-      position: relative;
     }
 
     .mat-form-field-infix {
-      padding-top: 0.5em !important;
+      padding-top: 0.75em !important;
       padding-bottom: 0.75em !important;
-      border-top: 0.75em solid transparent;
-    }
-
-    .desc-prefix-icon.mat-icon,
-    .desc-prefix-icon {
-      font-size: 20px !important;
-      width: 20px !important;
-      height: 20px !important;
-      line-height: 20px !important;
-      color: $text-muted;
-      margin: 0 !important;
-      vertical-align: middle;
     }
 
     textarea.mat-input-element {
@@ -72,8 +47,31 @@
       padding-top: 0 !important;
       line-height: 1.5 !important;
       resize: vertical;
-      min-height: 64px;
+      min-height: 72px;
     }
+  }
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $spacing-md;
+  margin-top: $spacing-md;
+  flex-wrap: wrap;
+
+  .cancel-btn,
+  .submit-btn {
+    min-width: 120px;
+  }
+
+  .submit-btn {
+    min-width: 148px;
+  }
+
+  mat-spinner {
+    display: inline-block;
+    margin: 0 auto;
   }
 }
 

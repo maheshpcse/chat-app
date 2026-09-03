@@ -84,7 +84,7 @@ export class GroupListComponent implements OnInit {
         conversationType: ConversationType.GROUP,
         displayName: group.name,
         avatarUrl: group.avatar || group.avatarUrl,
-        groupId: group.id ? String(group.id) : undefined,
+        groupId: (group.id || group.groupId) ? String(group.id || group.groupId) : undefined,
         lastMessageContent: group.description || ''
       };
       this.chatService.setActiveConversation(conv);
